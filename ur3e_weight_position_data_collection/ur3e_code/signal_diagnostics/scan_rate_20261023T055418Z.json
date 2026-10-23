@@ -1,0 +1,17 @@
+{
+  "measured_utc": "2026-10-23T05:54:18.789664+00:00",
+  "firmware": "OK: Amodo EIT v1.2.1 (Aug  4 2026 09:41:54)",
+  "drive_pattern": "combined",
+  "electrodes": 16,
+  "measurements_per_scan": 304,
+  "excitation_frequency_khz": 50,
+  "periods_per_measurement": 1,
+  "complete_scans": 205,
+  "elapsed_s": 5.02040518099966,
+  "complete_scans_per_s": 40.83335758951243,
+  "mean_scan_period_ms": 24.48978137073005,
+  "malformed_lines": 0,
+  "bytes_per_s": 217033.27933046242,
+  "timing_source": "Sustained host receipt rate over 5 s; firmware has no scan timestamps",
+  "app_frames_per_capture": 5
+}

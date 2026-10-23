@@ -1,0 +1,11 @@
+/**:
+  ros__parameters:
+    initial_ball_x: 0.45       # independently measured initial ball centre in Base X
+    roll_distance: 0.020
+    ball_duration: 8.0         # common observation horizon after engagement
+    virtual_mass: 0.6
+    virtual_damping: 6.0
+    goal_k: 80.0
+    goal_force_limit: 2.0
+    progress_speed: 0.0125
+    update_ball_attachment: false  # centre attachment in BOTH progress-feedback conditions

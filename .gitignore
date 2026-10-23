@@ -1,0 +1,38 @@
+# Share only robot control, physical EIT tools, and required sensor-view assets.
+# Existing simulation campaigns, paper builds, videos and unrelated CAD stay local.
+/*
+!/.gitignore
+!/franka_eit_vmc/
+!/ur3e_weight_position_data_collection/
+/ur3e_weight_position_data_collection/*
+!/ur3e_weight_position_data_collection/ur3e_code/
+/eit_palm_robot_mount/
+
+# Generated files and raw measurements inside the included code directories.
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/build/
+**/install/
+**/log/
+**/trial_logs/
+**/sessions/
+**/contact_position_data/
+**/contact_position_runs/
+*.pyc
+*.pyo
+*.bag
+*.db3
+*.mcap
+*.csv
+*.jsonl
+*.npy
+*.npz
+*.joblib
+*.png
+*.pdf
+*.zip
+*.tar.gz
+# Model exports are intentional portable inputs, including the future physical model.
+!/franka_eit_vmc/models/*.npz
+!/franka_eit_vmc/models/*.joblib

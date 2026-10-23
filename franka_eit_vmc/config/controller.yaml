@@ -1,0 +1,57 @@
+# ROS 2 parameter file. SI units. Geometry is an EXAMPLE until measured.
+/**:
+  ros__parameters:
+    robot_ip: '192.168.1.1'
+    connect_robot: false
+    joint_prefix: 'fr3_'
+    tool_transform_confirmed: false
+    mount_orientation_confirmed: true
+    ee_to_pad_m: [0.0, 0.0, 0.14]   # measured active-face centre in libfranka EE frame
+    ee_R_pad_xyzw: [0.0, 0.0, 0.0, 1.0]
+    ready_pad_yaw_rad: 1.1780972450961724  # CCW contacting-face midpoint 4–5 faces Base +X (67.5 deg)
+    ready_pad_position_m: [0.45, 0.0, 0.35]
+    landing_offset_y_m: 0.0        # joystick landing offset about task centre Base Y=0
+    workspace_min_m: [0.15, -0.18, 0.05]
+    workspace_max_m: [0.75, 0.18, 0.70]
+    # False = capture current q, matching the VMC Transformer convention.
+    # capture_posture.py creates an overlay containing true and seven measured joints.
+    use_saved_posture: false
+    q7_tolerance: 0.35
+    torque_limit_Nm: [8.0, 8.0, 8.0, 8.0, 3.0, 3.0, 3.0]
+    torque_rate: 50.0
+    joint_speed_limit: 0.6
+    point_speed_limit: 0.10
+    angular_speed_limit: 0.5
+    external_force_limit: 15.0
+    external_moment_limit: 3.0
+    heartbeat_timeout: 0.30
+    sensor_timeout: 0.30
+    contact_topic: '/eit/contact'
+    pad_frame: 'eit_pad'
+    pad_numbering: 'ccw'
+    expected_model_sha256: ''      # optionally pin the exported physical model fingerprint
+    ready_speed: 0.015
+    ready_angular_speed: 0.12
+    approach_speed: 0.004
+    approach_distance: 0.020
+    approach_timeout: 8.0
+    retract_distance: 0.015
+    preload: 3.0
+    preload_time: 0.55
+    hold_k: 600.0
+    hold_d: 35.0
+    hold_kr: 30.0
+    hold_dr: 3.0
+    coupling_k: 700.0
+    coupling_d: 30.0
+    normal_k: 800.0
+    normal_d: 60.0
+    force_xy_limit: 3.0
+    normal_force_limit: 7.0
+    orientation_k: 3.0
+    orientation_d: 1.0
+    moment_limit: 1.0
+    null_k: 2.0
+    null_d: 1.0
+    use_eit: true
+    update_ball_attachment: false

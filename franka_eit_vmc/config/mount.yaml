@@ -1,0 +1,6 @@
+# Pair [4, 5] viewed from contacting face; midpoint points Base +X.
+/**:
+  ros__parameters:
+    ready_pad_yaw_rad: 1.1780972450961724
+    mount_orientation_confirmed: true
+    pad_numbering: ccw

@@ -1,0 +1,13 @@
+{
+  "physical_model_available": false,
+  "artifacts": [
+    {
+      "file": "demo_position_model.npz",
+      "sha256": "e307f692fd09013517004c5a0cc1d95bbcbf85f3a95ecc16f32ce240dde736b6",
+      "data_origin": "synthetic UI signals",
+      "robot_control_allowed": false
+    }
+  ],
+  "physical_model_target": "position_model.npz",
+  "note": "Export from measured contact-position sessions; the robot trial gate rejects demo models."
+}

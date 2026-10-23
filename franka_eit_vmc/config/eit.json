@@ -1,0 +1,8 @@
+{
+  "eit_port": null,
+  "eit_electrode_pins": null,
+  "eit_frequency_khz": 50,
+  "eit_periods_per_measurement": 1,
+  "eit_frames_per_capture": 5,
+  "eit_capture_timeout_s": 10
+}

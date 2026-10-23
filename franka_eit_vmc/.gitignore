@@ -1,0 +1,12 @@
+build/
+install/
+log/
+trial_logs/
+sessions/
+__pycache__/
+*.py[cod]
+*.db3
+*.mcap
+*.csv
+*.jsonl
+# Keep model artifacts in models/ tracked; do not ignore all binary files.
