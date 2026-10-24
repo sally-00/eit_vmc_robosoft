@@ -6,7 +6,8 @@ import unittest
 from unittest.mock import patch
 
 import collect
-from eit_reader import EITReader, adjacent_protocol, measurement_protocol, parse_frame, supported_firmware
+from eit_reader import (EITReader, adjacent_protocol, measurement_protocol, parse_frame, supported_firmware,
+                        gain_exponent, gain_rows_with_rx_margin)
 
 
 class GeometryTests(unittest.TestCase):
@@ -47,6 +48,40 @@ class GeometryTests(unittest.TestCase):
 
 
 class AmodoProtocolTests(unittest.TestCase):
+    def test_reset_waits_for_its_reply_after_delayed_stop_acknowledgement(self):
+        reader = EITReader({"eit_electrode_pins": list(range(1, 9))})
+        with patch.object(reader, "_write") as write, patch.object(reader, "_line", side_effect=[
+                "OK: Stopped streaming.", "OK: Reset complete."]):
+            self.assertEqual(reader._response("reset", expected_prefix="OK: Reset"), "OK: Reset complete.")
+        write.assert_called_once_with("reset")
+
+    def test_receiver_margin_preserves_tx_order_and_clamps_minimum(self):
+        protocol = [(1, 2, 3, 4), (1, 2, 4, 5), (1, 2, 5, 6)]
+        rows = ["1 2 3 4 32 8", "1 2 4 5 /2 /32", "1 2 5 6 1 /64"]
+        self.assertEqual(gain_rows_with_rx_margin(rows, protocol, 1),
+                         ["1 2 3 4 32 4", "1 2 4 5 /2 /64", "1 2 5 6 1 /64"])
+        self.assertEqual(gain_rows_with_rx_margin(rows, protocol, 2)[0], "1 2 3 4 32 2")
+        self.assertEqual(gain_rows_with_rx_margin(rows, protocol, 0), rows)
+        for invalid in (-1, 15, True, .5, "1"):
+            with self.assertRaisesRegex(ValueError, "0–14"):
+                EITReader({"eit_electrode_pins": list(range(1, 9)), "eit_rx_gain_margin_steps": invalid})
+        for token in ("0", "3", "/128", "512", "nan"):
+            with self.assertRaises(ValueError):
+                gain_exponent(token)
+        with self.assertRaisesRegex(ValueError, "electrode order"):
+            gain_rows_with_rx_margin(["2 1 3 4 32 8", *rows[1:]], protocol, 1)
+        with self.assertRaisesRegex(ValueError, "entries"):
+            gain_rows_with_rx_margin(rows[:-1], protocol, 1)
+
+    def test_receiver_margin_rejects_incorrect_device_readback(self):
+        reader = EITReader({"eit_electrode_pins": list(range(1, 9)), "eit_rx_gain_margin_steps": 1})
+        reader.autogain_gains = [" ".join([*map(str, pins), "32", "8"]) for pins in reader.protocol]
+        with patch.object(reader, "_load_gain_rows") as load, patch.object(
+                reader, "_dump_gains", return_value=reader.autogain_gains):
+            with self.assertRaisesRegex(RuntimeError, "did not retain"):
+                reader._apply_rx_gain_margin()
+        self.assertTrue(all(row.split()[-1] == "4" for row in load.call_args.args[0]))
+
     def test_combined_and_opposite_drive_patterns(self):
         for count in (8, 16):
             pins=list(range(1,count+1))
@@ -122,6 +157,8 @@ class AmodoProtocolTests(unittest.TestCase):
                 self.loading = False
                 self.streaming = False
                 self.load_count = 0
+                self.configurations = []
+                self.reloads = 0
 
             @property
             def in_waiting(self):
@@ -132,8 +169,12 @@ class AmodoProtocolTests(unittest.TestCase):
                 self.commands.append(command)
                 if command == "load":
                     self.loading = True
+                    self.load_count = 0
+                    self.configurations = []
+                    self.reloads += 1
                 elif self.loading and command:
                     self.load_count += 1
+                    self.configurations.append(command)
                 elif self.loading:
                     self.loading = False
                     self.out.extend(b"OK: Electrode configuration complete.\r\n")
@@ -144,9 +185,12 @@ class AmodoProtocolTests(unittest.TestCase):
                 elif command in ("freqkhz 50", "setperiods 1", "mode phase"):
                     self.out.extend(b"OK: Configured.\r\n")
                 elif command == "autogain":
+                    gains = (("32", "8"), ("/2", "/64"), ("1", "/32"))
+                    self.configurations = [" ".join([*row.split()[:4], *gains[i % 3]])
+                                           for i, row in enumerate(self.configurations)]
                     self.out.extend(b"OK: Autogain complete.\r\n")
                 elif command == "dump":
-                    self.out.extend((b"1 2 3 4 1 1\r\n" * self.load_count) +
+                    self.out.extend(("\r\n".join(self.configurations)+"\r\n").encode() +
                                     f"OK: Dumped all loaded electrode configurations ({self.load_count}).\r\n".encode())
                 elif command == "start":
                     self.streaming = True
@@ -175,13 +219,16 @@ class AmodoProtocolTests(unittest.TestCase):
         ports_mod.comports = lambda: []
         with patch.dict(sys.modules, {"serial": serial_mod, "serial.tools": tools_mod,
                                       "serial.tools.list_ports": ports_mod}):
-            for count,pattern in ((8,"adjacent"),(16,"adjacent"),(8,"opposite"),
-                                  (16,"opposite"),(8,"combined"),(16,"combined")):
-                with self.subTest(electrodes=count,drive_pattern=pattern):
+            cases = [(count, pattern, margin) for count, pattern in
+                     ((8,"adjacent"),(16,"adjacent"),(8,"opposite"),(16,"opposite"),(8,"combined"),(16,"combined"))
+                     for margin in (0, 1, 2)]
+            for count, pattern, margin in cases:
+                with self.subTest(electrodes=count,drive_pattern=pattern,rx_margin=margin):
                     fake = FakeSerial()
                     channels = len(measurement_protocol(list(range(1,count+1)),pattern))
                     cfg = {"eit_port": "/dev/fake", "eit_electrode_pins": list(range(1, count+1)),
-                           "eit_frames_per_capture": 2,"eit_drive_pattern":pattern}
+                           "eit_frames_per_capture": 2,"eit_drive_pattern":pattern,
+                           "eit_rx_gain_margin_steps": margin}
                     reader = EITReader(cfg)
                     reader.open()
                     result = reader.capture()
@@ -192,6 +239,15 @@ class AmodoProtocolTests(unittest.TestCase):
                     self.assertEqual(len(reader.metadata()["gain_dump"]), channels)
                     self.assertEqual(reader.metadata()["electrode_count"], count)
                     self.assertEqual(reader.metadata()["drive_pattern"],pattern)
+                    self.assertEqual(fake.reloads, 2 if margin else 1)
+                    self.assertEqual(fake.commands.count("autogain"), 1)
+                    original = reader.metadata()["autogain_gain_dump"]
+                    active = reader.metadata()["gain_dump"]
+                    self.assertEqual(active, gain_rows_with_rx_margin(original, reader.protocol, margin))
+                    self.assertTrue(all(a.split()[:5] == b.split()[:5] for a, b in zip(original, active)))
+                    self.assertEqual(reader.metadata()["rx_gain_margin_steps"], margin)
+                    if margin:
+                        self.assertIn(2, reader.metadata()["rx_margin_clamped_channels"])
                     reader.close()
 
 

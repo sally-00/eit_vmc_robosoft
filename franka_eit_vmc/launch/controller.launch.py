@@ -1,4 +1,4 @@
-"""Launch ONE direct-FCI executable; no robot connection unless explicitly enabled."""
+"""Launch ONE direct-FCI executable for the physical robot."""
 from pathlib import Path
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument,OpaqueFunction
@@ -16,8 +16,7 @@ def setup(context):
     for name in ['mount','posture','overrides']:
         path=LaunchConfiguration(name).perform(context)
         if path:paths.append(path)
-    enabled=LaunchConfiguration('connect_robot').perform(context).lower()=='true'
-    return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',parameters=paths+[{'connect_robot':enabled}])]
+    return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',parameters=paths)]
 
 def generate_launch_description():
     share=Path(get_package_share_directory('franka_eit_vmc'))
@@ -27,4 +26,4 @@ def generate_launch_description():
         DeclareLaunchArgument('mount',default_value=''),
         DeclareLaunchArgument('posture',default_value=''),
         DeclareLaunchArgument('overrides',default_value=''),
-        DeclareLaunchArgument('connect_robot',default_value='false'),OpaqueFunction(function=setup)])
+        OpaqueFunction(function=setup)])

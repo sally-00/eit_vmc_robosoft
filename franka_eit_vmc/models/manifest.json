@@ -3,11 +3,11 @@
   "artifacts": [
     {
       "file": "demo_position_model.npz",
-      "sha256": "e307f692fd09013517004c5a0cc1d95bbcbf85f3a95ecc16f32ce240dde736b6",
+      "sha256": "3ee2fd8c77453da0b8355f537ad6dcfefcba57a116cf6d2a97e88945e6e218f6",
       "data_origin": "synthetic UI signals",
       "robot_control_allowed": false
     }
   ],
   "physical_model_target": "position_model.npz",
-  "note": "Export from measured contact-position sessions; the robot trial gate rejects demo models."
+  "note": "Copy an inference export with precomputed RBF parameters from the external model-preparation computer; the robot trial gate rejects demo models."
 }

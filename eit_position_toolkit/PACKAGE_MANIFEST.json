@@ -1,0 +1,20 @@
+{
+  "README.md": "f3f0a0a692f3e86ee69ccd01c06d14b4e79fa690c09ce7f7386405fecdceaee1",
+  "VALIDATION.md": "85a06c7d12c52268248813de602db79558810fa1fbbbbb665969974a0e318b4d",
+  "assets/numbered_retaining_plate/Frame_base_3_numbered_1-8_engraved_mm.stl": "c170c3d9d44030eecc8ee2fc266700149c708dd23e0f06d2d17b41ede3e36a7e",
+  "assets/numbered_retaining_plate_ccw/Frame_base_3_numbered_CCW_1-8_engraved_mm.stl": "ed4374e6fdc20ad3486594572c07e0efe7211694561b12851132eb6cb130711c",
+  "config.json": "09d83e8c4462a2ef3b125d3ff381ad88714aa77f252ce818f4ee3892d9cfc21f",
+  "contact_mlp.py": "b5b0a71987732ec0fbbdcf986b28c4828c495decfe722c90a26f5c446d9500d9",
+  "contact_position.py": "668b43fa12f825d3e14381e868c6836efe3abf2f39215c7ea24b97cf1d934155",
+  "contact_position_app.py": "518f19aa07c09f5f5c039d6d489800c1f7a8165f195d8abcf7cb20a4778312b5",
+  "contact_signal_debug.py": "895f5501253acf75f214ccd36b43a9dc8ecfa4ab7e35e39d8ffc090ea85d01df",
+  "eit_reader.py": "788735f1f1ff2cf86dd2e471723f9510f2223e127e4b3ff2a358a408408fc767",
+  "export_franka_model.py": "8de6782f15bbae3a4f4067af1b87bd313fecfb78c467fdb812787e7605f68e07",
+  "models/README.md": "41dc30e9d9f21f4e6047f77b27a24e93c3d689188ddbc6f75c7801e60372688d",
+  "requirements.txt": "1421d550874deb7bdcc55ad75557f2a63ddf02d1e2cc4d7631c5c3e7f4e6d9f8",
+  "review_session.py": "094fc964e9a3c5c91d9adff066cffd97d267c43e4f3daf74c8a6eeef9f72c9d5",
+  "signal_quality.py": "8205711f5398d0ddc96b89d7cd8b14d9a60cb0515b8a67421ecd080184d01466",
+  "test_contact_position.py": "844bc0c33dd65bc2caa10dcb3a6697f8df46c5d8d4931dfba33ce8e0b0176d72",
+  "test_reader.py": "99ec548d0b57315671c50b9361f19c502a6305f1f2e37eb231009617506d07d3",
+  "test_signal_quality.py": "140e908ae044bf76eed1d0af4bd22d3ca52527e5c7f3b89f6a0e74baba9fa125"
+}

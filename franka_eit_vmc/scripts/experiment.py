@@ -62,7 +62,9 @@ def main():
                 if active_seen and ((a.action=='ready' and message.mode_name=='hold') or (a.action=='trial' and message.mode_name=='done')):
                     completed=True;print('Finished:',a.action);return
         raise RuntimeError('Operation timed out; requesting stop')
-    except KeyboardInterrupt:print('Interrupted; requesting stop')
+    except KeyboardInterrupt:
+        print('Interrupted; requesting stop')
+        raise SystemExit(130)
     finally:
         try:
             if rclpy.ok() and not completed:call(Trigger,'stop',Trigger.Request())

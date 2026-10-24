@@ -61,7 +61,6 @@ class Bridge : public rclcpp::Node {
                                     : "eit_move_ready") {
     c.task = task;
     host = declare_parameter<std::string>("robot_ip", "192.168.1.1");
-    connect = declare_parameter<bool>("connect_robot", false);
     geometry_confirmed = declare_parameter<bool>("tool_transform_confirmed", false);
     mounting_confirmed = declare_parameter<bool>("mount_orientation_confirmed", false);
     pad_frame = declare_parameter<std::string>("pad_frame", "eit_pad");
@@ -84,6 +83,7 @@ class Bridge : public rclcpp::Node {
     };
     c.ee_to_pad = vector("ee_to_pad_m", c.ee_to_pad);
     c.ready_pad_position = vector("ready_pad_position_m", c.ready_pad_position);
+    c.ready_pad_position.x() += declare_parameter<double>("landing_offset_x_m", 0.);
     c.ready_pad_position.y() += declare_parameter<double>("landing_offset_y_m", 0.);
     c.workspace_min = vector("workspace_min_m", c.workspace_min);
     c.workspace_max = vector("workspace_max_m", c.workspace_max);
@@ -230,7 +230,7 @@ class Bridge : public rclcpp::Node {
   }
   Config c;
   std::string host, pad_frame, pad_numbering, expected_model;
-  bool connect = false, geometry_confirmed = false, mounting_confirmed = false;
+  bool geometry_confirmed = false, mounting_confirmed = false;
   Ring<Contact, 64> contacts;
   Ring<Telemetry, 64> telemetry;
   std::atomic<Request> request{Request::None};
@@ -309,15 +309,6 @@ int run_controller(int argc, char** argv, Task task) {
   int code = 0;
   try {
     auto node = std::make_shared<Bridge>(task);
-    if (!node->connect) {
-      RCLCPP_INFO(node->get_logger(),
-                  "Configuration parsed. connect_robot=false: no FCI connection or motion. Ready "
-                  "centre: %.3f %.3f %.3f m",
-                  node->c.ready_pad_position.x(), node->c.ready_pad_position.y(),
-                  node->c.ready_pad_position.z());
-      rclcpp::shutdown();
-      return 0;
-    }
     if (!node->geometry_confirmed || !node->mounting_confirmed)
       throw std::runtime_error(
           "Measure EE-to-pad geometry and resolve the engraved-number orientation before setting "

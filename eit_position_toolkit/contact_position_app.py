@@ -16,8 +16,9 @@ import numpy as np
 
 from contact_position import (HERE, DemoReader, PositionModel, baseline_reference, draw_pad, fit_samples,
                               new_session, signature, targets, voltages)
-from eit_reader import EITReader, measurement_protocol
-from contact_signal_debug import SignalDebugPlot
+from eit_reader import EITReader, measurement_protocol, validate_rx_margin
+from contact_signal_debug import SignalDebugPlot, SignalChannelTable, save_signal_snapshot
+from review_session import review_records
 
 
 class ContactApp:
@@ -49,7 +50,9 @@ class ContactApp:
         self.numbering = tk.StringVar(value=args.numbering)
         self.drive_pattern = tk.StringVar(value=cfg.get("eit_drive_pattern", "adjacent"))
         self.model_type = tk.StringVar(value=getattr(args, "training_model", None) or cfg.get("eit_training_model", "rbf"))
+        self.rx_gain_margin = tk.IntVar(value=cfg.get("eit_rx_gain_margin_steps", 0))
         self.scan_summary = tk.StringVar(value="")
+        self.pin_summary = tk.StringVar(value="")
         self.count = tk.IntVar(value=args.points)
         self.repeats = tk.IntVar(value=args.repeats)
         self.status = tk.StringVar(value="Remove all contact, then connect to EIT.")
@@ -88,7 +91,15 @@ class ContactApp:
         self.model_option = ttk.Combobox(scan_settings, values=("rbf", "mlp"),
                                           textvariable=self.model_type, state="readonly", width=7)
         self.model_option.pack(side="left", padx=6)
+        gain_settings = ttk.Frame(root, padding=(10, 0, 10, 5))
+        gain_settings.pack(fill="x")
+        ttk.Label(gain_settings, text="Extra RX gain halvings after autogain").pack(side="left")
+        self.gain_margin_option = ttk.Spinbox(gain_settings, from_=0, to=14, width=4,
+                                             textvariable=self.rx_gain_margin)
+        self.gain_margin_option.pack(side="left", padx=6)
+        ttk.Label(gain_settings, text="0 = original · 1 = ½ RX gain · 2 = ¼ RX gain · set before connecting").pack(side="left")
         self.update_scan_settings()
+        ttk.Label(root, textvariable=self.pin_summary, wraplength=1300).pack()
         ttk.Label(root, text="Match the physical engraved face to this view before collecting.",
                   font=("sans", 12, "bold")).pack()
         charts = ttk.Frame(root)
@@ -108,13 +119,26 @@ class ContactApp:
         self.clipping_option = ttk.Checkbutton(signal_frame, text="Allow clipped readings (continue experiment)",
                                                variable=self.allow_clipped)
         self.clipping_option.pack(anchor="w", padx=12)
-        self.signal_figure = Figure(figsize=(6, 6), dpi=100)
-        self.signal_canvas = FigureCanvasTkAgg(self.signal_figure, master=signal_frame)
+        signal_tabs = ttk.Notebook(signal_frame)
+        signal_tabs.pack(fill="both",expand=True)
+        plot_tab = ttk.Frame(signal_tabs)
+        channel_tab = ttk.Frame(signal_tabs)
+        signal_tabs.add(plot_tab,text="Signal plots")
+        signal_tabs.add(channel_tab,text="Channel diagnostics")
+        ttk.Label(channel_tab,text="* Estimated sine limit from active RX gain. Clipped amplitudes cannot measure headroom.\nVariation is within-capture change; during motion it is not a pure noise measurement.",wraplength=570).pack(fill="x",pady=5)
+        self.channel_table = SignalChannelTable(channel_tab)
+        self.signal_figure = Figure(figsize=(6, 7), dpi=100)
+        self.signal_canvas = FigureCanvasTkAgg(self.signal_figure, master=plot_tab)
         self.signal_plot = SignalDebugPlot(self.signal_figure)
+        self.signal_plot.adc_peak_limit_v = cfg.get("eit_adc_peak_limit_v",2.047)
+        self.signal_plot.warning_percent = cfg.get("eit_range_warning_percent",80.)
+        self.signal_plot.low_percent = cfg.get("eit_low_range_percent",5.)
         self.signal_canvas.get_tk_widget().pack(fill="both", expand=True)
         self.signal_label = ttk.Label(signal_frame, textvariable=self.signal_status,
                                       wraplength=580, justify="left")
         self.signal_label.pack(fill="x", padx=10, pady=4)
+        ttk.Button(signal_frame,text="Save signal snapshot…",command=self.save_snapshot).pack(anchor="w",padx=10)
+        ttk.Label(signal_frame,text="Range is an estimate from the supplied firmware and active RX gain. C overrides a low plotted voltage; it is not a healthy low signal.",wraplength=580).pack(fill="x",padx=10)
         ttk.Label(signal_frame, textvariable=self.prediction_metrics, wraplength=580,
                   justify="left").pack(fill="x", padx=10, pady=4)
         ttk.Label(root, textvariable=self.progress, font=("sans", 12)).pack(pady=3)
@@ -148,6 +172,19 @@ class ContactApp:
         if args.model:
             self.load(args.model)
 
+    def save_snapshot(self):
+        from tkinter import filedialog
+        if self.signal_plot.last_capture is None:
+            self.status.set("No current signal capture to save.")
+            return
+        path=filedialog.asksaveasfilename(title="Save EIT signal snapshot",defaultextension=".json",
+            initialfile="eit_signal_"+datetime.now().strftime("%Y%m%d_%H%M%S")+".json",filetypes=[("Signal snapshot","*.json")])
+        if path:
+            try:
+                save_signal_snapshot(path,self.signal_plot)
+                self.detail.set("Signal snapshot saved: "+path)
+            except Exception as exc:self.detail.set("Cannot save signal snapshot: "+str(exc))
+
     def redraw(self):
         self.ax.clear()
         draw_pad(self.ax, self.numbering.get(), self.args.radius_mm)
@@ -178,15 +215,18 @@ class ContactApp:
         self.pattern_option.configure(state="readonly" if idle and self.reader is None and self.model is None else "disabled")
         self.model_option.configure(state="readonly" if idle and self.state not in
                                     ("release", "touch", "testing", "test_release") else "disabled")
+        enabled(self.gain_margin_option, idle and self.reader is None)
 
     def update_scan_settings(self):
         self.cfg["eit_drive_pattern"] = self.drive_pattern.get()
         pins = self.cfg.get("eit_electrode_pins")
         if pins is None:
             self.scan_summary.set("Configure electrode pins before connecting")
+            self.pin_summary.set("Active electrode pins: not configured")
             return
         channels = len(measurement_protocol(pins, self.drive_pattern.get()))
         self.scan_summary.set(f"{len(pins)} electrodes · {channels} measurements/frame · {2*channels} model inputs")
+        self.pin_summary.set("Active electrode pins: " + ", ".join(map(str, pins)))
 
     def work(self, function, callback):
         if self.busy:
@@ -246,6 +286,7 @@ class ContactApp:
                 label = "Preview paused · " + label
             self.signal_status.set(label)
             summary = self.signal_plot.summary
+            self.channel_table.update(summary,self.signal_plot.device,self.signal_plot.warning_percent,self.signal_plot.low_percent)
             self.signal_label.configure(foreground="#b3261e" if "unavailable" in label or
                                         (summary is not None and summary["clipped"].any()) else "#234955")
             self.debug_step()
@@ -288,6 +329,11 @@ class ContactApp:
     def connect(self):
         if self.reader is not None:
             return
+        try:
+            self.cfg["eit_rx_gain_margin_steps"] = validate_rx_margin(self.rx_gain_margin.get())
+        except Exception as exc:
+            self.status.set(str(exc))
+            return
         self.status.set("Connecting and setting gain… keep the pad untouched.")
         allow_clipped = self.allow_clipped.get()
         def open_reader():
@@ -303,9 +349,10 @@ class ContactApp:
             return reader
         def connected(reader):
             self.reader = reader
+            self.signal_plot.device = reader.metadata()
             self.state = "idle"
             channels = len(reader.protocol)
-            self.status.set(f"Connected: {self.drive_pattern.get()} drive · {len(self.cfg['eit_electrode_pins'])} electrodes · {channels} measurements/frame. Start training or load a model.")
+            self.status.set(f"Connected: {self.drive_pattern.get()} drive · {len(self.cfg['eit_electrode_pins'])} electrodes · {channels} measurements/frame · extra RX halvings {self.rx_gain_margin.get()}. Start training or load a model.")
             self.detail.set("CCW: 1 bottom, 3 right, 5 top, 7 left. CW: 1 top, 3 right, 5 bottom, 7 left.")
         self.work(open_reader, connected)
 
@@ -409,7 +456,10 @@ class ContactApp:
         evaluation_name = "evaluation_mlp.json" if model_type == "mlp" else "evaluation.json"
         self.status.set(f"Training {model_type.upper()} position model…")
         def train():
+            quality = review_records(self.records, metadata)
+            (self.session / "signal_quality.json").write_text(json.dumps(quality,indent=2,allow_nan=False)+"\n")
             model, report = fit_samples(self.records, metadata)
+            report["signal_advisory_touches"] = quality["touches_with_advisories"]
             model.save(self.session / model_name)
             (self.session / "manifest.json").write_text(json.dumps(model.metadata, indent=2))
             (self.session / evaluation_name).write_text(json.dumps(report, indent=2))
@@ -425,6 +475,7 @@ class ContactApp:
                 self.detail.set(report["validation"])
             self.detail.set(self.detail.get() + f" Using {self.model.metadata['usable_measurement_channels']}/"
                             f"{self.model.metadata['measurement_channels']} measurement channels.")
+            self.detail.set(self.detail.get()+f" Signal advisories: {report.get('signal_advisory_touches',0)}/{len(self.records)} touches; see signal_quality.json.")
             self.progress.set(str(self.session / model_name))
         self.work(train, trained)
 
@@ -463,7 +514,12 @@ class ContactApp:
             self.progress.set(str(path))
             self.status.set(f"{model.model_type.upper()} model loaded: {self.drive_pattern.get()} drive · {model.metadata['measurement_channels']} measurements/frame. "
                             + ("Select Live test." if self.reader else "Connect with the pad untouched."))
-            self.detail.set("The saved plate orientation and EIT measurement settings are restored with the model.")
+            pins = ", ".join(map(str, saved["eit_electrode_pins"]))
+            requested_pins = getattr(self.args, "pins", None)
+            if requested_pins is not None and requested_pins != saved["eit_electrode_pins"]:
+                self.detail.set(f"Using the model's saved pins {pins}, overriding --pins. Match the physical wiring to this model.")
+            else:
+                self.detail.set(f"Saved model pins: {pins}. Plate orientation and EIT scan settings are restored with the model.")
         except Exception as exc:
             self.status.set("Cannot load model: " + str(exc))
         self.refresh()
@@ -561,18 +617,23 @@ def main():
     parser.add_argument("--model", type=Path)
     parser.add_argument("--training-model", choices=("rbf", "mlp"), default=None,
                         help="Position regressor for new training (default: config, otherwise rbf)")
+    parser.add_argument("--rx-gain-margin-steps", type=int, default=None, metavar="0-14",
+                        help="Extra receive-gain halvings after autogain; 1 halves RX, 2 quarters it (default: config)")
     parser.add_argument("--output", type=Path, default=HERE / "contact_position_runs")
     parser.add_argument("--preview", type=Path, help="Save a training-layout PNG and exit without opening hardware")
     args = parser.parse_args()
     cfg = json.loads(args.config.read_text())
     if args.training_model is not None:
         cfg["eit_training_model"] = args.training_model
+    if args.rx_gain_margin_steps is not None:
+        cfg["eit_rx_gain_margin_steps"] = args.rx_gain_margin_steps
     if cfg.get("eit_training_model", "rbf") not in ("rbf", "mlp"):
         parser.error("eit_training_model must be rbf or mlp")
     if args.allow_clipped is not None:
         cfg["eit_allow_clipped"] = args.allow_clipped
     args.radius_mm = args.radius_mm if args.radius_mm is not None else cfg.get("active_radius_m", .045) * 1000
     try:
+        validate_rx_margin(cfg.get("eit_rx_gain_margin_steps", 0))
         plan = targets(args.points, args.radius_mm, args.margin_mm)
         if not 1 <= args.repeats <= 20:
             raise ValueError("Choose 1–20 touches per point")

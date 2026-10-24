@@ -46,6 +46,48 @@ def adjacent_protocol(pins):
     return measurement_protocol(pins, "adjacent")
 
 
+def gain_exponent(token, maximum=8):
+    """Decode Amodo power-of-two gain tokens, e.g. 8 or /16."""
+    if not re.fullmatch(r"/?[1-9][0-9]*", token):
+        raise ValueError(f"Invalid Amodo gain: {token!r}")
+    value = int(token.lstrip("/"))
+    if value & (value-1):
+        raise ValueError(f"Amodo gain must be a power of two: {token!r}")
+    exponent = (value.bit_length()-1) * (-1 if token.startswith("/") else 1)
+    if not -6 <= exponent <= maximum:
+        raise ValueError(f"Amodo gain out of range: {token!r}")
+    return exponent
+
+
+def validate_rx_margin(steps):
+    if type(steps) is not int or not 0 <= steps <= 14:
+        raise ValueError("eit_rx_gain_margin_steps must be an integer in 0–14")
+    return steps
+
+
+def gain_rows_with_rx_margin(rows, protocol, steps):
+    """Validate the complete dump and lower RX only, clamped at 1/64."""
+    validate_rx_margin(steps)
+    if len(rows) != len(protocol):
+        raise ValueError(f"Amodo gain dump has {len(rows)} entries; expected {len(protocol)}")
+    result = []
+    for index, (row, expected) in enumerate(zip(rows, protocol), 1):
+        fields = row.split()
+        if len(fields) != 6:
+            raise ValueError(f"Malformed Amodo gain dump at channel {index}")
+        try:
+            pins = tuple(map(int, fields[:4]))
+        except ValueError as error:
+            raise ValueError(f"Invalid Amodo gain dump pins at channel {index}") from error
+        if pins != tuple(expected):
+            raise ValueError(f"Amodo gain dump electrode order differs at channel {index}")
+        tx = gain_exponent(fields[4], maximum=5)
+        rx = max(-6, gain_exponent(fields[5])-steps)
+        tokens = [str(2**exponent) if exponent >= 0 else f"/{2**(-exponent)}" for exponent in (tx, rx)]
+        result.append(" ".join([*map(str, pins), *tokens]))
+    return result
+
+
 def parse_frame(line, expected=40):
     """Preserve transmitted fields and per-channel clipping in phase mode."""
     raw = line.decode("ascii", errors="strict").strip() if isinstance(line, bytes) else line.strip()
@@ -79,6 +121,7 @@ class EITReader:
         self.periods = cfg.get("eit_periods_per_measurement", 1)
         self.frame_count = cfg.get("eit_frames_per_capture", 5)
         self.timeout = cfg.get("eit_capture_timeout_s", 10)
+        self.rx_gain_margin_steps = validate_rx_margin(cfg.get("eit_rx_gain_margin_steps", 0))
         for name, value, maximum in (("eit_frequency_khz", self.frequency, 1000),
                                      ("eit_periods_per_measurement", self.periods, 10000),
                                      ("eit_frames_per_capture", self.frame_count, 1000)):
@@ -89,6 +132,8 @@ class EITReader:
         self.ser = None
         self.version = None
         self.gains = None
+        self.autogain_gains = None
+        self.rx_margin_clamped_channels = []
         self._rx_buffer = bytearray()
 
     def _line(self, deadline):
@@ -109,15 +154,46 @@ class EITReader:
         self.ser.write((command + "\r").encode("ascii"))
         self.ser.flush()
 
-    def _response(self, command, timeout=3):
+    def _response(self, command, timeout=3, expected_prefix=None):
         self._write(command)
         deadline = time.monotonic() + timeout
         while True:
             line = self._line(deadline)
             if line.startswith("ERROR:"):
                 raise RuntimeError(f"Amodo EIT {command}: {line}")
-            if line.startswith("OK:"):
+            if line.startswith("OK:") and (expected_prefix is None or line.startswith(expected_prefix)):
                 return line
+
+    def _load_gain_rows(self, rows):
+        self._write("load")
+        for row in rows:
+            self._write(row)
+        result = self._response("")
+        if result != "OK: Electrode configuration complete.":
+            raise RuntimeError(f"Unexpected electrode load response: {result}")
+
+    def _dump_gains(self):
+        self._write("dump")
+        rows = []
+        deadline = time.monotonic() + 5
+        while True:
+            line = self._line(deadline)
+            if line.startswith("ERROR:"):
+                raise RuntimeError(f"Amodo gain dump: {line}")
+            if line.startswith("OK:"):
+                break
+            rows.append(line)
+        return gain_rows_with_rx_margin(rows, self.protocol, 0)
+
+    def _apply_rx_gain_margin(self):
+        """Device must be stopped. Always derive gains from the original autogain dump."""
+        expected = gain_rows_with_rx_margin(self.autogain_gains, self.protocol, self.rx_gain_margin_steps)
+        self._load_gain_rows(expected)
+        self.gains = self._dump_gains()
+        if self.gains != expected:
+            raise RuntimeError("EIT did not retain the requested RX gain margin; streaming was not started")
+        self.rx_margin_clamped_channels = [i+1 for i, row in enumerate(self.autogain_gains)
+                                          if gain_exponent(row.split()[5])-self.rx_gain_margin_steps < -6]
 
     def open(self):
         try:
@@ -139,7 +215,7 @@ class EITReader:
                 self._write(command)
             self.ser.reset_input_buffer()
             self._rx_buffer.clear()
-            result = self._response("reset")
+            result = self._response("reset", expected_prefix="OK: Reset")
             if not result.startswith("OK: Reset"):
                 raise RuntimeError(f"Unexpected reset response: {result}")
             self.version = self._response("version")
@@ -148,12 +224,7 @@ class EITReader:
             self._response("freqkhz " + str(self.frequency))
             self._response("setperiods " + str(self.periods))
             self._response("mode phase")
-            self._write("load")
-            for txp, txn, rxp, rxn in self.protocol:
-                self._write(f"{txp} {txn} {rxp} {rxn} 1 1")
-            result = self._response("")
-            if result != "OK: Electrode configuration complete.":
-                raise RuntimeError(f"Unexpected electrode load response: {result}")
+            self._load_gain_rows([f"{txp} {txn} {rxp} {rxn} 1 1" for txp, txn, rxp, rxn in self.protocol])
             self._write("autogain")
             deadline = time.monotonic() + 60
             while True:
@@ -162,18 +233,10 @@ class EITReader:
                     raise RuntimeError(f"Amodo autogain: {line}")
                 if line.startswith("OK: Autogain complete."):
                     break
-            self._write("dump")
-            self.gains = []
-            deadline = time.monotonic() + 5
-            while True:
-                line = self._line(deadline)
-                if line.startswith("ERROR:"):
-                    raise RuntimeError(f"Amodo gain dump: {line}")
-                if line.startswith("OK:"):
-                    break
-                self.gains.append(line)
-            if len(self.gains) != len(self.protocol):
-                raise RuntimeError(f"Amodo gain dump has {len(self.gains)} entries; expected {len(self.protocol)}")
+            self.autogain_gains = self._dump_gains()
+            self.gains = list(self.autogain_gains)
+            if self.rx_gain_margin_steps:
+                self._apply_rx_gain_margin()
             self._write("start")
         except BaseException:
             self.close()
@@ -187,6 +250,9 @@ class EITReader:
                 "measurement_channels": len(self.protocol),
                 "drive_pattern": self.drive_pattern,
                 "configuration_order_txp_txn_rxp_rxn": self.protocol,
+                "rx_gain_margin_steps": self.rx_gain_margin_steps,
+                "autogain_gain_dump": self.autogain_gains,
+                "rx_margin_clamped_channels": self.rx_margin_clamped_channels,
                 "gain_dump": self.gains, "mode": "magnitude_Vrms_and_phase_rad",
                 "frame_timestamp_source": "host receipt; firmware has no frame timestamp"}
 

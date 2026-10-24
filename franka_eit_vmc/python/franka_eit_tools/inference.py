@@ -1,5 +1,4 @@
 """Sensor-only inference and event hysteresis; never imports robot-control code."""
-from collections import deque
 from pathlib import Path
 import hashlib
 import numpy as np

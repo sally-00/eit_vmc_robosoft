@@ -12,7 +12,7 @@ from eit_reader import measurement_protocol
 from contact_mlp import ContactMLP
 
 HERE = Path(__file__).resolve().parent
-PLATES = HERE.parents[1] / "eit_palm_robot_mount"
+PLATES = HERE / "assets"
 MODEL_VERSION = 1
 MLP_MODEL_VERSION = 2
 
@@ -294,6 +294,8 @@ class DemoReader:
                 "electrode_count": len(self.cfg["eit_electrode_pins"]),
                 "measurement_channels": self.channels,
                 "drive_pattern": self.drive_pattern,
+                "rx_gain_margin_steps": self.cfg.get("eit_rx_gain_margin_steps", 0),
+                "rx_gain_margin_note": "Synthetic signals; no physical amplifier gain",
                 "configuration_order_txp_txn_rxp_rxn": self.protocol}
 
     def capture(self):

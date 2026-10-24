@@ -6,9 +6,9 @@ Two ROS 2 executables implement the matched joystick and ball-rolling experiment
 - `ball_roll_controller`: robot-motion versus EIT position feedback, with centre attachment shared.
 - `move_ready`: move the active pad face above the task at positive Base X/Z and Base Y=0.
 
-The package is self-contained with respect to research code: it contains the controller mathematics, Amodo ARIA serial reader, position model, collector, trainer, inference node, example model, and configuration. Runtime dependencies are ROS 2, Eigen, a compatible libfranka installation, NumPy, PyYAML and pyserial. There are no imports, symlinks or absolute paths back to the original project.
+The package is self-contained with respect to research code: it contains the controller mathematics, Amodo ARIA serial reader, read-only position decoder, inference node, example model, and configuration. Runtime dependencies are ROS 2, Eigen, a compatible libfranka installation, NumPy, PyYAML and pyserial. There are no imports, symlinks or absolute paths back to the original project.
 
-**Model status:** no trained physical-pad model was found in the supplied workspace. `models/demo_position_model.npz` is a trained synthetic UI-signal example, for offline testing only. Robot trials reject demo models. Export your existing measured `position_model.npz`, or collect/train it using the tools below, and put the measured model in `models/position_model.npz`. That directory is intentionally tracked by Git.
+**Model status:** `models/demo_position_model.npz` is a synthetic UI-signal example for offline testing only. Robot trials reject demo models. Train and export your measured model outside this ROS package, then copy the deployment file to `models/position_model.npz`. That directory is intentionally tracked by Git. The ROS package only loads model parameters and runs predictions; it contains no data collector, trainer or synthetic-model generator.
 
 The controllers have not been run on a physical robot. See `VALIDATION.md` for the checks actually performed.
 
@@ -100,6 +100,8 @@ source install/setup.bash
 
 The direct-FCI interface avoids coupling to a particular `franka_semantic_components` API. Use a realtime-capable host and compatible FCI configuration as for the existing VMC Transformer hardware experiments.
 
+When updating an older installation of this package, build in a clean workspace so removed training executables are not left in the install directory.
+
 Copy the installed example configs to an editable location:
 
 ```bash
@@ -109,7 +111,7 @@ cp -r "$(ros2 pkg prefix --share franka_eit_vmc)/config/." ~/eit_config/
 
 Set the actual robot IP and **measured** EE-to-active-face translation/rotation in `controller.yaml`. The 140 mm example is not a measured mount dimension. Set `tool_transform_confirmed: true` only after entering that measured transform. Measure tool mass/TCP and configure the Franka robot appropriately using your established procedure. The package does not guess payload or change collision thresholds.
 
-The example workspace is positive Base X/Z, centred at Base Y=0. Ready face centre is `[0.45, 0.0, 0.35]`. Adjust its height to be a small measured clearance above the actual object so the 20 mm approach budget can reach it. `landing_offset_y_m` offsets the joystick landing around the task centre for paired tests.
+The example workspace is positive Base X/Z, centred at Base Y=0. Ready face centre is `[0.45, 0.0, 0.35]`. Adjust its height to be a small measured clearance above the actual object so the 20 mm approach budget can reach it. `landing_offset_x_m` offsets joystick landings along Base X for paired tests; keep `landing_offset_y_m: 0.0` so the task stays centred at Y=0.
 
 FR3 joint limits are defaults. For a Panda, supply `config/panda.yaml` as an overlay and verify the actual robot model/limits.
 
@@ -141,22 +143,23 @@ Stop that FCI driver before running this package. Pass `posture.yaml` to the new
 
 The portable model is an RBF kernel-ridge position decoder on normalized complex-voltage changes. It uses 40 phase/magnitude channels (80 real features), estimates pad XY in millimetres internally, and publishes metres. Force labels/force predictions are not used.
 
-If a physical model has already been trained using the existing contact-position GUI, copy its `position_model.npz` into this package's `models/`. The format is compatible. Inspect it with:
+Prepare the model on the EIT training computer in the separate `eit_position_toolkit/` folder, outside this ROS package. For an existing 40-channel RBF checkpoint, the separate `export_franka_model.py` tool in that toolkit writes a deployment NPZ containing precomputed weights, kernel width and support limit:
+
+```bash
+python3 /path/to/eit_position_toolkit/export_franka_model.py \
+  --input /path/to/trained/position_model.npz \
+  --output /path/to/export/position_model.npz
+```
+
+Copy that exported file to this package's `models/position_model.npz` on the robot computer, or supply its absolute path. Existing checkpoints without precomputed parameters must be exported first. The current decoder supports RBF models with all 40 adjacent-scan channels; MLP models and other scans are not supported. The loader reads numeric NPZ arrays and JSON metadata with `allow_pickle=False`, and performs no fitting or weight reconstruction.
+
+Inspect the model:
 
 ```bash
 ros2 run franka_eit_vmc inspect_model.py /path/to/models/position_model.npz
 ```
 
-To collect a model using only this package, set the actual electrode-to-device pin mapping in `eit.json` (never guess pin order), then:
-
-```bash
-ros2 run franka_eit_vmc collect_eit.py --config ~/eit_config/eit.json \
-  --output ~/eit_sessions --numbering ccw --points 20 --repeats 3
-ros2 run franka_eit_vmc train_eit.py --session /path/to/the/session \
-  --output /path/to/franka_eit_vmc/models/position_model.npz
-```
-
-The collector prompts for known touch positions and separate unloaded baselines. Use the intended contacting objects/load range and independently verify held-out positions/sessions. The built-in last-repetition holdout is not an unseen-location or cross-session accuracy guarantee. The output uses numeric NPZ arrays and JSON metadata; it does not unpickle arbitrary Python objects.
+Set the actual electrode-to-device pin mapping in `eit.json` to match the exported model. Sensor settings are checked against the model metadata.
 
 Start live inference:
 
@@ -165,7 +168,7 @@ ros2 run franka_eit_vmc eit_contact_node.py --model /path/to/models/position_mod
   --config ~/eit_config/eit.json
 ```
 
-With the pad unloaded, request 20 fresh baseline frames:
+With the pad unloaded, request 20 fresh baseline frames. This measures the live electrical reference for prediction; it does not train or modify the model:
 
 ```bash
 ros2 service call /eit_contact/calibrate_baseline std_srvs/srv/Trigger '{}'
@@ -175,46 +178,143 @@ The node publishes `/eit/contact`. Three above-threshold frames indicate contact
 
 The firmware provides no device acquisition timestamp. Published timestamps are host receipt times; software freshness checks do not measure the full electrical acquisition/filter latency. Both processes should use the same host/system clock. The node stops on excessive serial backlog. Actual frame rate must be measured on the device; no 20 Hz hardware rate is claimed.
 
-## Move to ready, then run one experiment
+## Run the experiments in order
 
-Parsing/dry-run mode is the default and never connects to the robot:
+These commands operate the physical robot. Launching a task connects through FCI and holds the current pose; a ready/trial request starts motion. `task:=ready` starts its finite ready move immediately. All robot examples below use real control. Keep one FCI owner, and source ROS plus `~/eit_ws/install/setup.bash` in every terminal.
 
-```bash
-ros2 launch franka_eit_vmc controller.launch.py task:=joystick config:=/path/to/controller.yaml
-```
+### 1. Prepare the hardware and files once
 
-Once geometry, mounting and posture are configured and other FCI clients stopped, a finite ready move is:
+Build using the instructions above and copy the configs to `~/eit_config/`. Set the real robot IP, measured EE-to-pad transform/payload, reachable task height, workspace and joystick length. Set `tool_transform_confirmed: true` after entering the measured transform. The 4–5 midpoint mounting direction is already configured toward Base +X. Capture the desired wrist posture using `capture_posture.py` as described above, before stopping the previous FCI driver; save `~/eit_config/posture.yaml`.
 
-```bash
-ros2 launch franka_eit_vmc controller.launch.py task:=ready connect_robot:=true \
-  config:=/path/to/controller.yaml mount:=/path/to/mount.yaml posture:=/path/to/posture.yaml
-```
+Prepare a physical EIT model in `eit_position_toolkit/`, check its signal diagnostics and test known positions. For this ROS decoder use **eight verified electrode pins, adjacent scan, RBF, all 40 channels usable**; the toolkit's default 16-electrode combined scan/MLP cannot be loaded here. Export with the toolkit's `export_franka_model.py`, copy the deployment file to `~/eit_config/position_model.npz`, and match `~/eit_config/eit.json` to the saved wiring/frequency. Do not guess which eight pins to use on the physical pad.
 
-Then start **one** experiment node (it initially holds):
+The ±10 mm X offsets below are example pad-centre displacements. Confirm all three landings stay inside the calibrated sensing region with the real joystick. Base Y stays zero. The block helper checks that the launched offset matches its label. Keep the joystick fixture fixed while changing the palm landing.
+
+### 2. Start EIT inference (terminal A; leave running)
 
 ```bash
-ros2 launch franka_eit_vmc controller.launch.py task:=joystick connect_robot:=true \
-  config:=/path/to/controller.yaml mount:=/path/to/mount.yaml posture:=/path/to/posture.yaml
+ros2 run franka_eit_vmc inspect_model.py ~/eit_config/position_model.npz
+ros2 run franka_eit_vmc eit_contact_node.py --model ~/eit_config/position_model.npz \
+  --config ~/eit_config/eit.json
 ```
 
-In another terminal, with physical inference already calibrated:
+With the pad unloaded, use terminal C to request a baseline:
+
+```bash
+ros2 service call /eit_contact/calibrate_baseline std_srvs/srv/Trigger '{}'
+ros2 topic echo /eit/contact --once
+```
+
+The service queues calibration; inspect a subsequent message after the 20 fresh frames complete. It must show `measurement_valid: true`, `model_is_physical: true`, and `contact: false` while unloaded. When making a known touch, verify contact and position become valid, then release. Before robot trials check that acquisition gaps stay below `sensor_timeout` (default 0.30 s). Recalibrate only while unloaded if the electrical reference drifts.
+
+### 3. Joystick centre block: 10 trials
+
+Set independent joystick-angle recording before the block. In terminal B:
+
+```bash
+ros2 launch franka_eit_vmc controller.launch.py task:=joystick \
+  config:=$HOME/eit_config/controller.yaml posture:=$HOME/eit_config/posture.yaml \
+  overrides:=$HOME/eit_config/joystick_center.yaml
+```
+
+In terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task joystick --block center --repeats 5 --output ~/eit_trials
+```
+
+For each trial the helper pauses: clear the local route and type `ready` to move to the ready pose; reset the joystick upright, leave the pad unloaded and start independent recording, then type `run` to approach and execute +12°, then −12°. Enter the independently observed outcome/recording ID afterward. One contact location is used throughout each run. The EIT attachment is defined at contact and stays fixed in pad coordinates. The baseline assumes the pad centre. Both get the same contact detector, gains, length and angle commands. Verify the contact stays approximately fixed on the pad.
+
+Five paired repeats run both conditions, alternating baseline/EIT order across repeats. The helper does not automatically reset objects. `q` at a prompt exits the block while the task controller continues holding; Ctrl+C during a child operation requests its bounded stop and ends the block.
+
+### 4. Joystick negative-X block: 10 trials
+
+After the centre block, stop the joystick controller in terminal B and restart it with the negative-X overlay:
+
+```bash
+ros2 launch franka_eit_vmc controller.launch.py task:=joystick \
+  config:=$HOME/eit_config/controller.yaml posture:=$HOME/eit_config/posture.yaml \
+  overrides:=$HOME/eit_config/joystick_x_minus.yaml
+```
+
+Then in terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task joystick --block x_minus --repeats 5 --output ~/eit_trials
+```
+
+### 5. Joystick positive-X block: 10 trials
+
+Stop the controller in terminal B and restart:
+
+```bash
+ros2 launch franka_eit_vmc controller.launch.py task:=joystick \
+  config:=$HOME/eit_config/controller.yaml posture:=$HOME/eit_config/posture.yaml \
+  overrides:=$HOME/eit_config/joystick_x_plus.yaml
+```
+
+Then in terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task joystick --block x_plus --repeats 5 --output ~/eit_trials
+```
+
+Joystick total: **3 landings × 2 conditions × 5 repeats = 30 trials**. Measure actual angle error over the common command sequence, final angle error, contact losses and completion; measure peak load only with a reliable independent measurement or clearly label the robot wrench estimate. Expect the fixed-centre baseline to degrade more at off-centre landings; centred performance may be similar. These are hypotheses, not established hardware results.
+
+### 6. Ball preparation and undisturbed block: 10 trials
+
+Stop the joystick controller. Install the ball/table setup, mark its starting position and measure its Base-X centre independently. Set `initial_ball_x` in a copy of `ball.yaml` at `~/eit_config/ball.yaml`; this same value is used for both conditions. Reset the ball to that mark before every trial. The fixed goal is this initial X plus `roll_distance` (default 20 mm). Check the ready height for this object and leave both landing offsets zero in `controller.yaml`.
+
+Start independent camera recording of ball position; it is for evaluation, not controller feedback. In terminal B:
+
+```bash
+ros2 launch franka_eit_vmc controller.launch.py task:=ball \
+  config:=$HOME/eit_config/controller.yaml posture:=$HOME/eit_config/posture.yaml \
+  overrides:=$HOME/eit_config/ball.yaml
+```
+
+In terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task ball --block undisturbed --repeats 5 --output ~/eit_trials
+```
+
+Follow each ready/reset/run prompt and do not touch the ball externally during rolling. Both conditions keep the centre attachment (`update_ball_attachment: false`). `baseline` estimates progress from initial ball X plus half the palm travel; `eit` uses sensed contact position to correct virtual progress during manipulation. This tests progress feedback, not moving versus fixed attachment.
+
+### 7. Ball brief-push block: 10 trials
+
+Keep the same controller/configuration running. Establish a repeatable push protocol before this block: use a marked displacement stop or other repeatable jig along the rolling direction, with a consistent externally recorded timing cue during the rolling phase. Choose and record the displacement and timing before collecting results; use them for both conditions. One brief push occurs per trial. Release afterward, preserving palm/ball contact. The controller receives no disturbance flag and does not recover from contact loss.
+
+In terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task ball --block push --repeats 5 --output ~/eit_trials
+```
+
+Ball total: **2 physical conditions × 2 feedback conditions × 5 repeats = 20 trials**. Measure camera-derived final goal error, peak disturbance deviation, recovery into a prespecified goal tolerance, and contact loss. Evaluate recovery within the common 8 s engagement horizon. A baseline can work well during ideal rolling; EIT is expected to help when a push/slip breaks the half-palm-travel assumption.
+
+### 8. Save results and finish
+
+The five blocks produce **50 planned trials**. CSVs are saved under `~/eit_trials/<task>/<block_timestamp>/repeat_XX/`; `block.json` records the block/config check and `outcomes.jsonl` records your observations. Keep camera/angle recordings with their entered IDs. Record unsuccessful attempts and faults; if rerunning a failed block, keep the original attempt files and identify the additional trials explicitly.
+
+Controller `done` means its sequence finished, not object success. Controller CSVs do not contain measured joystick angle or camera ball ground truth. Define the success tolerance before examining results. Plot joystick errors by offset/condition and ball final errors/recovery traces by disturbance/feedback condition.
+
+To end a running task through the operator tool (terminal C):
+
+```bash
+ros2 run franka_eit_vmc experiment.py --task ball --action stop
+```
+
+Use `--task joystick` for that controller. The stop ends the FCI task; start a new controller process before further trials. Stop inference with Ctrl+C after robot control ends. A fault also requires inspecting the robot and restarting the controller; no automatic recovery is attempted.
+
+For a single additional trial, with the matching controller launched, use:
 
 ```bash
 ros2 run franka_eit_vmc experiment.py --task joystick --action ready
-ros2 run franka_eit_vmc experiment.py --task joystick --action trial --condition baseline --output ~/eit_trials
-ros2 run franka_eit_vmc experiment.py --task joystick --action ready
-ros2 run franka_eit_vmc experiment.py --task joystick --action trial --condition eit --output ~/eit_trials
+ros2 run franka_eit_vmc experiment.py --task joystick --action trial --condition eit --output ~/eit_trials/additional
 ```
 
-`baseline` means centre attachment for the joystick. Repeat at fixed landing offsets with unchanged gains and supplied geometry. `experiment.py` supplies a heartbeat while moving/running, records every attempt to a new CSV, and requests stop on interruption/error. Normal completion leaves the robot holding for the next command. Geometry/gains are immutable while a process is running; restart to apply a config change, and use the condition service/operator tool for the matched baseline/EIT switch.
-
-For the ball, stop the joystick process, launch with `task:=ball`, and use `--task ball` in the operator tool. `baseline` now means robot-motion progress. Set the independently measured `initial_ball_x` in `config/ball.yaml`, or use `overrides:=/path/to/ball_trial.yaml` on launch. Both conditions use the same fixed initial position and goal. Apply the repeatable external push independently; the controller receives no disturbance timing flag.
-
-For evaluation, use independent joystick-angle/ball-position measurements. The CSV records robot/controller state and the robot's external-force estimate, not ground-truth object success or calibrated pad contact force. Optional synchronized recording:
-
-```bash
-ros2 bag record /eit/contact /eit_joystick/status /eit_joystick/joint_states
-```
+The standalone `move_ready` executable is also available through `task:=ready`; the block procedure already requests ready movement from the task controller, so it does not need a separate FCI owner.
 
 ## Git transfer
 

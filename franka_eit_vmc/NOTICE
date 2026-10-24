@@ -1,5 +1,5 @@
 This package implements the requested EIT-to-VMC proof-of-concept experiments.
-The position-only RBF model, synthetic UI demo generator, and Amodo ARIA serial
+The read-only position decoder and Amodo ARIA serial
 reader are adapted from the user's existing ur3e_weight_position_data_collection/
 ur3e_code/contact_position.py and eit_reader.py. They are included locally so no
 original-workspace path is required at deployment.

@@ -423,7 +423,8 @@ class WorkflowTests(unittest.TestCase):
                                       training_model=self.training_model)
             cfg = {"eit_frames_per_capture": 5, "eit_electrode_pins": list(range(1, self.electrode_count+1)),
                    "eit_frequency_khz": 50, "eit_periods_per_measurement": 1,
-                   "eit_allow_clipped": self.force_clipped,"eit_drive_pattern":self.drive_pattern}
+                   "eit_allow_clipped": self.force_clipped,"eit_drive_pattern":self.drive_pattern,
+                   "eit_rx_gain_margin_steps": 1}
             root = tk.Tk()
             root.withdraw()
             try:
@@ -439,6 +440,8 @@ class WorkflowTests(unittest.TestCase):
                 app.connect()
                 settle()
                 self.assertIsNotNone(app.reader, app.status.get())
+                self.assertEqual(app.cfg["eit_rx_gain_margin_steps"], 1)
+                self.assertEqual(str(app.gain_margin_option.cget("state")), "disabled")
                 channels=len(measurement_protocol(cfg["eit_electrode_pins"],self.drive_pattern))
                 self.assertIn(f"{channels} measurements/frame", app.scan_summary.get())
                 # Preview runs while waiting for a touch, without recording/advancing it.
@@ -503,6 +506,7 @@ class WorkflowTests(unittest.TestCase):
                 self.assertIsNotNone(app.model, app.status.get())
                 self.assertEqual(app.model.model_type, self.training_model)
                 self.assertEqual(app.model.metadata["eit_config"]["eit_training_model"], self.training_model)
+                self.assertEqual(app.model.metadata["eit_config"]["eit_rx_gain_margin_steps"], 1)
                 self.assertEqual(app.model.metadata["allow_clipped"], self.force_clipped)
                 self.assertEqual(app.model.metadata["usable_measurement_channels"], channels-int(self.force_zero))
                 if self.force_zero:

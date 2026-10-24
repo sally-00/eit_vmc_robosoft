@@ -1,8 +1,9 @@
-# Share only robot control, physical EIT tools, and required sensor-view assets.
+# Share the standalone position toolkit, weighted UR3e collector and Franka code.
 # Existing simulation campaigns, paper builds, videos and unrelated CAD stay local.
 /*
 !/.gitignore
 !/franka_eit_vmc/
+!/eit_position_toolkit/
 !/ur3e_weight_position_data_collection/
 /ur3e_weight_position_data_collection/*
 !/ur3e_weight_position_data_collection/ur3e_code/
@@ -17,8 +18,14 @@
 **/log/
 **/trial_logs/
 **/sessions/
+**/runs/
 **/contact_position_data/
 **/contact_position_runs/
+**/signal_diagnostics/
+# Local signal snapshots and measured UR3e calibration/fixture poses.
+**/eit_signal_*.json
+/ur3e_weight_position_data_collection/ur3e_code/pad_calibration.json
+/ur3e_weight_position_data_collection/ur3e_code/mount_pose.json
 *.pyc
 *.pyo
 *.bag
@@ -31,8 +38,20 @@
 *.joblib
 *.png
 *.pdf
+
+# Portable distribution archives are local copies of the source folders.
 *.zip
 *.tar.gz
-# Model exports are intentional portable inputs, including the future physical model.
+*.tgz
+*.tar.xz
+
+# Explicitly shared model exports; raw session checkpoints remain ignored.
+!/eit_position_toolkit/models/
+!/eit_position_toolkit/models/*.npz
+!/eit_position_toolkit/models/*.joblib
 !/franka_eit_vmc/models/*.npz
 !/franka_eit_vmc/models/*.joblib
+
+# Keep the assembly figures linked from the weighted collector's README.
+!/ur3e_weight_position_data_collection/ur3e_code/figures/*.png
+!/ur3e_weight_position_data_collection/ur3e_code/figures/*.pdf

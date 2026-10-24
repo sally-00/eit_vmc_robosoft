@@ -40,8 +40,8 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch models DESTINATION share/${PROJECT_NAME})
 # Keep deployment tools adjacent to their executable wrappers; no source-workspace paths.
 install(DIRECTORY python/franka_eit_tools DESTINATION lib/${PROJECT_NAME} PATTERN __pycache__ EXCLUDE)
-install(PROGRAMS scripts/eit_contact_node.py scripts/collect_eit.py scripts/train_eit.py
-  scripts/configure_mount.py scripts/capture_posture.py scripts/experiment.py scripts/inspect_model.py
+install(PROGRAMS scripts/eit_contact_node.py
+  scripts/configure_mount.py scripts/capture_posture.py scripts/experiment.py scripts/run_block.py scripts/inspect_model.py
   DESTINATION lib/${PROJECT_NAME})
 install(FILES README.md LICENSE NOTICE VALIDATION.md DESTINATION share/${PROJECT_NAME})
 if(BUILD_TESTING)
@@ -51,6 +51,7 @@ if(BUILD_TESTING)
   add_test(NAME core COMMAND test_core)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_test(NAME eit_model COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eit.py)
+  add_test(NAME experiment_block COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_block.py)
 endif()
 ament_export_dependencies(rosidl_default_runtime)
 ament_package()

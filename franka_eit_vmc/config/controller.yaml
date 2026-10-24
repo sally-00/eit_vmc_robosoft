@@ -2,7 +2,6 @@
 /**:
   ros__parameters:
     robot_ip: '192.168.1.1'
-    connect_robot: false
     joint_prefix: 'fr3_'
     tool_transform_confirmed: false
     mount_orientation_confirmed: true
@@ -10,7 +9,8 @@
     ee_R_pad_xyzw: [0.0, 0.0, 0.0, 1.0]
     ready_pad_yaw_rad: 1.1780972450961724  # CCW contacting-face midpoint 4–5 faces Base +X (67.5 deg)
     ready_pad_position_m: [0.45, 0.0, 0.35]
-    landing_offset_y_m: 0.0        # joystick landing offset about task centre Base Y=0
+    landing_offset_x_m: 0.0        # joystick comparison varies Base X; task centre remains Y=0
+    landing_offset_y_m: 0.0
     workspace_min_m: [0.15, -0.18, 0.05]
     workspace_max_m: [0.75, 0.18, 0.70]
     # False = capture current q, matching the VMC Transformer convention.
