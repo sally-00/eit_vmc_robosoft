@@ -1,9 +1,11 @@
-# Share the standalone position toolkit, weighted UR3e collector and Franka code.
+# Share the standalone position toolkit, weighted UR3e collector, Franka and joystick code.
 # Existing simulation campaigns, paper builds, videos and unrelated CAD stay local.
 /*
 !/.gitignore
 !/franka_eit_vmc/
 !/eit_position_toolkit/
+!/joystick_hardware/
+/joystick_hardware/recordings/
 !/ur3e_weight_position_data_collection/
 /ur3e_weight_position_data_collection/*
 !/ur3e_weight_position_data_collection/ur3e_code/
