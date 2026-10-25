@@ -1,0 +1,1082 @@
+[
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 5
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 11
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 17
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 23
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 29
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 35
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 41
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 47
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 53
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 59
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 65
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 71
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 77
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 83
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 89
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 95
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 101
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 107
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 113
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 119
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 125
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 131
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 137
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 143
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 149
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 155
+    }
+  },
+  {
+    "campaign": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2",
+      "trial_id": 161
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 5
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 11
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 17
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 23
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 29
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 35
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 41
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 47
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": -0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 53
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 59
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 65
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 71
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 77
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 83
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 89
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 95
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 101
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 107
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 113
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 119
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.002,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 125
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 131
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 137
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.006,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 143
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 300,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 149
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 301,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 155
+    }
+  },
+  {
+    "campaign": "supplement",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 302,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "J2_centre_supplement",
+      "trial_id": 161
+    }
+  }
+]

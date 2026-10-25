@@ -1,0 +1,22 @@
+{
+  "reason": "Original copied checkpoint raises EOF while reading an array.",
+  "original_checkpoint_sha256": "bfd03e0ba983d72907101709d1a40b1aaf0f6bff59799f4c3a0af5b2c4bd3c09",
+  "manifest_checkpoint_sha256": "142662d424eaaa2bdfa72d462bf8d09708a0079fd844bcf8fea2dbbf85f7b35b",
+  "restored_checkpoint_sha256": "142662d424eaaa2bdfa72d462bf8d09708a0079fd844bcf8fea2dbbf85f7b35b",
+  "training_data_sha256": "a33ee38b685ddbecde37fe275ce1e71ca8642422b90c6af00ebfd02546aa9135",
+  "manifest_training_data_sha256": "a33ee38b685ddbecde37fe275ce1e71ca8642422b90c6af00ebfd02546aa9135",
+  "comparison": {
+    "train": {
+      "max_absolute_prediction_difference": 0.0
+    },
+    "validation": {
+      "max_absolute_prediction_difference": 0.0
+    },
+    "test": {
+      "max_absolute_prediction_difference": 0.0
+    },
+    "shift": {
+      "max_absolute_prediction_difference": 0.0
+    }
+  }
+}

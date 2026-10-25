@@ -1,0 +1,94 @@
+{
+  "ball_centre": {
+    "n": 27,
+    "passes": 27,
+    "scored_trials": 27,
+    "mean_error": 0.18242661356268305,
+    "mean_peak_force_N": 3.1743199915222826,
+    "rim_guard_stops": 0,
+    "horizon_stops": 0,
+    "by_offset": {
+      "-0.015": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.0": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.015": {
+        "n": 9,
+        "passes": 9
+      }
+    }
+  },
+  "ball_eit": {
+    "n": 27,
+    "passes": 27,
+    "scored_trials": 27,
+    "mean_error": 0.3166280721307436,
+    "mean_peak_force_N": 3.2716454219696574,
+    "rim_guard_stops": 0,
+    "horizon_stops": 0,
+    "by_offset": {
+      "-0.015": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.0": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.015": {
+        "n": 9,
+        "passes": 9
+      }
+    }
+  },
+  "joystick_centre": {
+    "n": 27,
+    "passes": 9,
+    "scored_trials": 18,
+    "mean_error": 2.8407169868808295,
+    "mean_peak_force_N": 5.614378883411963,
+    "rim_guard_stops": 11,
+    "horizon_stops": 7,
+    "by_offset": {
+      "-0.025": {
+        "n": 9,
+        "passes": 0
+      },
+      "0.0": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.025": {
+        "n": 9,
+        "passes": 0
+      }
+    }
+  },
+  "joystick_eit": {
+    "n": 27,
+    "passes": 27,
+    "scored_trials": 27,
+    "mean_error": 0.3156828926440845,
+    "mean_peak_force_N": 4.186567230652606,
+    "rim_guard_stops": 0,
+    "horizon_stops": 0,
+    "by_offset": {
+      "-0.025": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.0": {
+        "n": 9,
+        "passes": 9
+      },
+      "0.025": {
+        "n": 9,
+        "passes": 9
+      }
+    }
+  }
+}

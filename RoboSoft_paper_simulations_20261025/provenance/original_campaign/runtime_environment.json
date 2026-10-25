@@ -1,0 +1,48 @@
+{
+  "numpy": {
+    "version": "2.5.3",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/numpy/__init__.py",
+    "distribution_metadata_version": "2.4.6",
+    "note": "Imported NumPy reports 2.5.3; installed distribution metadata reports 2.4.6. Imported version is recorded in frozen protocol."
+  },
+  "scipy": {
+    "version": "1.17.1",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/scipy/__init__.py"
+  },
+  "pandas": {
+    "version": "3.0.1",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/pandas/__init__.py"
+  },
+  "matplotlib": {
+    "version": "3.10.8",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/matplotlib/__init__.py"
+  },
+  "sklearn": {
+    "version": "1.8.0",
+    "path": "/tmp/eit_task_deps/sklearn/__init__.py"
+  },
+  "joblib": {
+    "version": "1.6.0",
+    "path": "/tmp/eit_task_deps/joblib/__init__.py"
+  },
+  "threadpoolctl": {
+    "version": "3.7.0",
+    "path": "/tmp/eit_task_deps/threadpoolctl.py"
+  },
+  "mujoco": {
+    "version": "3.5.0",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/mujoco/__init__.py"
+  },
+  "yaml": {
+    "version": "6.0.3",
+    "path": "/tmp/eit_task_deps/yaml/__init__.py"
+  },
+  "PIL": {
+    "version": "12.0.0",
+    "path": "/home/yi/miniconda3/envs/mujoco312/lib/python3.12/site-packages/PIL/__init__.py"
+  },
+  "reportlab": {
+    "version": "5.0.1",
+    "path": "/tmp/eit_task_deps/reportlab/__init__.py"
+  }
+}

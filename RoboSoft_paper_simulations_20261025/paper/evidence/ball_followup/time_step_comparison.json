@@ -1,0 +1,54 @@
+[
+  {
+    "group": "feedback",
+    "attachment": "centre",
+    "progress_source": "odometry",
+    "original_trial_id": 60,
+    "refined_trial_id": 0,
+    "both_pass": true,
+    "late_error_1ms": 2.6141821833738406,
+    "late_error_half_ms": 2.611054980707838,
+    "error_difference_mm": -0.0031272026660027485,
+    "pitch_difference_deg": 0.0002603608808791069,
+    "peak_force_difference_N": -0.0092536589410539
+  },
+  {
+    "group": "feedback",
+    "attachment": "centre",
+    "progress_source": "eit",
+    "original_trial_id": 61,
+    "refined_trial_id": 1,
+    "both_pass": true,
+    "late_error_1ms": 0.5266174118902045,
+    "late_error_half_ms": 0.52169558790205,
+    "error_difference_mm": -0.00492182398815455,
+    "pitch_difference_deg": 0.0004161683293890661,
+    "peak_force_difference_N": -0.009235946375510284
+  },
+  {
+    "group": "attachment",
+    "attachment": "centre",
+    "progress_source": "eit",
+    "original_trial_id": 184,
+    "refined_trial_id": 2,
+    "both_pass": true,
+    "late_error_1ms": 0.42964154706476015,
+    "late_error_half_ms": 0.4303870420964259,
+    "error_difference_mm": 0.000745495031665766,
+    "pitch_difference_deg": -0.0001312374236945857,
+    "peak_force_difference_N": 6.747106684468207e-05
+  },
+  {
+    "group": "attachment",
+    "attachment": "eit",
+    "progress_source": "eit",
+    "original_trial_id": 186,
+    "refined_trial_id": 3,
+    "both_pass": true,
+    "late_error_1ms": 0.3325358932527321,
+    "late_error_half_ms": 0.33225758456026505,
+    "error_difference_mm": -0.00027830869246703305,
+    "pitch_difference_deg": 0.002423505789054703,
+    "peak_force_difference_N": 0.0002690691085138752
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "contact_frame_jacobian_max_difference": 5.551115123125783e-17,
+  "equivalent_contact_frame_torque_max_difference_Nm": 2.220446049250313e-16,
+  "virtual_transmission_power_residual_W": 8.673617379884035e-19,
+  "forward_4p8_vs_2p8mm_relative_contact_signal_difference": 0.015114165240724549,
+  "time_step_refinement": [
+    {
+      "task": "joystick",
+      "step_sizes_s": [
+        0.001,
+        0.0005
+      ],
+      "successes": [
+        true,
+        true
+      ],
+      "target_error_units": "degrees",
+      "target_error_difference": 1.947252514944431e-05,
+      "peak_force_difference_N": 0.00040443526490818726
+    },
+    {
+      "task": "ball",
+      "step_sizes_s": [
+        0.001,
+        0.0005
+      ],
+      "successes": [
+        true,
+        true
+      ],
+      "target_error_units": "mm",
+      "target_error_difference": 0.003015655212990076,
+      "peak_force_difference_N": 8.836197195227768e-05
+    }
+  ]
+}

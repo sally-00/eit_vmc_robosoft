@@ -1,0 +1,80 @@
+[
+  {
+    "folder": "01_synthetic_eit_validation",
+    "title": "Synthetic EIT decoder validation",
+    "paper_location": "Section IV-B; accuracy values in the text",
+    "trial_count": 0,
+    "subsets": {}
+  },
+  {
+    "folder": "02_joystick_attachment",
+    "title": "Joystick attachment accuracy and load",
+    "paper_location": "Section V-A; Figure 3(a)",
+    "trial_count": 99,
+    "subsets": {
+      "main_attachment_comparison": 54,
+      "reaction_driven_lever_control": 27,
+      "low_return_stiffness_control": 18
+    }
+  },
+  {
+    "folder": "03_ball_progress_after_push",
+    "title": "Ball progress correction after a push",
+    "paper_location": "Section V-B; Figure 3(b)",
+    "trial_count": 136,
+    "subsets": {
+      "progress_feedback": 120,
+      "prescribed_reference_control": 16
+    }
+  },
+  {
+    "folder": "04_ball_moving_attachment",
+    "title": "Ball moving contact attachment",
+    "paper_location": "Section V-C; Figure 3(c)",
+    "trial_count": 112,
+    "subsets": {
+      "attachment_gain_sweep": 96,
+      "negative_edge_failures": 16
+    }
+  },
+  {
+    "folder": "05_ball_contact_loss_recovery",
+    "title": "Ball contact-loss recovery",
+    "paper_location": "Section V-D; Figure 3(d)",
+    "trial_count": 12,
+    "subsets": {
+      "scheduled_vs_tactile_recovery": 12
+    }
+  },
+  {
+    "folder": "06_sensor_quality",
+    "title": "Sensor quality and task performance",
+    "paper_location": "Section VI; Figure 4",
+    "trial_count": 51,
+    "subsets": {
+      "bias_delay_sweep": 36,
+      "position_update_dropout": 9,
+      "high_electrical_noise_failures": 6
+    }
+  },
+  {
+    "folder": "07_supporting_controls",
+    "title": "Supporting nominal roll and dynamics controls",
+    "paper_location": "Section V-C and Discussion",
+    "trial_count": 90,
+    "subsets": {
+      "stop_restart_and_resistance_dynamics": 36,
+      "nominal_ball_attachment_control": 54
+    }
+  },
+  {
+    "folder": "08_numerical_checks",
+    "title": "Numerical and implementation checks",
+    "paper_location": "Section VI and supporting verification",
+    "trial_count": 8,
+    "subsets": {
+      "followup_half_timestep": 4,
+      "original_timestep": 4
+    }
+  }
+]

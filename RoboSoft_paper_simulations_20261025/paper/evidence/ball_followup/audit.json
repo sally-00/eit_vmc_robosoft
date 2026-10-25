@@ -1,0 +1,6 @@
+{
+  "attempts": 329,
+  "physical_steps": 2709669,
+  "issues": [],
+  "note": "Contact position is undefined outside contact. All other saved states and trace values are finite."
+}

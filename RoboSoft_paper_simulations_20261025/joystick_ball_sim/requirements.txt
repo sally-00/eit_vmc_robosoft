@@ -1,0 +1,11 @@
+numpy>=2.3,<3
+scipy>=1.16,<2
+pandas>=2.2,<4
+matplotlib==3.10.8
+scikit-learn==1.8.0
+joblib==1.6.0
+threadpoolctl==3.7.0
+mujoco==3.5.0
+PyYAML==6.0.3
+Pillow>=12,<13
+reportlab==5.0.1

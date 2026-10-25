@@ -1,0 +1,10 @@
+{
+  "state": "complete",
+  "completed": 540,
+  "total": 540,
+  "physical_steps": 5546276,
+  "max_physical_steps": 13560000,
+  "elapsed_s": 652.42649102211,
+  "workers": 4,
+  "successes": 442
+}

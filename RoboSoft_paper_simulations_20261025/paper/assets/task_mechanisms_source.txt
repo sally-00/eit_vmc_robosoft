@@ -1,0 +1,1 @@
+OpenAI image generation produced task_virtual_mechanisms_concept.png on 21 October 2026. Conceptual rendering, not a recorded experiment or exact mechanism schematic. The manuscript equations specify the component connections and controller dynamics.

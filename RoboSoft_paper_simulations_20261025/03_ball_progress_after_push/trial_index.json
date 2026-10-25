@@ -1,0 +1,4754 @@
+[
+  {
+    "uid": "followup_0000",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 0
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0000.npz"
+  },
+  {
+    "uid": "followup_0001",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 1
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0001.npz"
+  },
+  {
+    "uid": "followup_0002",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 2
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0002.npz"
+  },
+  {
+    "uid": "followup_0003",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 3
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0003.npz"
+  },
+  {
+    "uid": "followup_0004",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 4
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0004.npz"
+  },
+  {
+    "uid": "followup_0005",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 5
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0005.npz"
+  },
+  {
+    "uid": "followup_0006",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 6
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0006.npz"
+  },
+  {
+    "uid": "followup_0007",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 7
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0007.npz"
+  },
+  {
+    "uid": "followup_0008",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 8
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0008.npz"
+  },
+  {
+    "uid": "followup_0009",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 9
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0009.npz"
+  },
+  {
+    "uid": "followup_0010",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 10
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0010.npz"
+  },
+  {
+    "uid": "followup_0011",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 11
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0011.npz"
+  },
+  {
+    "uid": "followup_0012",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 12
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0012.npz"
+  },
+  {
+    "uid": "followup_0013",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 13
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0013.npz"
+  },
+  {
+    "uid": "followup_0014",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 14
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0014.npz"
+  },
+  {
+    "uid": "followup_0015",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 15
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0015.npz"
+  },
+  {
+    "uid": "followup_0016",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 16
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0016.npz"
+  },
+  {
+    "uid": "followup_0017",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 17
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0017.npz"
+  },
+  {
+    "uid": "followup_0018",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 18
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0018.npz"
+  },
+  {
+    "uid": "followup_0019",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 19
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0019.npz"
+  },
+  {
+    "uid": "followup_0020",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 20
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0020.npz"
+  },
+  {
+    "uid": "followup_0021",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 21
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0021.npz"
+  },
+  {
+    "uid": "followup_0022",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 22
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0022.npz"
+  },
+  {
+    "uid": "followup_0023",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "nominal",
+      "disturbances": [],
+      "trial_id": 23
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0023.npz"
+  },
+  {
+    "uid": "followup_0024",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 24
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0024.npz"
+  },
+  {
+    "uid": "followup_0025",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 25
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0025.npz"
+  },
+  {
+    "uid": "followup_0026",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 26
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0026.npz"
+  },
+  {
+    "uid": "followup_0027",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 27
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0027.npz"
+  },
+  {
+    "uid": "followup_0028",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 28
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0028.npz"
+  },
+  {
+    "uid": "followup_0029",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 29
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0029.npz"
+  },
+  {
+    "uid": "followup_0030",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 30
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0030.npz"
+  },
+  {
+    "uid": "followup_0031",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 31
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0031.npz"
+  },
+  {
+    "uid": "followup_0032",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 32
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0032.npz"
+  },
+  {
+    "uid": "followup_0033",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 33
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0033.npz"
+  },
+  {
+    "uid": "followup_0034",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 34
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0034.npz"
+  },
+  {
+    "uid": "followup_0035",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 35
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0035.npz"
+  },
+  {
+    "uid": "followup_0036",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 36
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0036.npz"
+  },
+  {
+    "uid": "followup_0037",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 37
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0037.npz"
+  },
+  {
+    "uid": "followup_0038",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 38
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0038.npz"
+  },
+  {
+    "uid": "followup_0039",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 39
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0039.npz"
+  },
+  {
+    "uid": "followup_0040",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 40
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0040.npz"
+  },
+  {
+    "uid": "followup_0041",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 41
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0041.npz"
+  },
+  {
+    "uid": "followup_0042",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 42
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0042.npz"
+  },
+  {
+    "uid": "followup_0043",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 43
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0043.npz"
+  },
+  {
+    "uid": "followup_0044",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 44
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0044.npz"
+  },
+  {
+    "uid": "followup_0045",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 45
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0045.npz"
+  },
+  {
+    "uid": "followup_0046",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 46
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0046.npz"
+  },
+  {
+    "uid": "followup_0047",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_2N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.25,
+          "force": 2.0
+        }
+      ],
+      "trial_id": 47
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0047.npz"
+  },
+  {
+    "uid": "followup_0048",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 48
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0048.npz"
+  },
+  {
+    "uid": "followup_0049",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 49
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0049.npz"
+  },
+  {
+    "uid": "followup_0050",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 50
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0050.npz"
+  },
+  {
+    "uid": "followup_0051",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 51
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0051.npz"
+  },
+  {
+    "uid": "followup_0052",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 52
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0052.npz"
+  },
+  {
+    "uid": "followup_0053",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 53
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0053.npz"
+  },
+  {
+    "uid": "followup_0054",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 54
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0054.npz"
+  },
+  {
+    "uid": "followup_0055",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 55
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0055.npz"
+  },
+  {
+    "uid": "followup_0056",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 56
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0056.npz"
+  },
+  {
+    "uid": "followup_0057",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 57
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0057.npz"
+  },
+  {
+    "uid": "followup_0058",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 58
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0058.npz"
+  },
+  {
+    "uid": "followup_0059",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 59
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0059.npz"
+  },
+  {
+    "uid": "followup_0060",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 60
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0060.npz"
+  },
+  {
+    "uid": "followup_0061",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 61
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0061.npz"
+  },
+  {
+    "uid": "followup_0062",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 62
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0062.npz"
+  },
+  {
+    "uid": "followup_0063",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 63
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0063.npz"
+  },
+  {
+    "uid": "followup_0064",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 64
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0064.npz"
+  },
+  {
+    "uid": "followup_0065",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 65
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0065.npz"
+  },
+  {
+    "uid": "followup_0066",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 66
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0066.npz"
+  },
+  {
+    "uid": "followup_0067",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 67
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0067.npz"
+  },
+  {
+    "uid": "followup_0068",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 68
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0068.npz"
+  },
+  {
+    "uid": "followup_0069",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 69
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0069.npz"
+  },
+  {
+    "uid": "followup_0070",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 70
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0070.npz"
+  },
+  {
+    "uid": "followup_0071",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 71
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0071.npz"
+  },
+  {
+    "uid": "followup_0072",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 72
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0072.npz"
+  },
+  {
+    "uid": "followup_0073",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 73
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0073.npz"
+  },
+  {
+    "uid": "followup_0074",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 74
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0074.npz"
+  },
+  {
+    "uid": "followup_0075",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 75
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0075.npz"
+  },
+  {
+    "uid": "followup_0076",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 76
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0076.npz"
+  },
+  {
+    "uid": "followup_0077",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 77
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0077.npz"
+  },
+  {
+    "uid": "followup_0078",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 78
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0078.npz"
+  },
+  {
+    "uid": "followup_0079",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 79
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0079.npz"
+  },
+  {
+    "uid": "followup_0080",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 80
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0080.npz"
+  },
+  {
+    "uid": "followup_0081",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 81
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0081.npz"
+  },
+  {
+    "uid": "followup_0082",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 82
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0082.npz"
+  },
+  {
+    "uid": "followup_0083",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 83
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0083.npz"
+  },
+  {
+    "uid": "followup_0084",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 84
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0084.npz"
+  },
+  {
+    "uid": "followup_0085",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 85
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0085.npz"
+  },
+  {
+    "uid": "followup_0086",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 86
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0086.npz"
+  },
+  {
+    "uid": "followup_0087",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 87
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0087.npz"
+  },
+  {
+    "uid": "followup_0088",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 88
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0088.npz"
+  },
+  {
+    "uid": "followup_0089",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 89
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0089.npz"
+  },
+  {
+    "uid": "followup_0090",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 90
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0090.npz"
+  },
+  {
+    "uid": "followup_0091",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 91
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0091.npz"
+  },
+  {
+    "uid": "followup_0092",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 92
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0092.npz"
+  },
+  {
+    "uid": "followup_0093",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 93
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0093.npz"
+  },
+  {
+    "uid": "followup_0094",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 94
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0094.npz"
+  },
+  {
+    "uid": "followup_0095",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "reverse_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": -4.0
+        }
+      ],
+      "trial_id": 95
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0095.npz"
+  },
+  {
+    "uid": "followup_0096",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 96
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0096.npz"
+  },
+  {
+    "uid": "followup_0097",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 97
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0097.npz"
+  },
+  {
+    "uid": "followup_0098",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 98
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0098.npz"
+  },
+  {
+    "uid": "followup_0099",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 99
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0099.npz"
+  },
+  {
+    "uid": "followup_0100",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 100
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0100.npz"
+  },
+  {
+    "uid": "followup_0101",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 101
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0101.npz"
+  },
+  {
+    "uid": "followup_0102",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 102
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0102.npz"
+  },
+  {
+    "uid": "followup_0103",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 103
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0103.npz"
+  },
+  {
+    "uid": "followup_0104",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 104
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0104.npz"
+  },
+  {
+    "uid": "followup_0105",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 105
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0105.npz"
+  },
+  {
+    "uid": "followup_0106",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 106
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0106.npz"
+  },
+  {
+    "uid": "followup_0107",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 107
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0107.npz"
+  },
+  {
+    "uid": "followup_0108",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 108
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0108.npz"
+  },
+  {
+    "uid": "followup_0109",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 109
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0109.npz"
+  },
+  {
+    "uid": "followup_0110",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 110
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0110.npz"
+  },
+  {
+    "uid": "followup_0111",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 111
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0111.npz"
+  },
+  {
+    "uid": "followup_0112",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 112
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0112.npz"
+  },
+  {
+    "uid": "followup_0113",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 113
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0113.npz"
+  },
+  {
+    "uid": "followup_0114",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 114
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0114.npz"
+  },
+  {
+    "uid": "followup_0115",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 115
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0115.npz"
+  },
+  {
+    "uid": "followup_0116",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 116
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0116.npz"
+  },
+  {
+    "uid": "followup_0117",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 117
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0117.npz"
+  },
+  {
+    "uid": "followup_0118",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 118
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0118.npz"
+  },
+  {
+    "uid": "followup_0119",
+    "subset": "progress_feedback",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "oracle",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "severe_6N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.15,
+          "force": 6.0
+        }
+      ],
+      "trial_id": 119
+    },
+    "trace": "03_ball_progress_after_push/progress_feedback/trials/followup_0119.npz"
+  },
+  {
+    "uid": "followup_0120",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 120
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0120.npz"
+  },
+  {
+    "uid": "followup_0121",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 121
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0121.npz"
+  },
+  {
+    "uid": "followup_0122",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 122
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0122.npz"
+  },
+  {
+    "uid": "followup_0123",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 123
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0123.npz"
+  },
+  {
+    "uid": "followup_0124",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 124
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0124.npz"
+  },
+  {
+    "uid": "followup_0125",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 125
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0125.npz"
+  },
+  {
+    "uid": "followup_0126",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 126
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0126.npz"
+  },
+  {
+    "uid": "followup_0127",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 127
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0127.npz"
+  },
+  {
+    "uid": "followup_0128",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 128
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0128.npz"
+  },
+  {
+    "uid": "followup_0129",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 129
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0129.npz"
+  },
+  {
+    "uid": "followup_0130",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 130
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0130.npz"
+  },
+  {
+    "uid": "followup_0131",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1601,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 131
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0131.npz"
+  },
+  {
+    "uid": "followup_0132",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 132
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0132.npz"
+  },
+  {
+    "uid": "followup_0133",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1602,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 133
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0133.npz"
+  },
+  {
+    "uid": "followup_0134",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "odometry",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 134
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0134.npz"
+  },
+  {
+    "uid": "followup_0135",
+    "subset": "prescribed_reference_control",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "point",
+      "progress_source": "eit",
+      "seed": 1603,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback_point",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 135
+    },
+    "trace": "03_ball_progress_after_push/prescribed_reference_control/trials/followup_0135.npz"
+  }
+]

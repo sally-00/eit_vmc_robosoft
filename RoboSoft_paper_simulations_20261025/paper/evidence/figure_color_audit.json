@@ -1,0 +1,28 @@
+{
+  "scope": "Four figures in the current paper; related standalone mechanism previews restyled consistently",
+  "text_contrast_against_white": {
+    "ink": 16.098951261824404,
+    "physical": 7.557378129674007,
+    "virtual": 6.030074013736682,
+    "contact": 5.185446345779855,
+    "baseline_label": 6.899926514838875
+  },
+  "minimum_heatmap_annotation_contrast": 7.54656365419632,
+  "sequential_maps_have_monotonic_luminance": true,
+  "redundant_encodings": [
+    "cross versus dot for nominal/sensed contact",
+    "square versus circle and dashed versus solid joystick curves",
+    "direct condition labels and individual-trial markers (Figure 3 solid bars, updated 24 October 2026)",
+    "numeric values and completion counts in every heatmap cell"
+  ],
+  "preview_modes": [
+    "Original",
+    "Protanopia preview",
+    "Deuteranopia preview",
+    "Tritanopia preview",
+    "Grayscale"
+  ],
+  "raw_trial_sources_unchanged": true,
+  "limits": "Computer-generated CVD and grayscale previews, not a user study or a complete PDF accessibility certification.",
+  "figure3_style_update": "24 October 2026: solid colours without hatches or bar outlines, at user request. Prior colour-vision preview images predate this style update."
+}

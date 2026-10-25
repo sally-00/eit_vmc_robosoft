@@ -1,0 +1,9 @@
+# Frozen simulation evidence must retain its SHA256 on every platform.
+* -text
+*.npz binary
+*.npy binary
+*.joblib binary
+*.png binary
+*.pdf binary
+# Python's CSV writer preserves CRLF in some archived tables.
+*.csv whitespace=cr-at-eol

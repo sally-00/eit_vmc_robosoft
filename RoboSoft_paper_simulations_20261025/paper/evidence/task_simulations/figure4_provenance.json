@@ -1,0 +1,14 @@
+{
+  "joystick": {
+    "trial": 131,
+    "frame": 345,
+    "time": 3.45,
+    "mechanism": "point"
+  },
+  "ball": {
+    "trial": 237,
+    "frame": 350,
+    "time": 3.5,
+    "mechanism": "mechanism"
+  }
+}

@@ -1,4 +1,4 @@
-# Share the standalone position toolkit, weighted UR3e collector, Franka and joystick code.
+# Share the EIT/robot tools and the curated paper simulation bundle.
 # Existing simulation campaigns, paper builds, videos and unrelated CAD stay local.
 /*
 !/.gitignore
@@ -57,3 +57,12 @@
 # Keep the assembly figures linked from the weighted collector's README.
 !/ur3e_weight_position_data_collection/ur3e_code/figures/*.png
 !/ur3e_weight_position_data_collection/ur3e_code/figures/*.pdf
+
+# Publish the curated paper simulations with their frozen datasets and results.
+# Override the global CSV/NPZ/model/image/PDF exclusions for this folder.
+!/RoboSoft_paper_simulations_20261025/
+!/RoboSoft_paper_simulations_20261025/**
+/RoboSoft_paper_simulations_20261025/**/__pycache__/
+/RoboSoft_paper_simulations_20261025/**/.pytest_cache/
+/RoboSoft_paper_simulations_20261025/**/.venv/
+/RoboSoft_paper_simulations_20261025/reruns/

@@ -1,0 +1,77 @@
+{
+  "draft": "../RoboSoft_EIT_VMC_Draft/manuscript.tex",
+  "report": "report/Joystick_Ball_EIT_VMC_Simulation_Report.pdf",
+  "implemented": [
+    {
+      "draft_protocol": "Cross switching and attachment on joystick",
+      "groups": [
+        "J1"
+      ],
+      "report_section": "5"
+    },
+    {
+      "draft_protocol": "Virtual lever versus adaptive point spring",
+      "groups": [
+        "J2",
+        "J3",
+        "D1"
+      ],
+      "report_section": "5.1 and 9.1"
+    },
+    {
+      "draft_protocol": "Occluded ball rolling with equal tactile progress feedback",
+      "groups": [
+        "B1"
+      ],
+      "report_section": "6"
+    },
+    {
+      "draft_protocol": "Virtual carriage versus adaptive point spring",
+      "groups": [
+        "B2",
+        "D1"
+      ],
+      "report_section": "6.1 and 9.1"
+    },
+    {
+      "draft_protocol": "Multiple rolling strokes and reconnection timing",
+      "groups": [
+        "B3"
+      ],
+      "report_section": "7"
+    },
+    {
+      "draft_protocol": "Contact-triggered switching under first-contact uncertainty",
+      "groups": [
+        "J1",
+        "B1"
+      ],
+      "report_section": "5 and 6"
+    },
+    {
+      "draft_protocol": "Independent unexpected contact-loss interruption",
+      "groups": [
+        "B4"
+      ],
+      "report_section": "8"
+    },
+    {
+      "draft_protocol": "Sensing and object-geometry sensitivity",
+      "groups": [
+        "B5",
+        "B6",
+        "S1",
+        "S2"
+      ],
+      "report_section": "9"
+    },
+    {
+      "draft_protocol": "Equivalent conventional contact-frame mapping",
+      "artifact": "results/verification.json",
+      "report_section": "10"
+    }
+  ],
+  "prior_support_experiments": "Already executed in ../ur3e_sim; excluded from this evaluation count.",
+  "later_extension": "Two-axis joystick gimbal is described as a later extension in the draft and is not evaluated here.",
+  "new_switching_task": "A blind support withdrawal/return during a 60 mm roll; physical table motion, sensor-driven loss/reacquisition, no interruption flag in controller."
+}

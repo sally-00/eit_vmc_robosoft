@@ -1,0 +1,208 @@
+[
+  {
+    "uid": "refined_0000",
+    "subset": "followup_half_timestep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "odometry",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.0005,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 0
+    },
+    "trace": "08_numerical_checks/followup_half_timestep/trials/refined_0000.npz"
+  },
+  {
+    "uid": "refined_0001",
+    "subset": "followup_half_timestep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1600,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.0005,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "feedback",
+      "case": "forward_4N",
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 1
+    },
+    "trace": "08_numerical_checks/followup_half_timestep/trials/refined_0001.npz"
+  },
+  {
+    "uid": "refined_0002",
+    "subset": "followup_half_timestep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1700,
+      "gap": 0.006,
+      "offset": 0.025,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.0005,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 0.3,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "attachment",
+      "case": "migration",
+      "trial_id": 2
+    },
+    "trace": "08_numerical_checks/followup_half_timestep/trials/refined_0002.npz"
+  },
+  {
+    "uid": "refined_0003",
+    "subset": "followup_half_timestep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1700,
+      "gap": 0.006,
+      "offset": 0.025,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.0005,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 0.3,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "attachment",
+      "case": "migration",
+      "trial_id": 3
+    },
+    "trace": "08_numerical_checks/followup_half_timestep/trials/refined_0003.npz"
+  },
+  {
+    "uid": "original_check_ball_0.0005",
+    "subset": "original_timestep",
+    "engine": "original",
+    "config": {
+      "task": "ball",
+      "attachment": "eit",
+      "switching": "event",
+      "mechanism": "mechanism",
+      "seed": 104,
+      "gap": 0.006,
+      "offset": 0.0,
+      "distance": 0.025,
+      "dt": 0.0005,
+      "nominal_time": 1.0,
+      "horizon": 28.0
+    },
+    "trace": "08_numerical_checks/original_timestep/ball_0.0005.npz"
+  },
+  {
+    "uid": "original_check_ball_0.001",
+    "subset": "original_timestep",
+    "engine": "original",
+    "config": {
+      "task": "ball",
+      "attachment": "eit",
+      "switching": "event",
+      "mechanism": "mechanism",
+      "seed": 104,
+      "gap": 0.006,
+      "offset": 0.0,
+      "distance": 0.025,
+      "dt": 0.001,
+      "nominal_time": 1.0,
+      "horizon": 28.0
+    },
+    "trace": "08_numerical_checks/original_timestep/ball_0.001.npz"
+  },
+  {
+    "uid": "original_check_joystick_0.0005",
+    "subset": "original_timestep",
+    "engine": "original",
+    "config": {
+      "task": "joystick",
+      "attachment": "eit",
+      "switching": "event",
+      "mechanism": "mechanism",
+      "seed": 104,
+      "gap": 0.006,
+      "offset": 0.0,
+      "distance": 0.025,
+      "dt": 0.0005,
+      "nominal_time": 1.0,
+      "horizon": 16.0
+    },
+    "trace": "08_numerical_checks/original_timestep/joystick_0.0005.npz"
+  },
+  {
+    "uid": "original_check_joystick_0.001",
+    "subset": "original_timestep",
+    "engine": "original",
+    "config": {
+      "task": "joystick",
+      "attachment": "eit",
+      "switching": "event",
+      "mechanism": "mechanism",
+      "seed": 104,
+      "gap": 0.006,
+      "offset": 0.0,
+      "distance": 0.025,
+      "dt": 0.001,
+      "nominal_time": 1.0,
+      "horizon": 16.0
+    },
+    "trace": "08_numerical_checks/original_timestep/joystick_0.001.npz"
+  }
+]

@@ -1,0 +1,212 @@
+[
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/scene.py",
+    "bundled_path": "joystick_ball_sim/src/scene.py",
+    "expected_sha256": "861e8339b863ebccfb88551fa67e5066915d6a07772eb1f0bf6c1211976644c7",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/sensing.py",
+    "bundled_path": "joystick_ball_sim/src/sensing.py",
+    "expected_sha256": "4d88ceebf5f607803ad4c89a7fa995db546eef2b08c2c929acd9bf13fefd0ed6",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/trial.py",
+    "bundled_path": "joystick_ball_sim/src/trial.py",
+    "expected_sha256": "ebef486cf570c529cba1394ae0772d910ffa98b48665270e529824aa49189d92",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/restore_estimator.py",
+    "bundled_path": "joystick_ball_sim/src/restore_estimator.py",
+    "expected_sha256": "f9db0d56fd9efdf28d0e98562bf239b070e3a4cea68059db04fbe185c71ee6a8",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/electrical.py",
+    "bundled_path": "joystick_ball_sim/src/electrical.py",
+    "expected_sha256": "8541399647785b5c71b08178bd9a9a836bf31b3a51af95368b648add8bd37030",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/run_development.py",
+    "bundled_path": "joystick_ball_sim/src/run_development.py",
+    "expected_sha256": "ef65195b5e5455eb150ea6d40a4b817a1eb2633246145b3ae4c3d46528c3051f",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/campaign.py",
+    "bundled_path": "joystick_ball_sim/src/campaign.py",
+    "expected_sha256": "3b96cfc76db7467facf7c72977a68107c7debff17a7c5df50258131476ca40fe",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/src/verify.py",
+    "bundled_path": "joystick_ball_sim/src/verify.py",
+    "expected_sha256": "e18595e25311be2125183c530902681b1235484341f9f8e4a97988dd50f70d44",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "ur3e_sim/src/robot.py",
+    "bundled_path": "ur3e_sim/src/robot.py",
+    "expected_sha256": "6b419c3a3cefa49e14cd402d376c02058481c493eaba992c872633cd24e13548",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "RoboSoft_EIT_VMC_Draft/manuscript.tex",
+    "bundled_path": null,
+    "expected_sha256": "1823272f0a37bf7eeead190b8445e8e34915bd4ebd66956c7fc14f79ca434da3",
+    "status": "historical_manuscript_reference"
+  },
+  {
+    "protocol": "joystick_ball_sim/results/frozen_protocol.json",
+    "original_reference": "joystick_ball_sim/results/eit_estimator_restored.joblib",
+    "bundled_path": "joystick_ball_sim/results/eit_estimator_restored.joblib",
+    "expected_sha256": "142662d424eaaa2bdfa72d462bf8d09708a0079fd844bcf8fea2dbbf85f7b35b",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "scene.py",
+    "bundled_path": "joystick_ball_sim/src/scene.py",
+    "expected_sha256": "861e8339b863ebccfb88551fa67e5066915d6a07772eb1f0bf6c1211976644c7",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "sensing.py",
+    "bundled_path": "joystick_ball_sim/src/sensing.py",
+    "expected_sha256": "4d88ceebf5f607803ad4c89a7fa995db546eef2b08c2c929acd9bf13fefd0ed6",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "trial.py",
+    "bundled_path": "joystick_ball_sim/src/trial.py",
+    "expected_sha256": "ebef486cf570c529cba1394ae0772d910ffa98b48665270e529824aa49189d92",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "restore_estimator.py",
+    "bundled_path": "joystick_ball_sim/src/restore_estimator.py",
+    "expected_sha256": "f9db0d56fd9efdf28d0e98562bf239b070e3a4cea68059db04fbe185c71ee6a8",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "electrical.py",
+    "bundled_path": "joystick_ball_sim/src/electrical.py",
+    "expected_sha256": "8541399647785b5c71b08178bd9a9a836bf31b3a51af95368b648add8bd37030",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "run_development.py",
+    "bundled_path": "joystick_ball_sim/src/run_development.py",
+    "expected_sha256": "ef65195b5e5455eb150ea6d40a4b817a1eb2633246145b3ae4c3d46528c3051f",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "campaign.py",
+    "bundled_path": "joystick_ball_sim/src/campaign.py",
+    "expected_sha256": "3b96cfc76db7467facf7c72977a68107c7debff17a7c5df50258131476ca40fe",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "verify.py",
+    "bundled_path": "joystick_ball_sim/src/verify.py",
+    "expected_sha256": "e18595e25311be2125183c530902681b1235484341f9f8e4a97988dd50f70d44",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "figures.py",
+    "bundled_path": "joystick_ball_sim/src/figures.py",
+    "expected_sha256": "169a3b231eee5a3c8c3f5807df2252981a4c94da98d0d3185dc47757c113ecf4",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "analyze.py",
+    "bundled_path": "joystick_ball_sim/src/analyze.py",
+    "expected_sha256": "e0ac571f80496311e006271fed71251e8807839f8065859b7bb8daec4d6618b5",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/paper_supplement/protocol.json",
+    "original_reference": "make_report.py",
+    "bundled_path": "joystick_ball_sim/src/make_report.py",
+    "expected_sha256": "39ba691f233fec82c7c3c30c9f0fae7a426cea97f690d5fdcd6aeaece604491b",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/followup_20261022/src/trial_followup.py",
+    "bundled_path": "joystick_ball_sim/followup_20261022/src/trial_followup.py",
+    "expected_sha256": "ddfbab6393ee70037d5bca47f93bec539ff2b17d7c696a587533a4d0ebd5ca52",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/followup_20261022/src/run_study.py",
+    "bundled_path": "joystick_ball_sim/followup_20261022/src/run_study.py",
+    "expected_sha256": "04cfb1bc3bfe555c94a4f6d123c7b2826135c7bc51fad6f2e04a3afce02525c2",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/followup_20261022/src/make_evaluation_schedule.py",
+    "bundled_path": "joystick_ball_sim/followup_20261022/src/make_evaluation_schedule.py",
+    "expected_sha256": "49fd1298346849506a72f333d10d2a8730f177b374843a6298fae573e42f0b4b",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/src/scene.py",
+    "bundled_path": "joystick_ball_sim/src/scene.py",
+    "expected_sha256": "861e8339b863ebccfb88551fa67e5066915d6a07772eb1f0bf6c1211976644c7",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/src/sensing.py",
+    "bundled_path": "joystick_ball_sim/src/sensing.py",
+    "expected_sha256": "4d88ceebf5f607803ad4c89a7fa995db546eef2b08c2c929acd9bf13fefd0ed6",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/ur3e_sim/src/robot.py",
+    "bundled_path": "ur3e_sim/src/robot.py",
+    "expected_sha256": "6b419c3a3cefa49e14cd402d376c02058481c493eaba992c872633cd24e13548",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/src/electrical.py",
+    "bundled_path": "joystick_ball_sim/src/electrical.py",
+    "expected_sha256": "8541399647785b5c71b08178bd9a9a836bf31b3a51af95368b648add8bd37030",
+    "status": "verified"
+  },
+  {
+    "protocol": "joystick_ball_sim/followup_20261022/evaluation/protocol.json",
+    "original_reference": "/media/yi/Yi Cam data/09_EIT_vmc/joystick_ball_sim/results/eit_estimator_restored.joblib",
+    "bundled_path": "joystick_ball_sim/results/eit_estimator_restored.joblib",
+    "expected_sha256": "142662d424eaaa2bdfa72d462bf8d09708a0079fd844bcf8fea2dbbf85f7b35b",
+    "status": "verified"
+  }
+]

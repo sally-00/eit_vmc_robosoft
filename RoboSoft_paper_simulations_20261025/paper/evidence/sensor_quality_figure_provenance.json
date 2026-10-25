@@ -1,0 +1,214 @@
+{
+  "figure": "sensor_quality_results",
+  "simulation_rerun": false,
+  "source": "evidence/ball_followup/analyzed_metrics.csv",
+  "source_sha256": "48fb0ebc859bf0d3e9a3e6358e828d6eebc7dbe7ee10148548f63cdfe9e7f85f",
+  "error_metric": "late_error_mm: mean absolute rolling-direction target error during final second (7\u20138 s)",
+  "completion_metric": "common_success: all task success criteria, not only position error",
+  "cells": [
+    {
+      "bias_mm": -5,
+      "added_delay_ms": 0,
+      "n": 3,
+      "mean_final_error_mm": 5.073122632832463,
+      "successes": 1,
+      "trial_ids": [
+        284,
+        285,
+        286
+      ],
+      "final_error_mm_by_trial": [
+        5.230323186509028,
+        5.654647350132253,
+        4.33439736185611
+      ]
+    },
+    {
+      "bias_mm": -5,
+      "added_delay_ms": 100,
+      "n": 3,
+      "mean_final_error_mm": 5.0746224161270765,
+      "successes": 1,
+      "trial_ids": [
+        287,
+        288,
+        289
+      ],
+      "final_error_mm_by_trial": [
+        5.238869398924367,
+        5.651062967919264,
+        4.333934881537597
+      ]
+    },
+    {
+      "bias_mm": -5,
+      "added_delay_ms": 250,
+      "n": 3,
+      "mean_final_error_mm": 5.075626418554461,
+      "successes": 1,
+      "trial_ids": [
+        290,
+        291,
+        292
+      ],
+      "final_error_mm_by_trial": [
+        5.3209757215641424,
+        5.557219638794801,
+        4.348683895304438
+      ]
+    },
+    {
+      "bias_mm": -5,
+      "added_delay_ms": 500,
+      "n": 3,
+      "mean_final_error_mm": 4.949957404885224,
+      "successes": 1,
+      "trial_ids": [
+        293,
+        294,
+        295
+      ],
+      "final_error_mm_by_trial": [
+        5.196800596937232,
+        5.146447300314745,
+        4.506624317403697
+      ]
+    },
+    {
+      "bias_mm": 0,
+      "added_delay_ms": 0,
+      "n": 3,
+      "mean_final_error_mm": 0.9702573356511195,
+      "successes": 3,
+      "trial_ids": [
+        296,
+        297,
+        298
+      ],
+      "final_error_mm_by_trial": [
+        1.0600565106203532,
+        0.6907674546793033,
+        1.1599480416537016
+      ]
+    },
+    {
+      "bias_mm": 0,
+      "added_delay_ms": 100,
+      "n": 3,
+      "mean_final_error_mm": 0.9751695948314772,
+      "successes": 3,
+      "trial_ids": [
+        299,
+        300,
+        301
+      ],
+      "final_error_mm_by_trial": [
+        1.0490559589947317,
+        0.7295973553988756,
+        1.1468554701008242
+      ]
+    },
+    {
+      "bias_mm": 0,
+      "added_delay_ms": 250,
+      "n": 3,
+      "mean_final_error_mm": 0.8313986237145267,
+      "successes": 3,
+      "trial_ids": [
+        302,
+        303,
+        304
+      ],
+      "final_error_mm_by_trial": [
+        0.7070510727945908,
+        0.663915008188633,
+        1.1232297901603563
+      ]
+    },
+    {
+      "bias_mm": 0,
+      "added_delay_ms": 500,
+      "n": 3,
+      "mean_final_error_mm": 0.7621206257200116,
+      "successes": 3,
+      "trial_ids": [
+        305,
+        306,
+        307
+      ],
+      "final_error_mm_by_trial": [
+        0.4495635999841239,
+        0.5161563007835788,
+        1.3206419763923318
+      ]
+    },
+    {
+      "bias_mm": 5,
+      "added_delay_ms": 0,
+      "n": 3,
+      "mean_final_error_mm": 5.140834017355505,
+      "successes": 1,
+      "trial_ids": [
+        308,
+        309,
+        310
+      ],
+      "final_error_mm_by_trial": [
+        4.9561850225731545,
+        5.432480316218195,
+        5.033836713275167
+      ]
+    },
+    {
+      "bias_mm": 5,
+      "added_delay_ms": 100,
+      "n": 3,
+      "mean_final_error_mm": 5.172122162486524,
+      "successes": 0,
+      "trial_ids": [
+        311,
+        312,
+        313
+      ],
+      "final_error_mm_by_trial": [
+        5.164933048312584,
+        5.185540850502691,
+        5.165892588644297
+      ]
+    },
+    {
+      "bias_mm": 5,
+      "added_delay_ms": 250,
+      "n": 3,
+      "mean_final_error_mm": 5.044483302633803,
+      "successes": 0,
+      "trial_ids": [
+        314,
+        315,
+        316
+      ],
+      "final_error_mm_by_trial": [
+        5.018013590559378,
+        5.089396690720892,
+        5.026039626621137
+      ]
+    },
+    {
+      "bias_mm": 5,
+      "added_delay_ms": 500,
+      "n": 3,
+      "mean_final_error_mm": 4.456660534116337,
+      "successes": 3,
+      "trial_ids": [
+        317,
+        318,
+        319
+      ],
+      "final_error_mm_by_trial": [
+        4.606995021226736,
+        4.739385410678429,
+        4.023601170443847
+      ]
+    }
+  ]
+}

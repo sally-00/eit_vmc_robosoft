@@ -1,0 +1,145 @@
+{
+  "figure": "main_task_results",
+  "simulation_rerun": false,
+  "sources": {
+    "evidence/task_simulations/selected_comparisons.csv": "6a0b059b0b32446abae51f50c9a05b4e60c6da92eecccae0e3bc65c5d7be3535",
+    "evidence/task_simulations/original_540_metrics.csv": "79fca4628eee7ff3b10a9095c677e8e1d23acc71f3686e651c263c15f7843f45",
+    "evidence/ball_followup/analyzed_metrics.csv": "48fb0ebc859bf0d3e9a3e6358e828d6eebc7dbe7ee10148548f63cdfe9e7f85f",
+    "evidence/ball_followup/summary.json": "e9f984e9787040f717d92cf3aa83c6682257a9a1a35eeb2db185c19fbc51ed6e"
+  },
+  "bar_means_and_trials": {
+    "(b) Ball: correction after a push / odometry": {
+      "n": 8,
+      "mean": 2.729334722595035,
+      "metric": "late_error_mm",
+      "trial_ids": [
+        48,
+        51,
+        54,
+        57,
+        60,
+        63,
+        66,
+        69
+      ]
+    },
+    "(b) Ball: correction after a push / eit": {
+      "n": 8,
+      "mean": 0.41221998667478255,
+      "metric": "late_error_mm",
+      "trial_ids": [
+        49,
+        52,
+        55,
+        58,
+        61,
+        64,
+        67,
+        70
+      ]
+    },
+    "(b) Ball: correction after a push / oracle": {
+      "n": 8,
+      "mean": 0.04714219367776863,
+      "metric": "late_error_mm",
+      "trial_ids": [
+        50,
+        53,
+        56,
+        59,
+        62,
+        65,
+        68,
+        71
+      ]
+    },
+    "(c) Ball: moving contact point / centre": {
+      "n": 8,
+      "mean": 2.9826580991381975,
+      "metric": "peak_pitch_deg",
+      "trial_ids": [
+        136,
+        140,
+        144,
+        148,
+        184,
+        188,
+        192,
+        196
+      ]
+    },
+    "(c) Ball: moving contact point / latched": {
+      "n": 8,
+      "mean": 4.00855823258634,
+      "metric": "peak_pitch_deg",
+      "trial_ids": [
+        137,
+        141,
+        145,
+        149,
+        185,
+        189,
+        193,
+        197
+      ]
+    },
+    "(c) Ball: moving contact point / eit": {
+      "n": 8,
+      "mean": 1.9165104362801864,
+      "metric": "peak_pitch_deg",
+      "trial_ids": [
+        138,
+        142,
+        146,
+        150,
+        186,
+        190,
+        194,
+        198
+      ]
+    },
+    "(c) Ball: moving contact point / oracle": {
+      "n": 8,
+      "mean": 1.9154129661633825,
+      "metric": "peak_pitch_deg",
+      "trial_ids": [
+        139,
+        143,
+        147,
+        151,
+        187,
+        191,
+        195,
+        199
+      ]
+    },
+    "(d) Ball: contact-loss recovery / timed_eit": {
+      "n": 6,
+      "mean": 33.61822638566508,
+      "metric": "disconnected_motion_mm",
+      "trial_ids": [
+        397,
+        402,
+        407,
+        412,
+        417,
+        422
+      ]
+    },
+    "(d) Ball: contact-loss recovery / event_eit": {
+      "n": 6,
+      "mean": 4.016901773089124,
+      "metric": "disconnected_motion_mm",
+      "trial_ids": [
+        399,
+        404,
+        409,
+        414,
+        419,
+        424
+      ]
+    }
+  },
+  "presentation": "Bars are means; white markers are individual synthetic trials. No population-level confidence intervals.",
+  "omitted_panels": "Earlier nominal ball attachment and stop-restart dynamics panels; limitations retained in manuscript, complete evidence unchanged."
+}

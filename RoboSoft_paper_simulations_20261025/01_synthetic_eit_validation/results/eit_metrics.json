@@ -1,0 +1,62 @@
+{
+  "selected_min_samples_leaf": 1,
+  "validation_candidates_mm": {
+    "1": 1.510809312977477,
+    "3": 1.6813617750092755,
+    "6": 1.9540844835543534
+  },
+  "datasets": {
+    "train": {
+      "episodes": 480,
+      "sessions": 40,
+      "location_median_mm": 2.5523236758355098e-14,
+      "location_p95_mm": 6.945257648076432e-14,
+      "force_mae_N": 4.6629367034256575e-15
+    },
+    "validation": {
+      "episodes": 80,
+      "sessions": 7,
+      "location_median_mm": 0.9064393913317497,
+      "location_p95_mm": 5.125655227459749,
+      "force_mae_N": 0.7741249999999995
+    },
+    "test": {
+      "episodes": 100,
+      "sessions": 9,
+      "location_median_mm": 0.9074352552678842,
+      "location_p95_mm": 4.34879451794659,
+      "force_mae_N": 0.9403199999999996
+    },
+    "shift": {
+      "episodes": 100,
+      "sessions": 9,
+      "location_median_mm": 1.0377384584575617,
+      "location_p95_mm": 6.08601690418816,
+      "force_mae_N": 1.4507000000000008
+    }
+  },
+  "numerical_checks": {
+    "0.004": {
+      "nodes": 485,
+      "triangles": 840,
+      "residual": 5.637851296924623e-18,
+      "electrode_mean_V": 8.673617379884035e-19
+    },
+    "0.0028": {
+      "nodes": 872,
+      "triangles": 1614,
+      "residual": 4.336808689942018e-18,
+      "electrode_mean_V": 8.673617379884035e-19
+    },
+    "0.002": {
+      "nodes": 1617,
+      "triangles": 3104,
+      "residual": 4.336808689942018e-18,
+      "electrode_mean_V": 8.673617379884035e-19
+    },
+    "relative_delta_voltage_mesh_4_to_2mm": 0.015579852682180253,
+    "relative_delta_voltage_mesh_2p8_to_2mm": 0.0052155800770893775,
+    "reciprocity_relative_error": 6.458097055827138e-16
+  },
+  "elapsed_seconds": 42.55150485038757
+}

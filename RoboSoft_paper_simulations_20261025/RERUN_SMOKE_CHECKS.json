@@ -1,0 +1,22 @@
+[
+  {
+    "task": "joystick",
+    "uid": "original_0005",
+    "saved_success": true,
+    "rerun_success": true,
+    "matching_trace_shape": true,
+    "maximum_finite_trace_difference": 0.0,
+    "saved_target_error": 0.31871312118315037,
+    "rerun_target_error": 0.31871312118315037
+  },
+  {
+    "task": "ball",
+    "uid": "followup_0000",
+    "saved_success": true,
+    "rerun_success": true,
+    "matching_trace_shape": true,
+    "maximum_finite_trace_difference": 0.0,
+    "saved_target_error": 0.45112294424115573,
+    "rerun_target_error": 0.45112294424115573
+  }
+]

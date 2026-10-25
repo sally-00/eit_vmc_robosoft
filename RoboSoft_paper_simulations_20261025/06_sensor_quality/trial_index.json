@@ -1,0 +1,1901 @@
+[
+  {
+    "uid": "followup_0284",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 284
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0284.npz"
+  },
+  {
+    "uid": "followup_0285",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 285
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0285.npz"
+  },
+  {
+    "uid": "followup_0286",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 286
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0286.npz"
+  },
+  {
+    "uid": "followup_0287",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 287
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0287.npz"
+  },
+  {
+    "uid": "followup_0288",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 288
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0288.npz"
+  },
+  {
+    "uid": "followup_0289",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 289
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0289.npz"
+  },
+  {
+    "uid": "followup_0290",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 290
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0290.npz"
+  },
+  {
+    "uid": "followup_0291",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 291
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0291.npz"
+  },
+  {
+    "uid": "followup_0292",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 292
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0292.npz"
+  },
+  {
+    "uid": "followup_0293",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 293
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0293.npz"
+  },
+  {
+    "uid": "followup_0294",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 294
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0294.npz"
+  },
+  {
+    "uid": "followup_0295",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": -0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 295
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0295.npz"
+  },
+  {
+    "uid": "followup_0296",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 296
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0296.npz"
+  },
+  {
+    "uid": "followup_0297",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 297
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0297.npz"
+  },
+  {
+    "uid": "followup_0298",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 298
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0298.npz"
+  },
+  {
+    "uid": "followup_0299",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 299
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0299.npz"
+  },
+  {
+    "uid": "followup_0300",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 300
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0300.npz"
+  },
+  {
+    "uid": "followup_0301",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 301
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0301.npz"
+  },
+  {
+    "uid": "followup_0302",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 302
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0302.npz"
+  },
+  {
+    "uid": "followup_0303",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 303
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0303.npz"
+  },
+  {
+    "uid": "followup_0304",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 304
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0304.npz"
+  },
+  {
+    "uid": "followup_0305",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 305
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0305.npz"
+  },
+  {
+    "uid": "followup_0306",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 306
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0306.npz"
+  },
+  {
+    "uid": "followup_0307",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.0,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 307
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0307.npz"
+  },
+  {
+    "uid": "followup_0308",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 308
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0308.npz"
+  },
+  {
+    "uid": "followup_0309",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 309
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0309.npz"
+  },
+  {
+    "uid": "followup_0310",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 310
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0310.npz"
+  },
+  {
+    "uid": "followup_0311",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 311
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0311.npz"
+  },
+  {
+    "uid": "followup_0312",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 312
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0312.npz"
+  },
+  {
+    "uid": "followup_0313",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.1,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 313
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0313.npz"
+  },
+  {
+    "uid": "followup_0314",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 314
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0314.npz"
+  },
+  {
+    "uid": "followup_0315",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 315
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0315.npz"
+  },
+  {
+    "uid": "followup_0316",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.25,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 316
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0316.npz"
+  },
+  {
+    "uid": "followup_0317",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 317
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0317.npz"
+  },
+  {
+    "uid": "followup_0318",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 318
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0318.npz"
+  },
+  {
+    "uid": "followup_0319",
+    "subset": "bias_delay_sweep",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "quality",
+      "case": "forward_4N",
+      "progress_bias": 0.005,
+      "progress_delay": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 319
+    },
+    "trace": "06_sensor_quality/bias_delay_sweep/trials/followup_0319.npz"
+  },
+  {
+    "uid": "followup_0320",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          2.5
+        ]
+      ],
+      "dropout_duration": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 320
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0320.npz"
+  },
+  {
+    "uid": "followup_0321",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          2.5
+        ]
+      ],
+      "dropout_duration": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 321
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0321.npz"
+  },
+  {
+    "uid": "followup_0322",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          2.5
+        ]
+      ],
+      "dropout_duration": 0.5,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 322
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0322.npz"
+  },
+  {
+    "uid": "followup_0323",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          3.0
+        ]
+      ],
+      "dropout_duration": 1.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 323
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0323.npz"
+  },
+  {
+    "uid": "followup_0324",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          3.0
+        ]
+      ],
+      "dropout_duration": 1.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 324
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0324.npz"
+  },
+  {
+    "uid": "followup_0325",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          3.0
+        ]
+      ],
+      "dropout_duration": 1.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 325
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0325.npz"
+  },
+  {
+    "uid": "followup_0326",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1900,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          4.0
+        ]
+      ],
+      "dropout_duration": 2.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 326
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0326.npz"
+  },
+  {
+    "uid": "followup_0327",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1901,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          4.0
+        ]
+      ],
+      "dropout_duration": 2.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 327
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0327.npz"
+  },
+  {
+    "uid": "followup_0328",
+    "subset": "position_update_dropout",
+    "engine": "followup",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "centre",
+      "mechanism": "mechanism",
+      "progress_source": "eit",
+      "seed": 1902,
+      "gap": 0.006,
+      "offset": 0.01,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.02,
+      "horizon": 14.0,
+      "fixed_duration": 8.0,
+      "allow_regrasp": false,
+      "orientation_k": 3.0,
+      "score_error_mm": 5.0,
+      "settle_after": 3.3,
+      "group": "dropout",
+      "case": "forward_4N",
+      "progress_dropouts": [
+        [
+          2.0,
+          4.0
+        ]
+      ],
+      "dropout_duration": 2.0,
+      "disturbances": [
+        {
+          "start": 2.0,
+          "duration": 0.35,
+          "force": 4.0
+        }
+      ],
+      "trial_id": 328
+    },
+    "trace": "06_sensor_quality/position_update_dropout/trials/followup_0328.npz"
+  },
+  {
+    "uid": "original_0516",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 1200,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 516
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0516.npz"
+  },
+  {
+    "uid": "original_0517",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 1201,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 517
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0517.npz"
+  },
+  {
+    "uid": "original_0518",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "joystick",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.025,
+      "seed": 1202,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 16.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 518
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0518.npz"
+  },
+  {
+    "uid": "original_0537",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.015,
+      "seed": 1200,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 28.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 537
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0537.npz"
+  },
+  {
+    "uid": "original_0538",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.015,
+      "seed": 1201,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 28.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 538
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0538.npz"
+  },
+  {
+    "uid": "original_0539",
+    "subset": "high_electrical_noise_failures",
+    "engine": "original",
+    "config": {
+      "task": "ball",
+      "switching": "event",
+      "attachment": "eit",
+      "mechanism": "mechanism",
+      "gap": 0.014,
+      "offset": 0.015,
+      "seed": 1202,
+      "nominal_time": 1.0,
+      "mu": 0.7,
+      "recess": 0.003,
+      "dt": 0.001,
+      "distance": 0.025,
+      "horizon": 28.0,
+      "group": "S2",
+      "noise": 0.01,
+      "trial_id": 539
+    },
+    "trace": "06_sensor_quality/high_electrical_noise_failures/trials/original_0539.npz"
+  }
+]
