@@ -1,12 +1,14 @@
 # ROS 2 parameter file. SI units. Geometry is an EXAMPLE until measured.
 /**:
   ros__parameters:
-    robot_ip: '192.168.1.1'
+    robot_ip: '192.168.8.185'
     joint_prefix: 'fr3_'
-    tool_transform_confirmed: false
+    tool_transform_confirmed: true
     mount_orientation_confirmed: true
-    ee_to_pad_m: [0.0, 0.0, 0.14]   # measured active-face centre in libfranka EE frame
-    ee_R_pad_xyzw: [0.0, 0.0, 0.0, 1.0]
+    ee_to_pad_m: [0.0, 0.0, 0.05]  # measured EE-to-active-face offset
+    # User-confirmed -90 deg pad clocking in the current EE frame:
+    # pad +X points toward EE -Y, with the corrected 50 mm axial offset.
+    ee_R_pad_xyzw: [0.0, 0.0, -0.7071067811865476, 0.7071067811865476]
     ready_pad_yaw_rad: 1.1780972450961724  # CCW contacting-face midpoint 4–5 faces Base +X (67.5 deg)
     ready_pad_position_m: [0.45, 0.0, 0.35]
     landing_offset_x_m: 0.0        # joystick comparison varies Base X; task centre remains Y=0
@@ -17,40 +19,79 @@
     # capture_posture.py creates an overlay containing true and seven measured joints.
     use_saved_posture: false
     q7_tolerance: 0.35
-    torque_limit_Nm: [8.0, 8.0, 8.0, 8.0, 3.0, 3.0, 3.0]
     torque_rate: 50.0
     joint_speed_limit: 0.6
     point_speed_limit: 0.10
     angular_speed_limit: 0.5
-    external_force_limit: 15.0
-    external_moment_limit: 3.0
     heartbeat_timeout: 0.30
+    max_period: 0.010       # seconds during robot motion
+    idle_max_period: 0.020  # seconds while holding or done
     sensor_timeout: 0.30
     contact_topic: '/eit/contact'
     pad_frame: 'eit_pad'
     pad_numbering: 'ccw'
-    expected_model_sha256: ''      # optionally pin the exported physical model fingerprint
-    ready_speed: 0.015
-    ready_angular_speed: 0.12
-    approach_speed: 0.004
-    approach_distance: 0.020
-    approach_timeout: 8.0
-    retract_distance: 0.015
-    preload: 3.0
-    preload_time: 0.55
-    hold_k: 600.0
-    hold_d: 35.0
-    hold_kr: 30.0
-    hold_dr: 3.0
-    coupling_k: 700.0
-    coupling_d: 30.0
-    normal_k: 800.0
-    normal_d: 60.0
-    force_xy_limit: 3.0
-    normal_force_limit: 7.0
-    orientation_k: 3.0
-    orientation_d: 1.0
-    moment_limit: 1.0
+    # JOYSTICK TRIAL: Hold -> Ready -> Hold -> Approach -> Preload ->
+    # Interact -> Retract -> Done. The block runner repeats this for baseline
+    # and EIT. A fault interrupts the sequence instead of advancing it.
+    # k = translation spring (N/m); d = translation damping (N.s/m).
+    # kr = rotation spring (Nm/rad); dr = rotation damping (Nm.s/rad).
+    # These are requested controller forces/moments, not measured contact load.
+    # 1. HOLD: hold the current pad pose at startup, or the ready pose after
+    #    Ready finishes. Wait here for the next motion command.
+    hold_k: 1500.0          # N/m position spring
+    hold_d: 35.0            # N.s/m velocity damping
+    hold_kr: 30.0           # Nm/rad orientation spring
+    hold_dr: 3.0            # Nm.s/rad angular damping
+    moment_limit: 1.0       # Nm requested orientation-moment cap
+
+    # 2. READY: lift, translate above the joystick, then descend to the
+    #    ready_pad_position_m plus landing offsets specified above/overlaid.
+    #    This pose is intended to remain above the joystick, before contact.
+    #    When settled, the controller returns to Hold at this ready pose.
+    ready_speed: 0.015      # m/s trajectory speed
+    ready_angular_speed: 0.12 # rad/s trajectory angular speed
+    ready_k: 5000.0         # N/m position spring
+    ready_d: 60.0           # N.s/m velocity damping
+    ready_kr: 90.0          # Nm/rad
+    ready_dr: 5.0           # Nm.s/rad
+    ready_moment_limit: 4.0 # Nm cap on requested orientation moment
+
+    # 3. APPROACH: move straight down from Ready until EIT detects contact,
+    #    or until the distance/time limit is reached. Translation uses
+    #    hold_k/d from stage 1; rotation uses the gains below. The contact
+    #    decision comes from eit.json and the selected EIT model.
+    approach_speed: 0.01    # m/s downward trajectory speed
+    approach_distance: 0.020 # m maximum commanded descent
+    approach_timeout: 8.0    # s maximum time awaiting contact
+    approach_kr: 90.0          # Nm/rad
+    approach_dr: 5.0           # Nm.s/rad
+    approach_moment_limit: 4.0 # Nm cap on requested orientation moment
+
+    # 4. PRELOAD: after EIT contact, ramp the requested downward preload and
+    #    hold the selected attachment point. No joystick angle motion yet.
+    #    Rotation still uses approach_kr/dr and approach_moment_limit.
+    preload: 3.0            # N downward force target
+    preload_time: 0.55      # s ramp duration from first contact
+    coupling_k: 3500.0      # N/m horizontal contact-point spring
+    coupling_d: 30.0        # N.s/m horizontal contact-point damping
+    normal_k: 800.0         # N/m vertical contact-point spring
+    normal_d: 60.0          # N.s/m vertical contact-point damping
+    force_xy_limit: 3.0     # N cap per horizontal force component
+    normal_force_limit: 7.0 # N cap on requested vertical force magnitude
+    # 5. INTERACT: move through joystick_angle_deg in joystick.yaml (+ then -).
+    #    Translation keeps coupling_k/d and normal_k/d from Preload, while
+    #    rotation switches to the softer gains below and moment_limit from
+    #    Hold. Baseline attaches at pad centre; EIT attaches at the detected
+    #    location when contact first begins.
+    orientation_k: 3.0      # Nm/rad
+    orientation_d: 1.0      # Nm.s/rad
+
+    # 6. RETRACT: move upward, using ready_k/d for translation and hold_kr/dr
+    #    plus moment_limit for rotation. DONE then holds the final pose with
+    #    the Hold gains until another Ready command arrives.
+    retract_distance: 0.015 # m upward distance
+
+    # Joint posture assistance throughout all active stages.
     null_k: 2.0
     null_d: 1.0
     use_eit: true

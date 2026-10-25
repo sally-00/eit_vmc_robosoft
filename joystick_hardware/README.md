@@ -1,6 +1,6 @@
 # ESP32 joystick readout
 
-This records raw joystick deflection for the planned physical joystick experiment. It does not move the robot. The serial output includes the ESP32 millisecond clock; the computer saves its own wall and monotonic timestamps alongside each sample for alignment with robot and EIT logs.
+The ESP32 is connected by USB to the same computer that runs the robot experiment. The uploaded sketch streams raw joystick readings. `franka_eit_vmc`'s `run_block.py` starts `run_joystick.sh` automatically for joystick blocks and saves one recording in the block folder. Use `run_joystick.sh` directly only for standalone sensor checks; do not run both readers on the same port. The sketch alone does not create a PC recording or retain a completed trial. The recorder does not move the robot. The serial output includes the ESP32 millisecond clock; the computer saves its own wall and monotonic timestamps alongside each sample for alignment with robot and EIT logs.
 
 The sketch uses the wiring you provided for the KY-023 / PS2 module:
 
@@ -18,13 +18,13 @@ GPIO32 and GPIO33 are ADC1 pins. GPIO14 reads the button as a digital input with
 
 The `.ino` sketch must be uploaded once to the ESP32, and uploaded again after any changes to its code. It then starts automatically whenever the board is powered.
 
-On this computer, fully quit any running Arduino IDE windows, then launch the downloaded IDE with serial-port access:
+On this computer, fully quit any running Arduino IDE windows, then launch the downloaded IDE:
 
 ```bash
-sg dialout -c "$HOME/Downloads/arduino-ide_2.3.10_Linux_64bit.AppImage"
+$HOME/Downloads/arduino-ide_2.3.10_Linux_64bit.AppImage
 ```
 
-The account is already in `dialout`, but existing applications may still have the old group membership. This command applies the group when launching Arduino IDE. A full computer restart should also refresh group membership for applications.
+Serial access requires the user account to belong to `dialout`; the instructions below cover a permission error.
 
 1. Install Arduino IDE. In **File > Preferences > Additional Boards Manager URLs**, add `https://espressif.github.io/arduino-esp32/package_esp32_index.json`. In **Tools > Board > Boards Manager**, search for `esp32` and install **esp32 by Espressif Systems**. You can skip this installation if ESP32 board support is already present.
 2. Connect the Freenove ESP32-WROVER board to this computer with a USB **data** cable. Open `esp32_joystick/esp32_joystick.ino` in Arduino IDE.
@@ -36,34 +36,42 @@ The firmware sends `esp_ms,x_raw,y_raw,pressed` CSV at nominally 100 samples/s a
 
 ## Plot and save on the computer
 
-Miniconda is installed at `/home/birl/Documents/miniconda3`, with `pyserial` and `matplotlib` already installed in its base environment. Close Arduino Serial Monitor, then run:
+First find the ESP32's actual port. `/dev/ttyUSB0` is an example; an `[Errno 2] No such file or directory` error means the named port does not exist, not that it needs permission. Connect the board with a USB **data** cable and run:
 
 ```bash
-sg dialout -c "$HOME/Documents/joystick_hardware/run_joystick.sh --port /dev/ttyUSB0"
+/usr/bin/python3 -m serial.tools.list_ports -v
+ls -l /dev/serial/by-id/  # if present, these names remain stable across reconnects
 ```
 
-The launcher uses the installed Miniconda interpreter, ignores inherited Python environment variables from other software, and saves each run to a new CSV file in `~/Documents/joystick_hardware/recordings/`. The live window plots both analog channels; close it or press Ctrl+C to stop.
+Use the detected `/dev/ttyUSB*`, `/dev/ttyACM*`, or `/dev/serial/by-id/*` path in `--port`. If no serial port appears, check the cable, USB connection, and whether the board appears in `lsusb` before changing permissions.
+
+If opening an existing port instead says `Permission denied`, grant this account access to serial devices and **log out and back in** before retrying:
+
+```bash
+sudo usermod -aG dialout "$USER"
+```
+
+In the new login session, verify access and use the actual device name:
+
+```bash
+id -nG  # must include dialout
+ls -l /dev/ttyUSB* /dev/ttyACM* 2>/dev/null
+```
+
+The same `dialout` membership covers the ESP32 and EIT device when their serial nodes are group-owned by `dialout`. The launcher uses system Python 3.10 with `pyserial` and `matplotlib`. Close Arduino Serial Monitor, then run from this checkout:
+
+```bash
+./joystick_hardware/run_joystick.sh --port /dev/ttyUSB0
+```
+
+The launcher ignores inherited Python environment variables from other software and saves each run to a new CSV file in `joystick_hardware/recordings/`. The live window plots both analog channels; close it or press Ctrl+C to stop.
 
 For recording without a plot:
 
 ```bash
-sg dialout -c "$HOME/Documents/joystick_hardware/run_joystick.sh --port /dev/ttyUSB0 --no-plot"
+./joystick_hardware/run_joystick.sh --port /dev/ttyUSB0 --no-plot
 ```
 
-If the USB device has another name, substitute the port shown in Arduino IDE or `ls /dev/ttyUSB* /dev/ttyACM*`. To choose a file, add `--output recordings/my_trial.csv` inside the quoted command. Existing files are never overwritten.
-
-The account `birl` is already in `dialout`. If configuring a different account, add it once with `sudo usermod -aG dialout USERNAME`, replacing `USERNAME` with that account's name, then restart the computer. After group membership takes effect, the launcher can also be run directly:
-
-```bash
-cd ~/Documents/joystick_hardware
-./run_joystick.sh --port /dev/ttyUSB0
-```
-
-To activate Miniconda manually in a terminal:
-
-```bash
-source ~/Documents/miniconda3/etc/profile.d/conda.sh
-conda activate base
-```
+If the USB device has another name, substitute the port shown in Arduino IDE or `ls /dev/ttyUSB* /dev/ttyACM*`. To choose a file, add `--output recordings/my_trial.csv` to the launcher command. Existing files are never overwritten.
 
 For the paper, these raw counts must be calibrated to physical joystick angle using measured centre and known positive/negative angles. Confirm which analog axis follows the planned one-axis motion and record its direction. The joystick reading measures angle for evaluation; it does not measure contact force. The ESP32 and PC timestamps have different clock origins, and USB serial arrival adds delay, so align the streams before computing tracking error.

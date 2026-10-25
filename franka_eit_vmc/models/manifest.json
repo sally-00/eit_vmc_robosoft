@@ -1,13 +1,15 @@
 {
-  "physical_model_available": false,
+  "physical_model_available": true,
   "artifacts": [
     {
-      "file": "demo_position_model.npz",
-      "sha256": "3ee2fd8c77453da0b8355f537ad6dcfefcba57a116cf6d2a97e88945e6e218f6",
-      "data_origin": "synthetic UI signals",
-      "robot_control_allowed": false
+      "file": "position_model.npz",
+      "source_session": "2026-10-24_11-41-56_JST_d87beb16_david_hydrogel_works",
+      "sha256": "355b9a75f5e8715863ca6bf17608dc168ae7095c24a8b0188894df48824fa0ac",
+      "data_origin": "measured hydrogel pad touches",
+      "electrodes": 16,
+      "drive_pattern": "combined",
+      "measurement_channels": 304
     }
   ],
-  "physical_model_target": "position_model.npz",
-  "note": "Copy an inference export with precomputed RBF parameters from the external model-preparation computer; the robot trial gate rejects demo models."
+  "note": "The runtime reads this trained RBF checkpoint directly; physical robot trials remain unvalidated."
 }

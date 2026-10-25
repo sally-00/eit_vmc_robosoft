@@ -1,7 +1,8 @@
 /**:
   ros__parameters:
+    ready_pad_position_m: [0.45, -0.10, 0.35]  # ball operating lane; Base Y = -100 mm
     initial_ball_x: 0.45       # independently measured initial ball centre in Base X
-    roll_distance: 0.020
+    roll_distance: 0.020     # positive = roll toward Base +X; goal X = 0.47 m
     ball_duration: 8.0         # common observation horizon after engagement
     virtual_mass: 0.6
     virtual_damping: 6.0

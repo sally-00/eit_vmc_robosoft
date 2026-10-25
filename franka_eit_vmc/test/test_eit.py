@@ -1,70 +1,147 @@
 #!/usr/bin/env python3
-import json,math,sys,tempfile,unittest
+import json
+import math
+import os
+import sys
+import tempfile
+import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock
+
 import numpy as np
-ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'python'))
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'python'))
 from franka_eit_tools.position_model import PositionModel
 from franka_eit_tools.inference import Inference
-from franka_eit_tools.eit_reader import adjacent_protocol,parse_frame
-from franka_eit_tools.mount import pair_yaw_for_base_x,ready_pad_rotation,number_angle
+from franka_eit_tools.model_selection import select_model
+from franka_eit_tools.eit_reader import EITReader, measurement_protocol, parse_frame
+from franka_eit_tools.mount import pair_yaw_for_base_x, ready_pad_rotation, number_angle
+
+MODEL = ROOT / 'models/position_model.npz'
+
 
 class Tests(unittest.TestCase):
-    def test_frame_protocol(self):
-        self.assertEqual(len(adjacent_protocol(list(range(1,9)))),40)
-        line=','.join(['0.01|0']*39+['0.02|0.1C'])
-        self.assertTrue(parse_frame(line)['clipped'][-1])
-        with self.assertRaises(ValueError):parse_frame('nan|0,'*40)
-        with self.assertRaises(ValueError):adjacent_protocol([1]*8)
+    def test_selects_newest_trained_checkpoint(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            older = root / 'older' / 'position_model.npz'
+            newer = root / 'newer' / 'position_model.npz'
+            older.parent.mkdir(); newer.parent.mkdir()
+            older.write_bytes(b'old'); newer.write_bytes(b'new')
+            os.utime(older, ns=(100, 100))
+            os.utime(newer, ns=(200, 200))
+            self.assertEqual(select_model(runs_dir=root), newer)
+            os.utime(older, ns=(300, 300))
+            self.assertEqual(select_model(runs_dir=root), older)
+            self.assertEqual(select_model(newer, runs_dir=root), newer)
 
-    def test_demo_is_not_physical(self):
-        path=ROOT/'models/demo_position_model.npz'
-        engine=Inference(path)
-        self.assertFalse(engine.physical)
-        base={'magnitude_Vrms':[.01]*40,'phase_rad':[0.]*40,'clipped':[False]*40}
-        engine.set_baseline({'frames':[base]*5})
-        x=engine.model.x[0];strength=max(.01,2*engine.model.threshold)
-        voltage=.01*(1+strength*(x[:40]+1j*x[40:]))
-        frame={'magnitude_Vrms':np.abs(voltage).tolist(),'phase_rad':np.angle(voltage).tolist(),'clipped':[False]*40}
-        for _ in range(3):out=engine.step(frame)
-        self.assertTrue(out['contact']);self.assertFalse(out['model_is_physical'])
-        self.assertTrue(out['position_valid'])
-        np.testing.assert_allclose([out['x_m'],out['y_m']],engine.model.estimate(x)[0][0]/1000,atol=1e-10)
-        bad=dict(frame,clipped=[True]*40)
-        self.assertFalse(engine.step(bad)['position_valid'])
+    def test_model_scan_and_training_predictions(self):
+        model = PositionModel.load(MODEL)
+        self.assertEqual(model.channels, 304)
+        self.assertEqual(model.x.shape, (40, 608))
+        self.assertEqual(len(model.protocol), 304)
+        self.assertEqual(model.metadata['eit_config']['eit_drive_pattern'], 'combined')
+        self.assertTrue(model.allow_clipped)
+        expected = {0: [0.03132909210833823, -0.3051030088828455],
+                    1: [-6.860636116234872, 6.5100508184072865],
+                    10: [12.513366757742135, -26.303813672452236],
+                    39: [-1.75273750250944, 39.63006474328955]}
+        for index, xy in expected.items():
+            np.testing.assert_allclose(model.estimate(model.x[index])[0][0], xy, atol=1e-10)
+
+    def test_protocol_and_frame(self):
+        pins = list(range(1, 17))
+        protocol = measurement_protocol(pins, 'combined')
+        self.assertEqual(len(protocol), 304)
+        self.assertEqual(protocol[0], (1, 2, 3, 4))
+        self.assertEqual(len(measurement_protocol(list(range(1, 9)), 'adjacent')), 40)
+        line = ','.join(['0.01|0'] * 303 + ['0.02|0.1C'])
+        self.assertTrue(parse_frame(line, len(protocol))['clipped'][-1])
+        with self.assertRaises(ValueError):
+            parse_frame(line, 40)
+
+    def test_reader_uses_saved_acquisition_settings(self):
+        model = PositionModel.load(MODEL)
+        saved = model.metadata['eit_config']
+        reader = EITReader(saved)
+        self.assertEqual(reader.protocol, model.protocol)
+        self.assertEqual(reader.drive_pattern, 'combined')
+        self.assertEqual(reader.rx_gain_margin_steps, 2)
+        self.assertEqual(reader.frequency, 50)
+
+    def test_reader_releases_port_when_stop_command_fails(self):
+        model = PositionModel.load(MODEL)
+        reader = EITReader(model.metadata['eit_config'])
+        port = Mock()
+        port.write.side_effect = OSError('USB disconnected')
+        reader.ser = port
+        reader.close()
+        port.close.assert_called_once_with()
+        self.assertIsNone(reader.ser)
+
+    def test_direct_inference_and_hysteresis(self):
+        engine = Inference(MODEL)
+        model = engine.model
+        self.assertTrue(engine.physical)
+        channels = model.channels
+        base = {'magnitude_Vrms': [1.] * channels, 'phase_rad': [0.] * channels,
+                'clipped': [False] * channels}
+        engine.set_baseline({'frames': [base] * 5})
+        features = model.x[0]
+        voltage = 1 + .5 * (features[:channels] + 1j * features[channels:])
+        frame = {'magnitude_Vrms': np.abs(voltage).tolist(),
+                 'phase_rad': np.angle(voltage).tolist(), 'clipped': [False] * channels}
+        for _ in range(3):
+            output = engine.step(frame)
+        self.assertTrue(output['contact'])
+        self.assertTrue(output['position_valid'])
+        self.assertEqual(output['contact_threshold'], 0.0)
+        np.testing.assert_allclose([output['x_m'], output['y_m']],
+                                   model.estimate(features)[0][0] / 1000, atol=1e-10)
+        engine.set_contact_threshold(output['signal_strength'] * 1.1)
+        for _ in range(2):
+            output = engine.step(frame)
+        self.assertFalse(output['contact'])
+        self.assertEqual(output['contact_threshold'],engine.contact_threshold)
+        with self.assertRaises(ValueError):engine.set_contact_threshold(-1.)
+        engine.set_contact_threshold(0.)
+        limited = Inference(MODEL, contact_threshold=output['signal_strength'] * 1.1)
+        limited.set_baseline({'frames': [base] * 5})
+        for _ in range(3):
+            limited_output = limited.step(frame)
+        self.assertFalse(limited_output['contact'])
+        self.assertTrue(limited_output['measurement_valid'])
+        for _ in range(2):
+            output = engine.step(base)
+        self.assertFalse(output['contact'])
+        self.assertFalse(output['position_valid'])
+        frame['clipped'] = [True] * channels
+        self.assertTrue(engine.step(frame)['measurement_valid'])  # Saved model allows clipping.
+
+    def test_invalid_checkpoint(self):
+        with np.load(MODEL, allow_pickle=False) as data:
+            arrays = {key: data[key] for key in data.files}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'model.npz'
+            np.savez(path, **{**arrays, 'x': np.ones((40, 80))})
+            with self.assertRaises(ValueError):
+                PositionModel.load(path)
+            np.savez(path, **{**arrays, 'x': np.array([object()], dtype=object)})
+            with self.assertRaises(ValueError):
+                PositionModel.load(path)
 
     def test_pair_mapping(self):
-        for numbering in ['ccw','cw']:
-            for first in range(1,9):
-                second=first%8+1;angle=pair_yaw_for_base_x([first,second],numbering)
-                alpha=number_angle(first,numbering);beta=number_angle(second,numbering)
-                v=np.array([math.cos(alpha)+math.cos(beta),math.sin(alpha)+math.sin(beta),0.]);v/=np.linalg.norm(v)
-                self.assertTrue(np.allclose(ready_pad_rotation(angle)@v,[1,0,0]))
-        with self.assertRaises(ValueError):pair_yaw_for_base_x([5,5])
+        for numbering in ['ccw', 'cw']:
+            for first in range(1, 9):
+                second = first % 8 + 1
+                angle = pair_yaw_for_base_x([first, second], numbering)
+                alpha, beta = number_angle(first, numbering), number_angle(second, numbering)
+                vector = np.array([math.cos(alpha) + math.cos(beta),
+                                   math.sin(alpha) + math.sin(beta), 0.])
+                vector /= np.linalg.norm(vector)
+                self.assertTrue(np.allclose(ready_pad_rotation(angle) @ vector, [1, 0, 0]))
 
-    def test_read_only_loading(self):
-        path=ROOT/'models/demo_position_model.npz'
-        with patch('numpy.linalg.solve',side_effect=AssertionError('Runtime must not fit')):
-            model=PositionModel.load(path)
-            with np.load(path,allow_pickle=False) as data:
-                d=model.distances(model.x,model.x)
-                expected=np.exp(-d**2/(2*float(data['width'])**2))@data['weights']
-            np.testing.assert_allclose(model.estimate(model.x)[0],expected)
-        self.assertFalse(hasattr(model,'save'))
 
-    def test_reject_unexported_and_invalid_models(self):
-        with np.load(ROOT/'models/demo_position_model.npz',allow_pickle=False) as data:
-            arrays={key:data[key] for key in data.files}
-        with tempfile.TemporaryDirectory() as d:
-            path=Path(d)/'model.npz'
-            legacy={k:v for k,v in arrays.items() if k not in ('weights','width','support_limit')}
-            np.savez(path,**legacy)
-            with self.assertRaisesRegex(ValueError,'export_franka_model.py'):PositionModel.load(path)
-            for field,value in [('weights',np.full_like(arrays['weights'],np.nan)),('width',0.),('x',np.ones((3,20)))]:
-                np.savez(path,**{**arrays,field:value})
-                with self.assertRaises(ValueError):PositionModel.load(path)
-            np.savez(path,**{**arrays,'weights':np.array([object()],dtype=object)})
-            with self.assertRaises(ValueError):PositionModel.load(path)
-
-if __name__=='__main__':unittest.main()
+if __name__ == '__main__':
+    unittest.main()

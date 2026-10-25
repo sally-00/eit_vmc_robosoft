@@ -4,6 +4,7 @@ uint8 fault
 string mode_name
 string fault_name
 bool use_eit
+bool retract_incomplete
 float64 trial_time_s
 float64 progress_m
 float64 progress_velocity_m_s
@@ -14,6 +15,9 @@ float64[3] controlled_point_m
 float64[3] reference_m
 float64[3] attachment_in_pad_m
 float64[3] coupling_force_n
+float64[3] requested_cartesian_force_n
+float64[3] requested_cartesian_moment_nm
 float64[3] external_force_n
+float64[3] external_moment_nm
 float64[7] joint_position_rad
 float64[7] commanded_torque_nm

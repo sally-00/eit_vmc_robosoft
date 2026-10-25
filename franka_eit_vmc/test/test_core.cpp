@@ -43,6 +43,117 @@ int main() {
       rejected = true;
     }
     require(rejected, "negative X workspace accepted");
+    {
+      Core core{Config{}};
+      auto s = state();
+      core.activate(s);
+      s.ee_position.x() -= .05;
+      s.external_force.x() = 100.;
+      s.external_moment.x() = 100.;
+      auto o = core.step(s, electrical(1.), 1., .001, true, Request::None);
+      require(o.fault == Fault::None,
+              "position lag or estimated external wrench caused a package stop");
+    }
+    {
+      Config cfg;
+      cfg.torque_rate = 20000.;
+      auto s = state();
+      Core hold(cfg);
+      hold.activate(s);
+      s.ee_position.x() -= .03;
+      auto held = hold.step(s, electrical(1.), 1., .001, true, Request::None);
+      require(std::abs(held.torque[0] - 18.) < 1e-9 &&
+                  std::abs(held.requested_force.x() - 18.) < 1e-9,
+              "hold spring force was clipped at the former joint torque limit");
+      s = state();
+      Core ready(cfg);
+      ready.activate(s);
+      ready.step(s, electrical(1.), 1., .001, true, Request::Ready);
+      s.ee_position.x() -= .03;
+      auto moving = ready.step(s, electrical(1.001), 1.001, .001, true, Request::None);
+      require(moving.mode == Mode::Ready && std::abs(moving.torque[0] - 18.) < 1e-9 &&
+                  std::abs(moving.requested_force.x() - 18.) < 1e-9,
+              "ready spring force was clipped at the former joint torque limit");
+      cfg.ready_k = 1800.;
+      cfg.ready_d = 60.;
+      s = state();
+      Core stiff_ready(cfg);
+      stiff_ready.activate(s);
+      stiff_ready.step(s, electrical(1.), 1., .001, true, Request::Ready);
+      s.ee_position.x() -= .005;
+      auto stiff = stiff_ready.step(s, electrical(1.001), 1.001, .001, true, Request::None);
+      require(stiff.mode == Mode::Ready && std::abs(stiff.torque[0] - 9.) < 1e-9,
+              "ready-only position stiffness was not applied");
+      cfg.ee_to_pad.setZero();
+      cfg.ready_kr = 90.;
+      cfg.ready_moment_limit = 4.;
+      s = state();
+      Core angular_hold(cfg);
+      Core angular_ready(cfg);
+      angular_hold.activate(s);
+      angular_ready.activate(s);
+      angular_ready.step(s, electrical(1.), 1., .001, true, Request::Ready);
+      s.ee_rotation =
+          Eigen::AngleAxisd(.1, V3::UnitZ()).toRotationMatrix() * s.ee_rotation;
+      auto held_angle = angular_hold.step(s, electrical(1.001), 1.001, .001, true,
+                                          Request::None);
+      auto moving_angle = angular_ready.step(s, electrical(1.001), 1.001, .001, true,
+                                             Request::None);
+      require(std::abs(held_angle.torque[5]) <= cfg.moment_limit + 1e-9 &&
+                  std::abs(moving_angle.torque[5]) > 3.9,
+              "ready-only orientation limit was not applied");
+    }
+    {
+      Config cfg;
+      cfg.ready_pad_position.z() = .34;
+      auto s = state();
+      Core core(cfg);
+      core.activate(s);
+      double now = 1.;
+      auto o = core.step(s, electrical(now), now, .01, true, Request::Ready);
+      bool began_descent = false;
+      for (int i = 0; i < 500 && !began_descent; ++i) {
+        now += .01;
+        if (i >= 150) s.ee_position.x() = .4545;
+        o = core.step(s, electrical(now), now, .01, true, Request::None);
+        began_descent = o.reference.z() < .3499;
+      }
+      require(began_descent && o.fault == Fault::None,
+              "ready did not descend with a 4.5 mm elevated-waypoint residual");
+    }
+    for (double offset : {.0049, .006}) {
+      Core core{Config{}};
+      auto s = state();
+      core.activate(s);
+      s.ee_position.x() += offset;
+      auto o = core.step(s, electrical(1.), 1., .001, true, Request::Start);
+      require(offset < .005 ? o.mode == Mode::Approach && o.fault == Fault::None
+                            : o.mode == Mode::Fault && o.fault == Fault::Tracking,
+              "trial-start ready-pose tolerance rejected a small drift or accepted a large one");
+    }
+    {
+      Config cfg;
+      cfg.ee_to_pad.setZero();
+      cfg.ready_pad_position.z() = .49;
+      cfg.approach_kr = 90.;
+      cfg.approach_dr = 5.;
+      cfg.approach_moment_limit = 4.;
+      cfg.orientation_k = 3.;
+      cfg.moment_limit = 1.;
+      Core core(cfg);
+      auto s = state();
+      core.activate(s);
+      core.step(s, electrical(1.), 1., .001, true, Request::Start);
+      s.ee_rotation = Eigen::AngleAxisd(.02, V3::UnitZ()).toRotationMatrix() * s.ee_rotation;
+      auto approaching = core.step(s, electrical(1.001, 2), 1.001, .001, true, Request::None);
+      require(approaching.mode == Mode::Approach &&
+                  std::abs(approaching.requested_moment.norm() - 1.8) < 1e-8,
+              "approach did not use its own orientation stiffness");
+      auto touching = core.step(s, electrical(1.002, 3, true), 1.002, .001, true, Request::None);
+      require(touching.mode == Mode::Preload &&
+                  std::abs(touching.requested_moment.norm() - 1.8) < 1e-8,
+              "preload did not retain approach orientation stiffness");
+    }
     for (bool eit : {false, true}) {
       Config cfg;
       cfg.task = Task::Joystick;
@@ -103,18 +214,97 @@ int main() {
       auto o = core.step(s, electrical(1.), 2., .001, true, Request::None);
       require(o.fault == Fault::SensorStale, "old contact accepted");
     }
+    for (bool released : {false, true}) {
+      Config cfg;
+      cfg.joystick_duration = .5;
+      cfg.preload_time = .1;
+      Core core(cfg);
+      auto s = state();
+      core.activate(s);
+      double now = 1.;
+      uint64_t sequence = 1;
+      auto o = core.step(s, electrical(now, sequence, false), now, .009, true, Request::Start);
+      now += .009;
+      o = core.step(s, electrical(now, ++sequence, true), now, .009, true, Request::None);
+      for (int i = 0; i < 200 && o.mode != Mode::Retract; ++i) {
+        now += .009;
+        o = core.step(s, electrical(now, ++sequence, true), now, .009, true, Request::None);
+      }
+      require(o.mode == Mode::Retract, "trial did not enter retract");
+      for (int i = 0; i < 1600 && o.mode == Mode::Retract; ++i) {
+        now += .009;
+        o = core.step(s, electrical(now, ++sequence, !released), now, .009, true,
+                      Request::None);
+      }
+      if (released) {
+        require(o.mode == Mode::Done && o.fault == Fault::None && o.retract_incomplete &&
+                    (o.reference - o.pad_position).norm() < 1e-9,
+                "fresh unloaded retract timeout did not hold for the next ready move");
+      } else {
+        require(o.mode == Mode::Fault && o.fault == Fault::RetractTimeout &&
+                    !o.retract_incomplete,
+                "contacting retract timeout incorrectly continued");
+      }
+    }
+    {
+      Config stiff_cfg;
+      stiff_cfg.joystick_duration = .5;
+      stiff_cfg.preload_time = .1;
+      stiff_cfg.ready_k = 3000.;
+      stiff_cfg.ready_d = stiff_cfg.hold_d;
+      Config soft_cfg = stiff_cfg;
+      soft_cfg.ready_k = soft_cfg.hold_k;
+      Core stiff(stiff_cfg), soft(soft_cfg);
+      auto s = state();
+      stiff.activate(s);
+      soft.activate(s);
+      double now = 1.;
+      uint64_t sequence = 1;
+      stiff.step(s, electrical(now, sequence), now, .009, true, Request::Start);
+      soft.step(s, electrical(now, sequence), now, .009, true, Request::Start);
+      Output a, b;
+      for (int i = 0; i < 200; ++i) {
+        now += .009;
+        auto contact = electrical(now, ++sequence, true);
+        a = stiff.step(s, contact, now, .009, true, Request::None);
+        b = soft.step(s, contact, now, .009, true, Request::None);
+        if (a.mode == Mode::Retract) break;
+      }
+      require(a.mode == Mode::Retract && b.mode == Mode::Retract,
+              "retract gain test did not enter retract");
+      for (int i = 0; i < 100; ++i) {
+        now += .009;
+        auto contact = electrical(now, ++sequence, true);
+        a = stiff.step(s, contact, now, .009, true, Request::None);
+        b = soft.step(s, contact, now, .009, true, Request::None);
+      }
+      const double displacement = a.reference.z() - a.pad_position.z();
+      require(a.mode == Mode::Retract && b.mode == Mode::Retract && displacement > .001 &&
+                  std::abs((a.requested_force.z() - b.requested_force.z()) -
+                           (stiff_cfg.ready_k - soft_cfg.ready_k) * displacement) < 1e-9,
+              "retraction did not use the ready position stiffness");
+    }
     for (Fault desired :
-         {Fault::Workspace, Fault::Joint7, Fault::Period, Fault::Heartbeat, Fault::Wrench}) {
+         {Fault::Workspace, Fault::Joint7, Fault::Period, Fault::Heartbeat}) {
       Core core{Config{}};
       auto s = state();
       core.activate(s);
       core.step(s, electrical(1.), 1., .001, true, Request::Ready);
       if (desired == Fault::Workspace) s.ee_position.x() = -.1;
       if (desired == Fault::Joint7) s.q[6] += .5;
-      if (desired == Fault::Wrench) s.external_force.x() = 20.;
       auto o = core.step(s, electrical(1.001), 1.001, desired == Fault::Period ? .02 : .001,
                          desired != Fault::Heartbeat, Request::None);
       require(o.fault == desired, "guard did not stop control");
+    }
+    {
+      Core core{Config{}};
+      auto s = state();
+      core.activate(s);
+      auto held = core.step(s, electrical(1.), 1., .015, true, Request::None);
+      require(held.mode == Mode::Hold && held.fault == Fault::None,
+              "idle hold rejected a 15 ms period");
+      auto gap = core.step(s, electrical(1.021), 1.021, .021, true, Request::None);
+      require(gap.fault == Fault::Period, "idle hold accepted a period over 20 ms");
     }
     {
       Core core{Config{}};

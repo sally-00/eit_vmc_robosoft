@@ -2,4 +2,4 @@
 set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir"
-exec "$script_dir/../miniconda3/bin/python" -E "$script_dir/plot_joystick.py" "$@"
+exec /usr/bin/python3 -E "$script_dir/plot_joystick.py" "$@"

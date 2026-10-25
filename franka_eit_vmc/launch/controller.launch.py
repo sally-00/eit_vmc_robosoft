@@ -11,12 +11,17 @@ def setup(context):
     task=LaunchConfiguration('task').perform(context)
     executables={'joystick':'joystick_controller','ball':'ball_roll_controller','ready':'move_ready'}
     if task not in executables:raise ValueError('task must be joystick, ball, or ready')
-    paths=[LaunchConfiguration('config').perform(context)]
-    if task!='ready':paths.append(str(share/'config'/('joystick.yaml' if task=='joystick' else 'ball.yaml')))
+    paths=[('config',LaunchConfiguration('config').perform(context))]
+    if task!='ready':paths.append(('task defaults',str(share/'config'/('joystick.yaml' if task=='joystick' else 'ball.yaml'))))
     for name in ['mount','posture','overrides']:
         path=LaunchConfiguration(name).perform(context)
-        if path:paths.append(path)
-    return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',parameters=paths)]
+        if path:paths.append((name,path))
+    for name,path in paths:
+        if not Path(path).expanduser().is_file():
+            raise RuntimeError(f'{name} parameter file does not exist: {path}. '
+                               'Set EIT_CONFIG_DIR to the franka_eit_vmc/config directory in this terminal.')
+    return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',
+                 parameters=[str(Path(path).expanduser()) for _,path in paths])]
 
 def generate_launch_description():
     share=Path(get_package_share_directory('franka_eit_vmc'))

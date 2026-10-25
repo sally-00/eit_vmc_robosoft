@@ -1,4 +1,8 @@
 /**:
   ros__parameters:
-    landing_offset_x_m: -0.01
+    # Keep the fixture at the centre-block location; move only the pad landing.
+    ready_pad_position_m: [0.45, 0.0, 0.075]
+    workspace_min_m: [0.15, -0.18, 0.030]
+    joystick_length: 0.02
+    landing_offset_x_m: -0.025
     landing_offset_y_m: 0.0

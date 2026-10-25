@@ -7,6 +7,8 @@
 #include <utility>
 namespace franka_eit_vmc {
 namespace {
+constexpr double kReadyPositionTolerance = .005;
+constexpr double kTrialStartPositionTolerance = .005;
 double clip(double x, double low, double high) { return std::clamp(x, low, high); }
 double smooth(double u) {
   u = clip(u, 0., 1.);
@@ -39,8 +41,7 @@ void Config::validate() const {
     throw std::invalid_argument("Ready pad position is outside workspace");
   if (ready_pad_rotation.col(2).dot(-V3::UnitZ()) < .99)
     throw std::invalid_argument("Ready pad normal must point down");
-  if (!q_min.allFinite() || !q_max.allFinite() || !(q_min.array() < q_max.array()).all() ||
-      !torque_limit.allFinite() || (torque_limit.array() <= 0).any())
+  if (!q_min.allFinite() || !q_max.allFinite() || !(q_min.array() < q_max.array()).all())
     throw std::invalid_argument("Invalid joint/torque limits");
   if (use_saved_posture && (!posture_reference.allFinite() ||
                             (posture_reference.array() <= q_min.array() + joint_margin).any() ||
@@ -57,8 +58,16 @@ void Config::validate() const {
                              preload_time,
                              hold_k,
                              hold_d,
+                             ready_k,
+                             ready_d,
                              hold_kr,
                              hold_dr,
+                             ready_kr,
+                             ready_dr,
+                             ready_moment_limit,
+                             approach_kr,
+                             approach_dr,
+                             approach_moment_limit,
                              coupling_k,
                              coupling_d,
                              force_xy_limit,
@@ -75,13 +84,11 @@ void Config::validate() const {
                              joint_speed_limit,
                              point_speed_limit,
                              angular_speed_limit,
-                             external_force_limit,
-                             external_moment_limit,
                              q7_tolerance,
                              sensor_timeout,
                              heartbeat_timeout,
                              max_period,
-                             max_tracking_error,
+                             idle_max_period,
                              active_radius,
                              joystick_length,
                              joystick_angle,
@@ -101,7 +108,8 @@ void Config::validate() const {
           "Control gains, limits and durations must be finite and positive");
   if (!std::isfinite(initial_ball_x) || initial_ball_x < workspace_min.x() ||
       initial_ball_x + roll_distance > workspace_max.x() || active_radius > .045 ||
-      max_period > .02 || preload > normal_force_limit || ready_speed >= point_speed_limit ||
+      max_period > .02 || idle_max_period > .02 || idle_max_period < max_period ||
+      preload > normal_force_limit || ready_speed >= point_speed_limit ||
       approach_speed >= point_speed_limit || joystick_angle > .35 || sensor_timeout > 1. ||
       joystick_duration <= preload_time || ball_duration <= preload_time)
     throw std::invalid_argument("Invalid task geometry or timing bounds");
@@ -145,6 +153,8 @@ void Core::activate(const Sample& s) {
   fault_ = Fault::None;
   phase_time_ = 0.;
   settle_time_ = 0.;
+  unloaded_retract_time_ = 0.;
+  retract_incomplete_ = false;
   activated_ = true;
   last_sequence_ = 0;
 }
@@ -158,6 +168,7 @@ void Core::begin_ready(const Sample& s) {
   ready_stage_ = 0;
   phase_time_ = 0.;
   settle_time_ = 0.;
+  retract_incomplete_ = false;
   phase_start_position_ = face(s);
   phase_start_rotation_ = Eigen::Quaterniond(pad_rotation(s));
 }
@@ -165,6 +176,8 @@ void Core::begin_retract(const Sample& s) {
   mode_ = Mode::Retract;
   phase_time_ = 0.;
   settle_time_ = 0.;
+  unloaded_retract_time_ = 0.;
+  retract_incomplete_ = false;
   phase_start_position_ = face(s);
   hold_ = phase_start_position_ + V3(0., 0., c_.retract_distance);
   hold_rotation_ = pad_rotation(s);
@@ -173,11 +186,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
                   Request request) {
   Output out;
   const double safe_dt = std::isfinite(dt) && dt > 0. ? std::min(dt, c_.max_period) : .001;
+  const double period_limit =
+      (mode_ == Mode::Hold || mode_ == Mode::Done) ? c_.idle_max_period : c_.max_period;
   if (!activated_) throw std::logic_error("Activate the core before stepping");
-  if (!std::isfinite(dt) || dt <= 0. || dt > c_.max_period) fail(Fault::Period);
+  if (!std::isfinite(dt) || dt <= 0. || dt > period_limit) fail(Fault::Period);
   if (!std::isfinite(now) || !s.q.allFinite() || !s.dq.allFinite() || !s.coriolis.allFinite() ||
       !s.previous_torque.allFinite() || !s.ee_position.allFinite() || !rotation(s.ee_rotation) ||
-      !s.jacobian.allFinite() || !s.external_force.allFinite() || !s.external_moment.allFinite())
+      !s.jacobian.allFinite())
     fail(Fault::Nonfinite);
   const V3 pface = face(s);
   const auto Rp = pad_rotation(s);
@@ -191,9 +206,6 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   if (s.dq.cwiseAbs().maxCoeff() > c_.joint_speed_limit) fail(Fault::JointSpeed);
   if (vface.norm() > c_.point_speed_limit || omega.norm() > c_.angular_speed_limit)
     fail(Fault::CartesianSpeed);
-  if (s.external_force.norm() > c_.external_force_limit ||
-      s.external_moment.norm() > c_.external_moment_limit)
-    fail(Fault::Wrench);
   if (std::abs(s.q[6] - posture_[6]) > c_.q7_tolerance) fail(Fault::Joint7);
   const bool in_trial =
       mode_ == Mode::Approach || mode_ == Mode::Preload || mode_ == Mode::Interact;
@@ -212,7 +224,7 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   if (request == Request::Start && (mode_ == Mode::Hold || mode_ == Mode::Done) && heartbeat) {
     if (!sensor_fresh || contact.contact)
       fail(Fault::SensorStale);
-    else if ((pface - c_.ready_pad_position).norm() > .004 ||
+    else if ((pface - c_.ready_pad_position).norm() > kTrialStartPositionTolerance ||
              orientation_error(Rp, c_.ready_pad_rotation).norm() > .05)
       fail(Fault::Tracking);
     else {
@@ -246,7 +258,8 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
     ref = phase_start_position_ + smooth(u) * (target - phase_start_position_);
     vref = smooth_d(u) / ready_duration_ * (target - phase_start_position_);
     desired_rotation = phase_start_rotation_.slerp(smooth(u), target_rotation).toRotationMatrix();
-    if (phase_time_ >= ready_duration_ && (pface - target).norm() < .003 &&
+    if (phase_time_ >= ready_duration_ &&
+        (pface - target).norm() <= kReadyPositionTolerance &&
         orientation_error(Rp, desired_rotation).norm() < .04 && s.dq.norm() < .08)
       settle_time_ += safe_dt;
     else
@@ -372,9 +385,12 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
         clip(c_.normal_k * (normal_ref - c_.preload * activation / c_.normal_k - point.z()) -
                  c_.normal_d * velocity.z(),
              -c_.normal_force_limit, c_.normal_force_limit);
+    const bool establishing_contact = mode_ == Mode::Preload;
     moment = limit_norm(
-        c_.orientation_k * orientation_error(Rp, desired_rotation) - c_.orientation_d * omega,
-        c_.moment_limit);
+        (establishing_contact ? c_.approach_kr : c_.orientation_k) *
+                orientation_error(Rp, desired_rotation) -
+            (establishing_contact ? c_.approach_dr : c_.orientation_d) * omega,
+        establishing_contact ? c_.approach_moment_limit : c_.moment_limit);
     if (c_.task == Task::Ball && trial_time_ > c_.preload_time) {
       const double effort =
           clip(c_.goal_k * (goal_ - z_), -c_.goal_force_limit, c_.goal_force_limit);
@@ -387,6 +403,8 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       begin_retract(s);
   }
   if (mode_ == Mode::Retract) {
+    unloaded_retract_time_ = sensor_fresh && !contact.contact
+                                 ? unloaded_retract_time_ + safe_dt : 0.;
     const double duration = std::max(1., 1.875 * c_.retract_distance / c_.ready_speed);
     ref = phase_start_position_ + smooth(phase_time_ / duration) * (hold_ - phase_start_position_);
     vref = smooth_d(phase_time_ / duration) / duration * (hold_ - phase_start_position_);
@@ -395,7 +413,16 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
     desired_rotation = hold_rotation_;
     if (phase_time_ > duration && (pface - hold_).norm() < .004 && s.dq.norm() < .08)
       mode_ = Mode::Done;
-    if (phase_time_ > duration + 10.) fail(Fault::ReadyTimeout);
+    if (phase_time_ > duration + 10. && mode_ == Mode::Retract) {
+      if (unloaded_retract_time_ >= .5) {
+        retract_incomplete_ = true;
+        mode_ = Mode::Done;
+        hold_ = pface;
+        hold_rotation_ = Rp;
+      } else {
+        fail(Fault::RetractTimeout);
+      }
+    }
   }
   if (mode_ == Mode::Hold || mode_ == Mode::Ready || mode_ == Mode::Approach ||
       mode_ == Mode::Retract || mode_ == Mode::Done) {
@@ -404,16 +431,22 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       vref.setZero();
       desired_rotation = hold_rotation_;
     }
-    force =
-        limit_norm(c_.hold_k * (ref - pface) + c_.hold_d * (vref - vface), c_.normal_force_limit);
-    moment = limit_norm(c_.hold_kr * orientation_error(Rp, desired_rotation) - c_.hold_dr * omega,
-                        c_.moment_limit);
+    const bool moving_to_clearance = mode_ == Mode::Ready || mode_ == Mode::Retract;
+    const double position_k = moving_to_clearance ? c_.ready_k : c_.hold_k;
+    const double position_d = moving_to_clearance ? c_.ready_d : c_.hold_d;
+    force = position_k * (ref - pface) + position_d * (vref - vface);
+    const bool ready = mode_ == Mode::Ready;
+    const bool approach = mode_ == Mode::Approach;
+    moment = limit_norm((ready ? c_.ready_kr : approach ? c_.approach_kr : c_.hold_kr) *
+                            orientation_error(Rp, desired_rotation) -
+                            (ready ? c_.ready_dr : approach ? c_.approach_dr : c_.hold_dr) * omega,
+                        ready ? c_.ready_moment_limit
+                              : approach ? c_.approach_moment_limit : c_.moment_limit);
     point = pface;
     jc = jf;
   }
   if (mode_ != Mode::Fault && mode_ != Mode::Stopping) {
     if (!inside(ref) || !inside(point)) fail(Fault::Workspace);
-    if ((ref - point).norm() > c_.max_tracking_error) fail(Fault::Tracking);
   }
   V7 target = V7::Zero();
   if (mode_ != Mode::Fault && mode_ != Mode::Stopping) {
@@ -432,11 +465,10 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
     target.setZero();
   }
   for (int i = 0; i < 7; ++i) {
-    const double bounded = clip(target[i], -c_.torque_limit[i], c_.torque_limit[i]);
     // Slew all torque, including faults and shutdown, from the previous hardware command.
     const double previous = std::isfinite(s.previous_torque[i]) ? s.previous_torque[i] : 0.;
     out.torque[i] =
-        previous + clip(bounded - previous, -c_.torque_rate * safe_dt, c_.torque_rate * safe_dt);
+        previous + clip(target[i] - previous, -c_.torque_rate * safe_dt, c_.torque_rate * safe_dt);
   }
   out.mode = mode_;
   out.fault = fault_;
@@ -445,12 +477,15 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   out.reference = ref;
   out.attachment = attachment_;
   out.coupling_force = fc;
+  out.requested_force = force;
+  out.requested_moment = moment;
   out.progress = z_;
   out.progress_velocity = dz_;
   out.goal = goal_;
   out.angle_command = c_.task == Task::Joystick ? z_ : 0.;
   out.trial_time = trial_time_;
   out.use_eit = use_eit_;
+  out.retract_incomplete = retract_incomplete_;
   out.finished =
       (mode_ == Mode::Fault || mode_ == Mode::Stopping) && out.torque.cwiseAbs().maxCoeff() < 1e-4;
   last_sequence_ = contact.sequence;
@@ -470,7 +505,6 @@ const char* fault_name(Fault x) {
                                 "joint_limit",
                                 "joint_speed",
                                 "cartesian_speed",
-                                "wrench",
                                 "joint7",
                                 "sensor_stale_or_nonphysical",
                                 "sensor_position",
@@ -479,7 +513,8 @@ const char* fault_name(Fault x) {
                                 "ready_timeout",
                                 "tracking",
                                 "heartbeat",
-                                "robot"};
+                                "robot",
+                                "retract_timeout"};
   return names[static_cast<int>(x)];
 }
 }  // namespace franka_eit_vmc

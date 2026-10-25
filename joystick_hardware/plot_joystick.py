@@ -31,15 +31,17 @@ def choose_port(requested):
     from serial.tools import list_ports
 
     ports = list(list_ports.comports())
-    if len(ports) == 1:
-        return ports[0].device
+    esp32_ports = [port for port in ports if (port.vid, port.pid) == (0x1A86, 0x7523)]
+    if len(esp32_ports) == 1:
+        return esp32_ports[0].device
     found = ", ".join(port.device for port in ports) or "none"
-    raise SystemExit(f"Specify --port. Detected serial ports: {found}")
+    raise SystemExit(f"Expected one ESP32 CH340 serial port (1a86:7523); found {len(esp32_ports)}. Detected serial ports: {found}")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", help="ESP32 serial port, e.g. /dev/ttyUSB0; auto if only one")
+    parser.add_argument("--port", help="ESP32 serial port; auto-detects the CH340 adapter by USB ID when omitted")
+    parser.add_argument("--detect-port", action="store_true", help="Print the detected ESP32 serial port and exit")
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument("--output", type=Path, help="CSV path; defaults to a new timestamped file")
     parser.add_argument("--no-plot", action="store_true", help="Save and print samples without a GUI")
@@ -53,6 +55,11 @@ def main():
     except ImportError as exc:
         raise SystemExit("Install pyserial: python -m pip install pyserial") from exc
 
+    port = choose_port(args.port)
+    if args.detect_port:
+        print(port)
+        return
+
     plt = None
     if not args.no_plot:
         try:
@@ -60,7 +67,6 @@ def main():
         except ImportError as exc:
             raise SystemExit("Install matplotlib or pass --no-plot") from exc
 
-    port = choose_port(args.port)
     output = args.output or Path("recordings") / f"joystick_{datetime.now().astimezone():%Y%m%d_%H%M%S}.csv"
     output.parent.mkdir(parents=True, exist_ok=True)
 

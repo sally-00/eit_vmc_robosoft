@@ -19,7 +19,6 @@ enum class Fault {
   JointLimit,
   JointSpeed,
   CartesianSpeed,
-  Wrench,
   Joint7,
   SensorStale,
   SensorPosition,
@@ -28,7 +27,8 @@ enum class Fault {
   ReadyTimeout,
   Tracking,
   Heartbeat,
-  Robot
+  Robot,
+  RetractTimeout
 };
 enum class Request { None, Ready, Start, Stop };
 struct Config {
@@ -41,22 +41,25 @@ struct Config {
   V3 workspace_min{0.15, -0.18, 0.05}, workspace_max{0.75, 0.18, 0.70};
   V7 q_min{(V7() << -2.9007, -1.8361, -2.9007, -3.0770, -2.8763, 0.4398, -3.0508).finished()};
   V7 q_max{(V7() << 2.9007, 1.8361, 2.9007, -0.1169, 2.8763, 4.6216, 3.0508).finished()};
-  V7 torque_limit{(V7() << 8., 8., 8., 8., 3., 3., 3.).finished()};
   V7 posture_reference{V7::Zero()};
   bool use_saved_posture{false};
   bool update_ball_attachment{false};
   double ready_speed{0.015}, ready_angular_speed{0.12}, ready_timeout{90.};
   double approach_speed{0.004}, approach_distance{0.020}, approach_timeout{8.};
   double retract_distance{0.015}, preload{3.}, preload_time{0.55};
-  double hold_k{600.}, hold_d{35.}, hold_kr{30.}, hold_dr{3.};
+  double hold_k{600.}, hold_d{35.}, ready_k{600.}, ready_d{35.};
+  double hold_kr{30.}, hold_dr{3.};
+  double ready_kr{90.}, ready_dr{5.}, ready_moment_limit{4.};
+  double approach_kr{90.}, approach_dr{5.}, approach_moment_limit{4.};
   double coupling_k{700.}, coupling_d{30.}, force_xy_limit{3.};
   double normal_k{800.}, normal_d{60.}, normal_force_limit{7.};
   double orientation_k{3.}, orientation_d{1.}, moment_limit{1.};
   double null_k{2.}, null_d{1.}, torque_rate{50.}, joint_margin{0.06};
   double joint_speed_limit{0.6}, point_speed_limit{0.10}, angular_speed_limit{0.5};
-  double external_force_limit{15.}, external_moment_limit{3.}, q7_tolerance{0.35};
-  double sensor_timeout{0.30}, heartbeat_timeout{0.30}, max_period{0.010};
-  double max_tracking_error{0.035}, active_radius{0.036};
+  double q7_tolerance{0.35};
+  double sensor_timeout{0.30}, heartbeat_timeout{0.30}, max_period{0.010},
+         idle_max_period{0.020};
+  double active_radius{0.036};
   double joystick_length{0.092}, joystick_angle{0.20943951023931953}, joystick_duration{9.1};
   double angle_speed{0.28}, angle_acceleration{2.0};
   double initial_ball_x{0.45}, roll_distance{0.020}, ball_duration{8.};
@@ -82,8 +85,9 @@ struct Output {
   V7 torque{V7::Zero()};
   V3 pad_position{V3::Zero()}, point{V3::Zero()}, reference{V3::Zero()}, attachment{V3::Zero()};
   V3 coupling_force{V3::Zero()};
+  V3 requested_force{V3::Zero()}, requested_moment{V3::Zero()};
   double progress{0.}, progress_velocity{0.}, goal{0.}, angle_command{0.}, trial_time{0.};
-  bool use_eit{true}, finished{false};
+  bool use_eit{true}, finished{false}, retract_incomplete{false};
 };
 Eigen::Matrix3d skew(const V3& x);
 J67 point_jacobian(const J67& ee_jacobian, const V3& world_offset);
@@ -111,11 +115,12 @@ class Core {
   V3 phase_start_position_{V3::Zero()}, initial_face_{V3::Zero()};
   Eigen::Quaterniond phase_start_rotation_{Eigen::Quaterniond::Identity()};
   double phase_time_{0.}, trial_time_{0.}, settle_time_{0.}, ready_duration_{1.},
+      unloaded_retract_time_{0.},
       normal_anchor_{0.};
   double z_{0.}, dz_{0.}, z0_{0.}, observed_{0.}, goal_{0.};
   int ready_stage_{0};
   uint64_t last_sequence_{0};
-  bool activated_{false};
+  bool activated_{false}, retract_incomplete_{false};
   void fail(Fault fault);
   V3 face(const Sample& s) const;
   Eigen::Matrix3d pad_rotation(const Sample& s) const;

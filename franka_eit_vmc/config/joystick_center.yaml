@@ -1,4 +1,9 @@
 /**:
   ros__parameters:
+    # Joystick base bottom is at Base Z=0; upright tip is at Z=0.055 m.
+    # The ready pad face is 20 mm above the tip. Verify this on the robot.
+    ready_pad_position_m: [0.45, 0.0, 0.075]
+    workspace_min_m: [0.15, -0.18, 0.030]
+    joystick_length: 0.020
     landing_offset_x_m: 0.0
     landing_offset_y_m: 0.0

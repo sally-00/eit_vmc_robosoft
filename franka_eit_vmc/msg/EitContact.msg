@@ -9,4 +9,5 @@ bool model_is_physical
 float64 x_m
 float64 y_m
 float64 signal_strength
+float64 contact_threshold
 string model_sha256

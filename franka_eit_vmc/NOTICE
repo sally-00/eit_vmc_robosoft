@@ -1,13 +1,14 @@
 This package implements the requested EIT-to-VMC proof-of-concept experiments.
-The read-only position decoder and Amodo ARIA serial
-reader are adapted from the user's existing ur3e_weight_position_data_collection/
-ur3e_code/contact_position.py and eit_reader.py. They are included locally so no
-original-workspace path is required at deployment.
+The position decoder and Amodo ARIA serial reader follow the local
+eit_position_toolkit/contact_position.py and eit_reader.py training and acquisition
+algorithms. They are included locally so no original-workspace path is required
+at deployment.
 The source reference inspected for Franka conventions was the user's
 Transformer/VMC_Transformer_Research_Brief/hardware/franka_transformer_cutting
 package. Its controller is not a runtime dependency. This package uses direct
 libfranka executables inside ROS 2, rather than loading the reference ROS-control
 plugin. libfranka and ROS 2 retain their respective licenses.
-models/demo_position_model.npz was trained on synthetic UI signals. It is not a
-physical-pad model. No physical trained EIT model was present in the supplied
-workspace when this package was prepared.
+models/position_model.npz is copied from the measured
+2026-10-24_11-41-56_JST_d87beb16_david_hydrogel_works session. Its acquisition
+settings and trained vectors are retained in the checkpoint. No physical robot
+trial has been performed with this package.
