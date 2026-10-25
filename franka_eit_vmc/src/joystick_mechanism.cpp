@@ -2,6 +2,22 @@
 #include <cmath>
 
 namespace franka_eit_vmc {
+ShaftGeometry shaft_geometry(double angle_x, double angle_y, double rate_x, double rate_y) {
+  const V3 unnormalised(std::tan(angle_x), std::tan(angle_y), 1.);
+  const double length = unnormalised.norm();
+  const V3 axis = unnormalised / length;
+  const V3 unnormalised_rate(rate_x / std::pow(std::cos(angle_x), 2),
+                             rate_y / std::pow(std::cos(angle_y), 2), 0.);
+  const V3 axis_rate = (unnormalised_rate - axis * axis.dot(unnormalised_rate)) / length;
+  const V3 angular_velocity = axis.cross(axis_rate);
+  const Eigen::Matrix3d rotation =
+      Eigen::Quaterniond::FromTwoVectors(V3::UnitZ(), axis).toRotationMatrix();
+  return {axis, axis_rate, angular_velocity, rotation};
+}
+ArcReference inward_arc(const V3& anchor, double length, double depth, const ShaftGeometry& shaft) {
+  const double radius = length - depth;
+  return {anchor + radius * shaft.axis - length * V3::UnitZ(), radius * shaft.axis_rate};
+}
 ArcReference inward_arc(const V3& anchor, double length, double depth, double theta, double rate) {
   const double radius = length - depth;
   return {anchor + V3(radius * std::sin(theta), 0., radius * std::cos(theta) - length),

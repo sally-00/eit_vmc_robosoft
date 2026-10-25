@@ -3,6 +3,13 @@
 
 namespace franka_eit_vmc {
 struct ArcReference { V3 position; V3 velocity; };
+struct ShaftGeometry {
+  V3 axis, axis_rate, angular_velocity;
+  Eigen::Matrix3d rotation;
+};
+ShaftGeometry shaft_geometry(double angle_x, double angle_y, double rate_x, double rate_y);
+ArcReference inward_arc(const V3& upright_surface, double physical_length, double depth,
+                        const ShaftGeometry& shaft);
 ArcReference inward_arc(const V3& upright_surface, double physical_length, double depth,
                         double angle, double rate);
 struct SliderAlignment {

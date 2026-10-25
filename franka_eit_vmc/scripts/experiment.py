@@ -37,7 +37,8 @@ def main():
         if not result.success:raise RuntimeError(result.message)
         return result
     mechanism_fields=['joystick_mechanism','joystick_inward_arc_m',
-        'joystick_shaft_angle_rad','joystick_shaft_rate_rad_s','joystick_shaft_age_s',
+        'joystick_shaft_angle_rad','joystick_shaft_rate_rad_s',
+        'joystick_shaft_angle_y_rad','joystick_shaft_rate_y_rad_s','joystick_shaft_age_s',
         'joystick_shaft_fresh','joystick_shaft_clipped','joystick_force_scale','joystick_slider_at_stop']
     log=None;completed=False
     try:
@@ -54,9 +55,9 @@ def main():
             label=a.condition if a.action=='trial' else 'ready'
             log=(a.output/f'{a.task}_{label}_{stamp}.csv').open('x',newline='')
             writer=csv.writer(log)
-            writer.writerow(['host_time_ns','mode','fault','use_eit','retract_incomplete','trial_time_s','progress_m','progress_velocity_m_s','ball_goal_x_m','theta_d_rad','tracking_error_m',
+            writer.writerow(['host_time_ns','mode','fault','use_eit','retract_incomplete','trial_time_s','progress_m','progress_velocity_m_s','ball_goal_x_m','theta_d_rad','theta_d_y_rad','tracking_error_m',
                              'sensor_sequence','sensor_contact','sensor_contact_candidate','sensor_fresh','sensor_measurement_valid','sensor_position_valid','sensor_physical_model','sensor_age_s','sensor_signal_strength','sensor_contact_threshold','sensor_pattern_distance','sensor_pattern_support_limit','sensor_predicted_radius_mm']+
-                            [f'{prefix}_{axis}' for prefix in ['pad_m','point_m','reference_m','attachment_m','coupling_force_N','requested_force_N','requested_moment_Nm','external_force_N','external_moment_Nm'] for axis in ['x','y','z']]+[f'q{i}_rad' for i in range(1,8)]+[f'tau{i}_Nm' for i in range(1,8)]+mechanism_fields+['joystick_slider_u_m','joystick_slider_v_m']+[f'{prefix}_{axis}' for prefix in ['alignment_force_N','alignment_centre_m','alignment_target_m'] for axis in ['x','y','z']])
+                            [f'{prefix}_{axis}' for prefix in ['pad_m','pad_normal_base','desired_pad_normal_base','point_m','reference_m','attachment_m','coupling_force_N','requested_force_N','requested_moment_Nm','external_force_N','external_moment_Nm'] for axis in ['x','y','z']]+[f'q{i}_rad' for i in range(1,8)]+[f'tau{i}_Nm' for i in range(1,8)]+mechanism_fields+['joystick_slider_u_m','joystick_slider_v_m']+[f'{prefix}_{axis}' for prefix in ['alignment_force_N','alignment_centre_m','alignment_target_m'] for axis in ['x','y','z']])
             print('Controller trace:',log.name)
         rows.clear()
         start_service='move_ready' if a.action=='ready' else 'start_trial'
@@ -79,9 +80,9 @@ def main():
                 message=rows.pop(0)
                 if log:
                     tracking_error=math.dist(message.pad_position_m,message.reference_m)
-                    writer.writerow([time.time_ns(),message.mode_name,message.fault_name,message.use_eit,message.retract_incomplete,message.trial_time_s,message.progress_m,message.progress_velocity_m_s,message.ball_goal_x_m,message.joystick_angle_command_rad,tracking_error,
+                    writer.writerow([time.time_ns(),message.mode_name,message.fault_name,message.use_eit,message.retract_incomplete,message.trial_time_s,message.progress_m,message.progress_velocity_m_s,message.ball_goal_x_m,message.joystick_angle_command_rad,message.joystick_angle_command_y_rad,tracking_error,
                                      message.sensor_sequence,message.sensor_contact,message.sensor_contact_candidate,message.sensor_fresh,message.sensor_measurement_valid,message.sensor_position_valid,message.sensor_physical_model,message.sensor_age_s,message.sensor_signal_strength,message.sensor_contact_threshold,message.sensor_pattern_distance,message.sensor_pattern_support_limit,message.sensor_predicted_radius_mm]+
-                                    list(message.pad_position_m)+list(message.controlled_point_m)+list(message.reference_m)+list(message.attachment_in_pad_m)+list(message.coupling_force_n)+list(message.requested_cartesian_force_n)+list(message.requested_cartesian_moment_nm)+list(message.external_force_n)+list(message.external_moment_nm)+list(message.joint_position_rad)+list(message.commanded_torque_nm)+[getattr(message,name) for name in mechanism_fields]+list(message.joystick_slider_m)+list(message.joystick_alignment_force_n)+list(message.joystick_alignment_centre_m)+list(message.joystick_alignment_target_m))
+                                    list(message.pad_position_m)+list(message.pad_normal_base)+list(message.desired_pad_normal_base)+list(message.controlled_point_m)+list(message.reference_m)+list(message.attachment_in_pad_m)+list(message.coupling_force_n)+list(message.requested_cartesian_force_n)+list(message.requested_cartesian_moment_nm)+list(message.external_force_n)+list(message.external_moment_nm)+list(message.joint_position_rad)+list(message.commanded_torque_nm)+[getattr(message,name) for name in mechanism_fields]+list(message.joystick_slider_m)+list(message.joystick_alignment_force_n)+list(message.joystick_alignment_centre_m)+list(message.joystick_alignment_target_m))
                 if message.fault:
                     detail=(f' (EIT contact={message.sensor_contact}, fresh={message.sensor_fresh}, '
                             f'measurement_valid={message.sensor_measurement_valid}, '

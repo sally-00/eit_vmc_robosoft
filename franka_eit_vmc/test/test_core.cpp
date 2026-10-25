@@ -209,12 +209,13 @@ int main() {
               "joystick attachment changed after engagement");
       require(!core.set_condition(!eit), "condition changed during active trial");
       auto loss = core.step(s, electrical(1.004, 5, false), 1.004, .001, true, Request::None);
-      require(loss.fault == Fault::ContactLoss && !loss.sensor_contact &&
+      require(loss.fault == Fault::None && loss.mode == Mode::Preload &&
+                  (loss.attachment-o.attachment).norm()<1e-12 && !loss.sensor_contact &&
                   !loss.sensor_contact_candidate && loss.sensor_fresh &&
                   loss.sensor_measurement_valid && loss.sensor_sequence == 5 &&
                   std::abs(loss.sensor_signal_strength - .01) < 1e-12 &&
                   std::abs(loss.sensor_pattern_distance - .7) < 1e-12,
-              "contact loss telemetry did not capture the triggering sensor state");
+              "joystick contact loss did not retain the established attachment");
     }
     {
       Config cfg;
@@ -296,6 +297,8 @@ int main() {
       require((a.reference - b.reference).norm() < 1e-12,
               "state correction changed spring extension");
       require(b.attachment.norm() == 0., "proof-of-concept ball attachment must stay at centre");
+      auto loss=core.step(s,electrical(1.004,5,false),1.004,.001,true,Request::None);
+      require(loss.fault==Fault::ContactLoss,"ball contact-loss guard changed");
     }
     {
       Core core{Config{}};
@@ -455,6 +458,21 @@ int main() {
               "free planar slider transmitted tangential preload");
     }
     {
+      const double x=.15, y=.26, vx=.12, vy=-.08, dt=1e-6;
+      const auto shaft=shaft_geometry(x,y,vx,vy);
+      const auto plus=shaft_geometry(x+dt*vx,y+dt*vy,vx,vy);
+      const auto minus=shaft_geometry(x-dt*vx,y-dt*vy,vx,vy);
+      require((shaft.axis.norm()-1.)<1e-12 &&
+              ((plus.axis-minus.axis)/(2*dt)-shaft.axis_rate).norm()<1e-9,
+              "two-axis shaft direction or rate is inconsistent");
+      require((shaft.rotation*V3::UnitZ()-shaft.axis).norm()<1e-12,
+              "palm target normal does not follow the 3D shaft");
+      const auto arc=inward_arc(V3(.45,0.,.055),.02,.01,shaft);
+      require((arc.position-(V3(.45,0.,.055)+.01*shaft.axis-.02*V3::UnitZ())).norm()<1e-12 &&
+              (arc.velocity-.01*shaft.axis_rate).norm()<1e-12,
+              "two-axis inward task arc is not absolute to the upright pivot");
+    }
+    {
       const auto I=Eigen::Matrix3d::Identity();
       const auto Q=Eigen::AngleAxisd(.2,V3::UnitY()).toRotationMatrix();
       const auto links=slider_alignment(V3::Zero(),I,V3::Zero(),V3::Zero(),V3(.01,.02,-.01),
@@ -474,15 +492,29 @@ int main() {
       try { cfg.validate(); } catch(const std::invalid_argument&) {rejected_depth=true;}
       require(rejected_depth,"inward depth reached or exceeded the physical length");
     }
-    for (int bad : {0,1,2}) {
+    {
+      Config cfg;cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      cfg.joystick_length=.02;cfg.joystick_inward_arc_m=.005;
+      cfg.active_radius=.036;cfg.joystick_slider_radius_m=.05;
+      cfg.validate();
+    }
+    for (int bad : {0,1}) {
       Config cfg; cfg.joystick_mechanism=JoystickMechanism::InwardArc;
       Core core(cfg);auto s=state();core.activate(s);
       ShaftFeedback shaft;shaft.sequence=1;shaft.valid=true;shaft.acquired_steady_s=1.;
       if(bad==0)shaft.valid=false;
       if(bad==1)shaft.acquired_steady_s=.5;
-      if(bad==2)shaft.clipped=true;
       auto o=core.step(s,electrical(1.),1.,.001,true,Request::Start,shaft);
       require(o.fault==Fault::JoystickFeedback,"new mode accepted unusable live angle feedback");
+    }
+    {
+      Config cfg;cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      Core core(cfg);auto s=state();core.activate(s);
+      ShaftFeedback shaft;shaft.sequence=1;shaft.valid=true;shaft.clipped=true;
+      shaft.angle=-.6108652381980153;shaft.acquired_steady_s=1.;
+      auto out=core.step(s,electrical(1.),1.,.001,true,Request::Start,shaft);
+      require(out.fault==Fault::None && out.shaft_fresh && out.shaft_clipped,
+              "ADC rail still stopped inward-arc control");
     }
     {
       Config cfg;cfg.joystick_mechanism=JoystickMechanism::InwardArc;
@@ -528,9 +560,42 @@ int main() {
           V3(std::sin(.2),0.,std::cos(.2)-1.);
       require((o.alignment_target-previous-delta).norm()<1e-10,
               "alignment followed task command instead of current shaft angle");
+      const V3 attachment=o.attachment;
+      o=advance(false,Request::None);
+      require(o.fault==Fault::None && o.mode==Mode::Interact &&
+              (o.attachment-attachment).norm()<1e-12 && !o.sensor_contact,
+              "inward-arc joystick stopped or moved attachment after contact loss");
       shaft.acquired_steady_s=now-.3;
       auto stale=core.step(s,electrical(now,seq,true),now,.001,true,Request::None,shaft);
       require(stale.fault==Fault::JoystickFeedback,"stale shaft feedback did not stop an active trial");
+    }
+    {
+      Config cfg;cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      cfg.approach_contact_confirm_s=.001;cfg.approach_contact_travel_m=.000001;
+      cfg.preload_time=.05;cfg.torque_rate=1000000.;
+      Core core(cfg);auto s=state();core.activate(s);
+      double now=1.;uint64_t seq=1;
+      ShaftFeedback shaft;shaft.valid=true;shaft.angle_y=.26;
+      auto advance=[&](bool touching,Request request) {
+        shaft.acquired_steady_s=now;shaft.sequence=seq;
+        auto out=core.step(s,electrical(now,seq++,touching),now,.001,true,request,shaft);
+        now+=.001;return out;
+      };
+      advance(false,Request::Start);advance(true,Request::None);
+      s.ee_position.z()-=.00001;
+      Output out;
+      for (int i=0;i<5;++i)out=advance(true,Request::None);
+      const auto initial=shaft_geometry(0.,.26,0.,0.);
+      require(out.mode==Mode::Preload && out.fault==Fault::None &&
+              std::abs(out.angle_command_y-.26)<1e-12 &&
+              (out.reference-(out.point-cfg.joystick_inward_arc_m*initial.axis)).norm()<1e-8,
+              "tilted start was incorrectly rebased to upright");
+      require((out.desired_pad_normal+initial.axis).norm()<1e-8,
+              "initial palm target is not perpendicular to the tilted shaft");
+      for (int i=0;i<200;++i)out=advance(true,Request::None);
+      require(out.mode==Mode::Interact && out.angle_command_y<.26 &&
+              out.angle_command>0.,
+              "task did not drive Base Y toward zero and Base X toward its absolute goal");
     }
     std::cout << "Core geometry, matched-condition, rebase and fault tests passed\n";
     return 0;

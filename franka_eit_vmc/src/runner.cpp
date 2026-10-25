@@ -220,11 +220,15 @@ class Bridge : public rclcpp::Node {
           value.sequence = m->sequence;
           value.angle = m->angle_rad;
           value.rate = m->angular_velocity_rad_s;
+          value.angle_y = m->angle_y_rad;
+          value.rate_y = m->angular_velocity_y_rad_s;
           value.clipped = m->clipped;
           value.valid = m->measurement_valid && m->header.frame_id == "franka_base" &&
               std::isfinite(age) && age >= -.01 && age <= c.joystick_feedback_timeout &&
               std::isfinite(value.angle) && std::isfinite(value.rate) &&
-              std::abs(value.angle) < 1.5707963267948966;
+              std::isfinite(value.angle_y) && std::isfinite(value.rate_y) &&
+              std::abs(value.angle) < 1.5707963267948966 &&
+              std::abs(value.angle_y) < 1.5707963267948966;
           value.acquired_steady_s = value.valid ? steady_s() - age : -1.;
           shafts.push(value);
         });
@@ -340,6 +344,8 @@ class Bridge : public rclcpp::Node {
     s.joystick_inward_arc_m = o.inward_arc_m;
     s.joystick_shaft_angle_rad = o.shaft_angle;
     s.joystick_shaft_rate_rad_s = o.shaft_rate;
+    s.joystick_shaft_angle_y_rad = o.shaft_angle_y;
+    s.joystick_shaft_rate_y_rad_s = o.shaft_rate_y;
     s.joystick_shaft_age_s = o.shaft_age_s;
     s.joystick_shaft_fresh = o.shaft_fresh;
     s.joystick_shaft_clipped = o.shaft_clipped;
@@ -369,8 +375,11 @@ class Bridge : public rclcpp::Node {
     s.progress_velocity_m_s = o.progress_velocity;
     s.ball_goal_x_m = o.goal;
     s.joystick_angle_command_rad = o.angle_command;
+    s.joystick_angle_command_y_rad = o.angle_command_y;
     for (int i = 0; i < 3; ++i) {
       s.pad_position_m[i] = o.pad_position[i];
+      s.pad_normal_base[i] = o.pad_normal[i];
+      s.desired_pad_normal_base[i] = o.desired_pad_normal[i];
       s.controlled_point_m[i] = o.point[i];
       s.reference_m[i] = o.reference[i];
       s.attachment_in_pad_m[i] = o.attachment[i];

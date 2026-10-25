@@ -1,4 +1,4 @@
-"""Calibration, freshness and rail rejection without a serial device or robot."""
+"""Calibration, freshness and bounded ADC-rail feedback without a serial device or robot."""
 import json
 import math
 from pathlib import Path
@@ -12,10 +12,10 @@ class FeedbackTests(unittest.TestCase):
     def setUp(self):
         self.cal=json.loads((Path(__file__).resolve().parents[1]/'config/joystick_adc_calibration.json').read_text())
 
-    def row(self, raw, index=1):
+    def row(self, raw, index=1, x_raw=2043):
         return dict(host_unix_ns=str(1_000_000_000+index*10_000_000),
                     host_monotonic_ns=str(10_000_000_000+index*10_000_000),
-                    x_raw='2043',y_raw=str(raw))
+                    x_raw=str(x_raw),y_raw=str(raw))
 
     def test_center_and_direction_follow_base_x_mapping(self):
         d=ShaftDecoder(self.cal)
@@ -27,12 +27,23 @@ class FeedbackTests(unittest.TestCase):
         self.assertLess(negative['angle_rad'],0.)
         self.assertAlmostEqual(positive['angle_rad'],math.radians(35)*987/1987)
 
-    def test_clipped_samples_are_invalid_instead_of_command_fallback(self):
+    def test_adc_rail_samples_remain_valid_bounded_feedback(self):
         d=ShaftDecoder(self.cal)
         d.decode(self.row(1987))
         for i,raw in enumerate((0,4095),2):
             result=d.decode(self.row(raw,i))
-            self.assertTrue(result['clipped']);self.assertFalse(result['measurement_valid'])
+            self.assertTrue(result['clipped']);self.assertTrue(result['measurement_valid'])
+            self.assertAlmostEqual(abs(result['angle_rad']),math.radians(35))
+
+    def test_cross_axis_start_uses_absolute_calibration(self):
+        d=ShaftDecoder(self.cal)
+        d.decode(self.row(1987,x_raw=1139))
+        result=d.decode(self.row(1987,2,x_raw=1139))
+        self.assertTrue(result['measurement_valid'])
+        self.assertEqual(result['angle_rad'],0.)
+        self.assertAlmostEqual(result['angle_y_rad'],math.radians(35)*904/2043)
+        limit=d.decode(self.row(1987,3,x_raw=0))
+        self.assertTrue(limit['clipped']);self.assertTrue(limit['measurement_valid'])
 
     def test_timestamp_is_not_refreshed_by_decoding(self):
         d=ShaftDecoder(self.cal)

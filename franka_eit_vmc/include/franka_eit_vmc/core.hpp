@@ -63,7 +63,7 @@ struct Config {
   double q7_tolerance{0.35};
   double sensor_timeout{0.30}, heartbeat_timeout{0.30}, max_period{0.010},
          idle_max_period{0.020};
-  double active_radius{0.036};
+  double active_radius{0.045};
   double joystick_length{0.092}, joystick_angle{0.20943951023931953}, joystick_duration{9.1};
   // Only InwardArc uses these geometry/guide settings and live shaft feedback.
   JoystickMechanism joystick_mechanism{JoystickMechanism::Legacy};
@@ -95,7 +95,7 @@ struct Contact {
 };
 struct ShaftFeedback {
   uint64_t sequence{0};
-  double acquired_steady_s{-1.}, angle{0.}, rate{0.};
+  double acquired_steady_s{-1.}, angle{0.}, rate{0.}, angle_y{0.}, rate_y{0.};
   bool valid{false}, clipped{false};
 };
 struct Output {
@@ -103,12 +103,15 @@ struct Output {
   Fault fault{Fault::None};
   V7 torque{V7::Zero()};
   V3 pad_position{V3::Zero()}, point{V3::Zero()}, reference{V3::Zero()}, attachment{V3::Zero()};
+  V3 pad_normal{V3::Zero()}, desired_pad_normal{V3::Zero()};
   V3 coupling_force{V3::Zero()};
   V3 requested_force{V3::Zero()}, requested_moment{V3::Zero()};
-  double progress{0.}, progress_velocity{0.}, goal{0.}, angle_command{0.}, trial_time{0.};
+  double progress{0.}, progress_velocity{0.}, goal{0.}, angle_command{0.},
+      angle_command_y{0.}, trial_time{0.};
   bool use_eit{true}, finished{false}, retract_incomplete{false};
   JoystickMechanism joystick_mechanism{JoystickMechanism::Legacy};
-  double inward_arc_m{0.}, shaft_angle{0.}, shaft_rate{0.}, shaft_age_s{0.}, force_scale{1.};
+  double inward_arc_m{0.}, shaft_angle{0.}, shaft_rate{0.}, shaft_angle_y{0.}, shaft_rate_y{0.},
+      shaft_age_s{0.}, force_scale{1.};
   bool shaft_fresh{false}, shaft_clipped{false}, slider_at_stop{false};
   V3 alignment_force{V3::Zero()}, alignment_centre{V3::Zero()}, alignment_target{V3::Zero()};
   Eigen::Vector2d slider{Eigen::Vector2d::Zero()};
@@ -151,7 +154,7 @@ class Core {
       unloaded_retract_time_{0.},
       normal_anchor_{0.};
   int approach_confirm_frames_{0};
-  double z_{0.}, dz_{0.}, z0_{0.}, observed_{0.}, goal_{0.};
+  double z_{0.}, dz_{0.}, y_{0.}, dy_{0.}, z0_{0.}, observed_{0.}, goal_{0.};
   Eigen::Vector2d slider_{Eigen::Vector2d::Zero()};
   int ready_stage_{0};
   uint64_t last_sequence_{0};

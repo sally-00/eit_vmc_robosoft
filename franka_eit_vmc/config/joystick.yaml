@@ -3,7 +3,7 @@
     joystick_length: 0.020     # assumes reported 20 mm is pivot-to-contact radius
     approach_distance: 0.030  # from 75 mm ready to 45 mm, preserving prior lower endpoint
     approach_timeout: 10.0
-    joystick_angle_deg: 45.0  # commands +45 degrees, then -45 degrees
+    joystick_angle_deg: 30.0  # commands +30 degrees, then -30 degrees
     joystick_duration: 9.1
     angle_speed: 0.28
     angle_acceleration: 2.0

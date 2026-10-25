@@ -20,9 +20,9 @@
     use_saved_posture: false
     q7_tolerance: 0.35
     torque_rate: 50.0
-    joint_speed_limit: 0.6
-    point_speed_limit: 0.10
-    angular_speed_limit: 0.5
+    joint_speed_limit: 1.0
+    point_speed_limit: 0.50
+    angular_speed_limit: 1.0
     heartbeat_timeout: 0.30
     max_period: 0.010       # seconds during robot motion
     idle_max_period: 0.020  # seconds while holding or done
@@ -30,6 +30,7 @@
     contact_topic: '/eit/contact'
     pad_frame: 'eit_pad'
     pad_numbering: 'ccw'
+    active_radius: 0.045     # m; 90 mm sensor pad diameter, centre to allowed contact edge
     # JOYSTICK TRIAL: Hold -> Ready -> Hold -> Approach -> Preload ->
     # Interact -> Retract -> Done. The block runner repeats this for baseline
     # and EIT. A fault interrupts the sequence instead of advancing it.
@@ -108,9 +109,9 @@
                                   # Example: upright tip Z=.055 minus L=.020.
                                   # Keep fixed for all landing-offset blocks.
     joystick_alignment_half_span_m: 0.080 # NEW ONLY: virtual cross-arm half-span
-    joystick_alignment_spring_k: 234.375  # NEW ONLY: N/m PER alignment link (4 links)
-    joystick_alignment_spring_d: 78.125   # NEW ONLY: Ns/m PER alignment link
-    joystick_slider_radius_m: 0.036 # NEW ONLY: common palm-slider radial travel, m
+    joystick_alignment_spring_k: 1000.0  # NEW ONLY: N/m PER alignment link (4 links)
+    joystick_alignment_spring_d: 80.0   # NEW ONLY: Ns/m PER alignment link
+    joystick_slider_radius_m: 0.05 # NEW ONLY: virtual palm-slider travel, m; independent of EIT active_radius
     joystick_feedback_topic: '/joystick/shaft' # NEW CONTROL ONLY; also recorded in legacy
     joystick_feedback_timeout: 0.20 # NEW CONTROL ONLY: seconds; bad feedback stops inward_arc.
                                   # In legacy this only labels feedback freshness.
@@ -120,8 +121,8 @@
     # task normal_k*.01 = 8 N + alignment 4*k*.01 = 9.375 N BEFORE force limits.
     # A common force scale caps their SUM; this is not measured force regulation.
     # preload and orientation_k/d are NOT used by the new contact mechanism.
-    # The current ESP32 calibration ends at +/-35 deg. Use a command below that
-    # (e.g. launch joystick_angle_deg:=30); feedback at an ADC rail is invalid.
+    # The current ESP32 calibration ends at +/-35 deg. Set joystick_angle_deg
+    # below 35 in joystick.yaml; ADC-rail angles are bounded estimates.
 
     # 6. RETRACT: move upward, using ready_k/d for translation and hold_kr/dr
     #    plus moment_limit for rotation. DONE then holds the final pose with

@@ -89,9 +89,38 @@ class BlockTests(unittest.TestCase):
             displaced=''.join(f'{stamp-500_000_000+i*10_000_000},3190,2300\n' for i in range(50))
             path.write_text(header+displaced)
             self.assertFalse(block.joystick_is_centered(path,3190,3095,80))
+            self.assertEqual(block.recent_joystick_reading(path),(3190,2300))
             stale=''.join(f'{stamp-2_500_000_000+i*10_000_000},3190,3095\n' for i in range(50))
             path.write_text(header+stale)
             self.assertFalse(block.joystick_is_centered(path,3190,3095,80))
+
+    def test_inward_arc_accepts_stable_tilt_before_ready(self):
+        recorder=Mock();recorder.poll.return_value=None
+        with patch.object(block,'check_joystick_recorder'),patch.object(
+                block,'recent_joystick_reading',return_value=(1139,1990)):
+            block.wait_for_joystick_center(Path('/tmp/unused.csv'),recorder,
+                Path('/tmp/unused.log'),2043,1987,80,allow_tilt=True)
+
+    def test_inward_arc_accepts_stable_adc_rail(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'joystick.csv';stamp=time.time_ns()
+            path.write_text('host_unix_ns,x_raw,y_raw\n'+''.join(
+                f'{stamp-500_000_000+i*10_000_000},2043,4095\n' for i in range(50)))
+            self.assertEqual(block.recent_joystick_reading(path),(2043,4095))
+            self.assertFalse(block.joystick_is_centered(path,2043,1987,80))
+
+    def test_automatic_inward_block_allows_tilt_for_both_conditions(self):
+        with tempfile.TemporaryDirectory() as d:
+            recorder=Mock();feedback=Mock();feedback.poll.return_value=None
+            checked=dict(joystick_mechanism='inward_arc',joystick_inward_arc_m=.01,
+                         joystick_length=.02,joystick_angle_deg=30.,
+                         joystick_feedback_topic='/joystick/shaft')
+            args=['run_block.py','--task','joystick','--block','center','--repeats','1',
+                  '--mechanism','inward_arc','--output',d]
+            with patch.object(sys,'argv',args),patch.object(block,'configure_joystick_mechanism'),patch.object(block,'check_controller',return_value=checked),patch.object(block,'start_joystick_recorder',side_effect=lambda folder,port:(recorder,folder/'joystick_esp32.csv',folder/'joystick_recorder.log')),patch.object(block,'start_shaft_feedback',return_value=(feedback,Path(d)/'feedback.log')),patch.object(block,'wait_for_shaft_feedback'),patch.object(block,'check_joystick_recorder'),patch.object(block,'wait_for_joystick_center') as wait,patch.object(block,'stop_joystick_recorder'),patch.object(block,'stop_controller'),patch.object(block,'plot_joystick_block'),patch.object(block.subprocess,'run'),patch('builtins.input',side_effect=AssertionError('automatic block asked for input')):
+                block.main()
+            self.assertEqual(wait.call_count,4)
+            self.assertTrue(all(call.kwargs['allow_tilt'] for call in wait.call_args_list))
 
     def test_quit_never_starts_motion(self):
         with tempfile.TemporaryDirectory() as d:

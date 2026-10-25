@@ -18,13 +18,17 @@ class FeedbackNode(Node):
         super().__init__('eit_joystick_shaft_feedback')
         calibration=json.loads(args.calibration.read_text())
         channel=calibration['mapping']['base_x_deg']['channel']
+        channel_y=calibration['mapping']['base_y_deg']['channel']
         center=args.center_x_raw if channel=='x_raw' else args.center_y_raw
-        self.decoder = ShaftDecoder(calibration,observed_center=center)
+        center_y=args.center_x_raw if channel_y=='x_raw' else args.center_y_raw
+        self.decoder = ShaftDecoder(calibration,observed_center=center,observed_center_y=center_y)
         self.output=args.output.open('x',newline='') if args.output else None
         self.writer=csv.writer(self.output) if self.output else None
         if self.writer:
             self.writer.writerow(['host_unix_ns','host_monotonic_ns','esp_ms','x_raw','y_raw','pressed',
-                'shaft_angle_rad','shaft_angle_deg','shaft_rate_rad_s','measurement_valid','clipped'])
+                'shaft_angle_rad','shaft_angle_deg','shaft_rate_rad_s',
+                'shaft_angle_y_rad','shaft_angle_y_deg','shaft_rate_y_rad_s',
+                'measurement_valid','clipped'])
         self.stream = args.csv.open()
         self.columns = None
         self.pending = ''
@@ -48,7 +52,8 @@ class FeedbackNode(Node):
             fields = next(csv.reader(io.StringIO(line)))
             if self.columns is None:
                 self.columns = fields
-                if not {'host_unix_ns', 'host_monotonic_ns', self.decoder.channel} <= set(fields):
+                if not {'host_unix_ns', 'host_monotonic_ns', self.decoder.channel,
+                        self.decoder.channel_y} <= set(fields):
                     raise ValueError('Joystick recording lacks required feedback columns')
                 continue
             if len(fields) != len(self.columns):
@@ -59,6 +64,8 @@ class FeedbackNode(Node):
                 if self.writer:
                     self.writer.writerow([row.get(k,'') for k in ['host_unix_ns','host_monotonic_ns','esp_ms','x_raw','y_raw','pressed']]+
                         [latest['angle_rad'],math.degrees(latest['angle_rad']),latest['angular_velocity_rad_s'],
+                         latest['angle_y_rad'],math.degrees(latest['angle_y_rad']),
+                         latest['angular_velocity_y_rad_s'],
                          latest['measurement_valid'],latest['clipped']])
                 self.sequence += 1
             except (KeyError, ValueError):

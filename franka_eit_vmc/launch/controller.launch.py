@@ -7,12 +7,14 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def setup(context):
-    share=Path(get_package_share_directory('franka_eit_vmc'))
     task=LaunchConfiguration('task').perform(context)
     executables={'joystick':'joystick_controller','ball':'ball_roll_controller','ready':'move_ready'}
     if task not in executables:raise ValueError('task must be joystick, ball, or ready')
-    paths=[('config',LaunchConfiguration('config').perform(context))]
-    if task!='ready':paths.append(('task defaults',str(share/'config'/('joystick.yaml' if task=='joystick' else 'ball.yaml'))))
+    config_path=Path(LaunchConfiguration('config').perform(context)).expanduser()
+    paths=[('config',str(config_path))]
+    if task!='ready':
+        task_file='joystick.yaml' if task=='joystick' else 'ball.yaml'
+        paths.append(('task defaults',str(config_path.parent/task_file)))
     for name in ['mount','posture','overrides']:
         path=LaunchConfiguration(name).perform(context)
         if path:paths.append((name,path))
@@ -21,10 +23,6 @@ def setup(context):
             raise RuntimeError(f'{name} parameter file does not exist: {path}. '
                                'Set EIT_CONFIG_DIR to the franka_eit_vmc/config directory in this terminal.')
     parameters=[str(Path(path).expanduser()) for _,path in paths]
-    angle=LaunchConfiguration('joystick_angle_deg').perform(context)
-    if angle:
-        if task!='joystick':raise ValueError('joystick_angle_deg applies only to joystick')
-        parameters.append({'joystick_angle_deg':float(angle)})
     return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',
                  parameters=parameters)]
 
@@ -36,5 +34,4 @@ def generate_launch_description():
         DeclareLaunchArgument('mount',default_value=''),
         DeclareLaunchArgument('posture',default_value=''),
         DeclareLaunchArgument('overrides',default_value=''),
-        DeclareLaunchArgument('joystick_angle_deg',default_value=''),
         OpaqueFunction(function=setup)])

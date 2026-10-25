@@ -31,3 +31,19 @@ No physical robot, ESP32 or EIT sensor was connected for this change.
 - An installed-layout ROS smoke check feeds a temporary raw CSV through the actual feedback node and receives `JoystickState` messages. It checks continuous calibrated CSV output, degree/radian conversion, rail invalidation and preservation of old source timestamps. It never opens USB or FCI.
 
 The measured ADC calibration reaches rails at its approximate ±35° stops. New-mechanism blocks reject commanded amplitudes outside that range; 30° is the documented example. Rate filtering and host-receipt timestamps do not identify physical angle accuracy or the full USB/control delay. The real computer needs a rebuild for the new message definitions. Geometry, gains, actual pressure, pad friction, feedback delay and closed-loop hardware performance remain unvalidated by these offline checks.
+
+## Tilted-start two-axis update — 25 October 2026
+
+The recorded x-minus startup had a stable X ADC value near 1139, corresponding to approximately +15.5° Base Y tilt, while its Base X angle stayed near zero. This update accepts stable, nonclipped tilted starts only in `inward_arc`; legacy blocks still require upright. Decoder tests cover the real startup sample, both calibrated channels and rail rejection. Core tests cover the 3D shaft axis/rate, contact-defined task pivot, initial tilted reference, palm normal aligned against the shaft, and Base Y command progressing toward zero while Base X progresses toward the absolute target. Block-runner tests verify tilted starts are allowed for both automatic conditions. The package builds and all four CTest targets pass. Physical robot motion with this two-axis change has not been tested.
+
+## ADC-rail continuation — 25 October 2026
+
+The decoder now keeps the bounded ±35° angle estimate valid at either ADC rail and records `clipped` separately. The block runner accepts a stable rail reading in inward-arc mode, and the controller no longer uses the clip flag as a fault condition. Tests cover rail decoding, automatic start checks, and a fresh clipped controller sample. Stale timestamps, invalid samples and lost feedback still stop inward-arc control. This change has not been physically tested.
+
+## Joystick contact-drop continuation — 25 October 2026
+
+The x-minus baseline trace at 17:37:18 stopped when EIT pattern distance crossed the model support limit despite continued signal. The joystick controller now requires contact for approach engagement but retains the established attachment and continues preload/interaction if the EIT contact bit later drops. Core tests cover both baseline and EIT attachments, inward-arc continuation, and unchanged ball contact-loss behavior. The updated controller has not yet been run on the physical robot.
+
+## Inward-arc parameter validation — 25 October 2026
+
+The live x-plus controller reported `joystick_length=0.020 m`, `active_radius=0.036 m` and `joystick_slider_radius_m=0.050 m`. A requested inward depth of 0.005 m was below the physical length; the old generic validation error actually came from comparing virtual slider travel with the EIT pad active radius. These quantities are independent. The comparison was removed, individual parameter errors now identify the failing field, and a core test covers this exact configuration. Hardware motion with these gains and travel has not been validated.

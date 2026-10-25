@@ -121,16 +121,25 @@ void Config::validate() const {
       joystick_duration <= preload_time || ball_duration <= preload_time)
     throw std::invalid_argument("Invalid task geometry or timing bounds");
   if (joystick_mechanism == JoystickMechanism::InwardArc) {
-    if (task != Task::Joystick || !std::isfinite(joystick_inward_arc_m) ||
-        joystick_inward_arc_m < 0. || joystick_inward_arc_m >= joystick_length ||
-        !joystick_pivot_m.allFinite() || joystick_alignment_half_span_m <= 0. ||
-        !std::isfinite(joystick_alignment_half_span_m) || joystick_slider_radius_m <= 0. ||
-        joystick_slider_radius_m > active_radius || !std::isfinite(joystick_slider_radius_m) ||
-        !std::isfinite(joystick_alignment_spring_k) || joystick_alignment_spring_k <= 0. ||
-        !std::isfinite(joystick_alignment_spring_d) || joystick_alignment_spring_d <= 0. ||
-        !std::isfinite(joystick_feedback_timeout) || joystick_feedback_timeout <= 0. ||
+    if (task != Task::Joystick)
+      throw std::invalid_argument("inward_arc requires the joystick task");
+    if (!std::isfinite(joystick_inward_arc_m) || joystick_inward_arc_m < 0. ||
+        joystick_inward_arc_m >= joystick_length)
+      throw std::invalid_argument("joystick_inward_arc_m must be nonnegative and below joystick_length");
+    if (!joystick_pivot_m.allFinite())
+      throw std::invalid_argument("joystick_pivot_m must be finite");
+    if (!std::isfinite(joystick_alignment_half_span_m) || joystick_alignment_half_span_m <= 0.)
+      throw std::invalid_argument("joystick_alignment_half_span_m must be positive");
+    // The virtual palm slider is distinct from the EIT pad's active contact radius.
+    if (!std::isfinite(joystick_slider_radius_m) || joystick_slider_radius_m <= 0.)
+      throw std::invalid_argument("joystick_slider_radius_m must be positive");
+    if (!std::isfinite(joystick_alignment_spring_k) || joystick_alignment_spring_k <= 0.)
+      throw std::invalid_argument("joystick_alignment_spring_k must be positive");
+    if (!std::isfinite(joystick_alignment_spring_d) || joystick_alignment_spring_d <= 0.)
+      throw std::invalid_argument("joystick_alignment_spring_d must be positive");
+    if (!std::isfinite(joystick_feedback_timeout) || joystick_feedback_timeout <= 0. ||
         joystick_feedback_timeout > .5)
-      throw std::invalid_argument("Invalid inward-arc joystick parameters (depth must be below physical length)");
+      throw std::invalid_argument("joystick_feedback_timeout must be in (0, 0.5] seconds");
   }
 
 }
@@ -248,8 +257,9 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   const bool inward = c_.task == Task::Joystick &&
                       c_.joystick_mechanism == JoystickMechanism::InwardArc;
   const double shaft_age = now - shaft.acquired_steady_s;
-  const bool shaft_fresh = shaft.sequence > 0 && shaft.valid && !shaft.clipped &&
+  const bool shaft_fresh = shaft.sequence > 0 && shaft.valid &&
       std::isfinite(shaft.angle) && std::isfinite(shaft.rate) &&
+      std::isfinite(shaft.angle_y) && std::isfinite(shaft.rate_y) &&
       std::isfinite(shaft_age) && shaft_age >= -.01 && shaft_age <= c_.joystick_feedback_timeout;
   if (inward && in_trial && !shaft_fresh) fail(Fault::JoystickFeedback);
   if (in_trial && !sensor_fresh) fail(Fault::SensorStale);
@@ -379,17 +389,22 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       normal_anchor_ = point.z();
       initial_face_ = pface;
       if (inward) {
-        const V3 tip = c_.joystick_pivot_m + c_.joystick_length *
-            V3(std::sin(shaft.angle), 0., std::cos(shaft.angle));
+        const auto initial_shaft = shaft_geometry(shaft.angle, shaft.angle_y, shaft.rate, shaft.rate_y);
+        // The task pivot is contact-defined, while both angle commands remain
+        // absolute with respect to the calibrated upright shaft direction.
+        h0_ = point - c_.joystick_length * (initial_shaft.axis - V3::UnitZ());
+        const V3 tip = c_.joystick_pivot_m + c_.joystick_length * initial_shaft.axis;
         slider_ = (Rp.transpose() * (tip - pface)).head<2>();
         if (slider_.norm() > c_.joystick_slider_radius_m)
           slider_ *= c_.joystick_slider_radius_m / slider_.norm();
       }
       trial_time_ = 0.;
       phase_time_ = 0.;
-      z_ = c_.task == Task::Ball ? c_.initial_ball_x : 0.;
+      z_ = c_.task == Task::Ball ? c_.initial_ball_x : inward ? shaft.angle : 0.;
+      y_ = inward ? shaft.angle_y : 0.;
       z0_ = z_;
       dz_ = 0.;
+      dy_ = 0.;
       observed_ = z_;
       goal_ = c_.initial_ball_x + c_.roll_distance;
       mode_ = Mode::Preload;
@@ -402,7 +417,10 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   }
   if (mode_ == Mode::Preload || mode_ == Mode::Interact) {
     trial_time_ += safe_dt;
-    if (!contact.contact) fail(Fault::ContactLoss);
+    // Joystick contact is needed to establish the attachment in Approach.
+    // Once established, its centre/EIT pad coordinate stays fixed even when
+    // the EIT contact decision later drops out.
+    if (c_.task == Task::Ball && !contact.contact) fail(Fault::ContactLoss);
     if (mode_ != Mode::Fault && c_.task == Task::Ball && new_frame) {
       if (use_eit_ &&
           (!contact.position_valid || !std::isfinite(contact.x) || !std::isfinite(contact.y)))
@@ -449,6 +467,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
                safe_dt;
         dz_ = clip(dz_, -c_.angle_speed, c_.angle_speed);
         z_ += dz_ * safe_dt;
+        if (inward) {
+          const double desired_y_speed = clip(-2. * y_, -c_.angle_speed, c_.angle_speed);
+          dy_ += clip((desired_y_speed - dy_) / .12, -c_.angle_acceleration,
+                      c_.angle_acceleration) * safe_dt;
+          dy_ = clip(dy_, -c_.angle_speed, c_.angle_speed);
+          y_ += dy_ * safe_dt;
+        }
       }
       ref =
           h0_ + V3(c_.joystick_length * std::sin(z_), 0., c_.joystick_length * (std::cos(z_) - 1.));
@@ -462,20 +487,20 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       if (Rp.col(2).dot(-V3::UnitZ()) < std::cos(.15)) fail(Fault::Tracking);
     }
     if (inward && mode_ != Mode::Fault) {
-      const auto arc = inward_arc(h0_, c_.joystick_length, c_.joystick_inward_arc_m, z_, dz_);
+      const auto task_shaft = shaft_geometry(z_, y_, dz_, dy_);
+      const auto arc = inward_arc(h0_, c_.joystick_length, c_.joystick_inward_arc_m, task_shaft);
       ref = arc.position;
       const V3 K(c_.coupling_k, c_.coupling_k, c_.normal_k);
       const V3 D(c_.coupling_d, c_.coupling_d, c_.normal_d);
       fc = activation * (K.cwiseProduct(ref - point) + D.cwiseProduct(arc.velocity - velocity));
       const double radius = c_.joystick_length - c_.joystick_inward_arc_m;
-      const V3 axis(std::sin(shaft.angle), 0., std::cos(shaft.angle));
-      alignment_target = c_.joystick_pivot_m + radius * axis;
-      const V3 target_velocity = radius * shaft.rate *
-          V3(std::cos(shaft.angle), 0., -std::sin(shaft.angle));
-      desired_rotation = Eigen::AngleAxisd(shaft.angle, V3::UnitY()).toRotationMatrix() * hold_rotation_;
+      const auto measured_shaft = shaft_geometry(shaft.angle, shaft.angle_y, shaft.rate, shaft.rate_y);
+      alignment_target = c_.joystick_pivot_m + radius * measured_shaft.axis;
+      const V3 target_velocity = radius * measured_shaft.axis_rate;
+      desired_rotation = measured_shaft.rotation * hold_rotation_;
       slider_used = slider_;
       const auto links = slider_alignment(pface, Rp, vface, omega,
-          alignment_target, target_velocity, desired_rotation, shaft.rate * V3::UnitY(),
+          alignment_target, target_velocity, desired_rotation, measured_shaft.angular_velocity,
           slider_, c_.joystick_alignment_half_span_m, c_.joystick_alignment_spring_k,
           c_.joystick_alignment_spring_d, c_.joystick_slider_radius_m);
       alignment_centre = links.centre;
@@ -598,6 +623,8 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   out.mode = mode_;
   out.fault = fault_;
   out.pad_position = pface;
+  out.pad_normal = Rp.col(2);
+  out.desired_pad_normal = desired_rotation.col(2);
   out.point = point;
   out.reference = ref;
   out.attachment = attachment_;
@@ -608,12 +635,15 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   out.progress_velocity = dz_;
   out.goal = goal_;
   out.angle_command = c_.task == Task::Joystick ? z_ : 0.;
+  out.angle_command_y = c_.task == Task::Joystick && inward ? y_ : 0.;
   out.trial_time = trial_time_;
   out.use_eit = use_eit_;
   out.retract_incomplete = retract_incomplete_;
   out.joystick_mechanism = c_.joystick_mechanism;
   out.inward_arc_m = c_.joystick_inward_arc_m;
-  out.shaft_angle = shaft.angle; out.shaft_rate = shaft.rate; out.shaft_age_s = shaft_age;
+  out.shaft_angle = shaft.angle; out.shaft_rate = shaft.rate;
+  out.shaft_angle_y = shaft.angle_y; out.shaft_rate_y = shaft.rate_y;
+  out.shaft_age_s = shaft_age;
   out.shaft_fresh = shaft_fresh; out.shaft_clipped = shaft.clipped;
   out.force_scale = force_scale; out.alignment_force = alignment_force;
   out.alignment_centre = alignment_centre; out.alignment_target = alignment_target;
@@ -663,7 +693,7 @@ const char* fault_name(Fault x) {
                                 "heartbeat",
                                 "robot",
                                 "retract_timeout",
-                                "joystick_feedback_stale_invalid_or_clipped"};
+                                "joystick_feedback_stale_or_invalid"};
   return names[static_cast<int>(x)];
 }
 }  // namespace franka_eit_vmc

@@ -23,7 +23,10 @@ float64 progress_m
 float64 progress_velocity_m_s
 float64 ball_goal_x_m
 float64 joystick_angle_command_rad
+float64 joystick_angle_command_y_rad
 float64[3] pad_position_m
+float64[3] pad_normal_base
+float64[3] desired_pad_normal_base
 float64[3] controlled_point_m
 float64[3] reference_m
 float64[3] attachment_in_pad_m
@@ -40,6 +43,8 @@ string joystick_mechanism
 float64 joystick_inward_arc_m
 float64 joystick_shaft_angle_rad
 float64 joystick_shaft_rate_rad_s
+float64 joystick_shaft_angle_y_rad
+float64 joystick_shaft_rate_y_rad_s
 float64 joystick_shaft_age_s
 bool joystick_shaft_fresh
 bool joystick_shaft_clipped

@@ -64,32 +64,49 @@ def start_joystick_recorder(folder,port):
         raise
 
 
-def joystick_is_centered(path,center_x,center_y,tolerance):
+def recent_joystick_reading(path):
     with path.open(newline='') as stream:
         rows=deque(csv.DictReader(stream),maxlen=50)
     samples=[]
     for row in rows:
         try:samples.append((int(row['host_unix_ns']),int(row['x_raw']),int(row['y_raw'])))
         except (KeyError,TypeError,ValueError):continue
-    if len(samples)<30 or time.time_ns()-samples[-1][0]>500_000_000:return False
+    if len(samples)<30 or time.time_ns()-samples[-1][0]>500_000_000:return None
     xs=[row[1] for row in samples];ys=[row[2] for row in samples]
     x=statistics.median(xs);y=statistics.median(ys)
-    return (abs(x-center_x)<=tolerance and abs(y-center_y)<=tolerance and
-            max(abs(value-x) for value in xs)<=60 and
-            max(abs(value-y) for value in ys)<=60)
+    if (not 0<=x<=4095 or not 0<=y<=4095 or
+            max(abs(value-x) for value in xs)>60 or
+            max(abs(value-y) for value in ys)>60):return None
+    return x,y
 
 
-def wait_for_joystick_center(csv_path,recorder,recorder_log,center_x,center_y,tolerance):
+def joystick_is_centered(path,center_x,center_y,tolerance):
+    reading=recent_joystick_reading(path)
+    return (reading is not None and abs(reading[0]-center_x)<=tolerance and
+            abs(reading[1]-center_y)<=tolerance)
+
+
+def wait_for_joystick_center(csv_path,recorder,recorder_log,center_x,center_y,tolerance,
+                             allow_tilt=False):
     deadline=time.monotonic()+20.
     waiting=False
     while True:
         check_joystick_recorder(recorder,recorder_log)
-        if joystick_is_centered(csv_path,center_x,center_y,tolerance):return
+        reading=recent_joystick_reading(csv_path)
+        if reading is not None and (allow_tilt or
+                (abs(reading[0]-center_x)<=tolerance and
+                 abs(reading[1]-center_y)<=tolerance)):
+            if allow_tilt:
+                print(f'Stable ESP32 start reading: X={reading[0]:.0f}, Y={reading[1]:.0f} raw; '
+                      'inward_arc uses calibrated absolute angles.',flush=True)
+            return
         if time.monotonic()>=deadline:
-            raise RuntimeError('Joystick did not return to its calibrated centre within 20 s; '
+            requirement='stable reading' if allow_tilt else 'calibrated centre'
+            raise RuntimeError(f'Joystick did not reach a {requirement} within 20 s; '
                                f'check the fixture and ESP32 recording {csv_path}')
         if not waiting:
-            print('Waiting for the joystick to return upright before automatic motion...',flush=True)
+            print('Waiting for stable joystick feedback before automatic motion...' if allow_tilt else
+                  'Waiting for the joystick to return upright before automatic motion...',flush=True)
             waiting=True
         time.sleep(.1)
 
@@ -232,8 +249,9 @@ def validate_inward_configuration(checked,calibration):
     limit=float(calibration['nominal_limit_deg']);angle=checked['joystick_angle_deg']
     if not math.isfinite(limit) or not math.isfinite(angle) or not 0<angle<limit:
         raise RuntimeError(f'Inward-arc live feedback is calibrated to ±{limit:g} deg; '
-                           f'active joystick_angle_deg={angle:g}. Launch with joystick_angle_deg:=30 '
-                           '(or another positive value below the calibrated stop).')
+                           f'active joystick_angle_deg={angle:g}. Set joystick_angle_deg below '
+                           f'{limit:g} in joystick.yaml beside the launch controller.yaml, '
+                           'then restart the controller.')
 
 
 def start_shaft_feedback(folder,csv_path,topic,center_x=None,center_y=None):
@@ -260,7 +278,7 @@ def wait_for_shaft_feedback(process,log_path):
         while time.monotonic()<deadline:
             if process.poll() is not None:raise RuntimeError(f'Shaft feedback process stopped; see {log_path}')
             rclpy.spin_once(node,timeout_sec=.05);m=latest[0]
-            if m and m.joystick_shaft_fresh and not m.joystick_shaft_clipped:return
+            if m and m.joystick_shaft_fresh:return
         raise RuntimeError(f'No fresh calibrated shaft feedback; see {log_path}')
     finally:node.destroy_node();rclpy.shutdown()
 
@@ -340,7 +358,8 @@ def main():
                 if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 if auto:
                     wait_for_joystick_center(recorder_csv,recorder,recorder_log,
-                                             a.center_x_raw,a.center_y_raw,a.center_tolerance_raw)
+                                             a.center_x_raw,a.center_y_raw,a.center_tolerance_raw,
+                                             allow_tilt=checked.get('joystick_mechanism')=='inward_arc')
                 elif require_command('Clear the local ready-motion route; type ready or r and press Enter (q stops): ',('ready','r')) is None:return
                 subprocess.run([sys.executable,str(script),'--task',a.task,'--action','ready',
                                 '--output',str(destination)],check=True)
@@ -348,7 +367,8 @@ def main():
                 if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 if auto:
                     wait_for_joystick_center(recorder_csv,recorder,recorder_log,
-                                             a.center_x_raw,a.center_y_raw,a.center_tolerance_raw)
+                                             a.center_x_raw,a.center_y_raw,a.center_tolerance_raw,
+                                             allow_tilt=checked.get('joystick_mechanism')=='inward_arc')
                 elif a.task=='joystick':
                     print('Reset joystick upright; leave pad unloaded. ESP32 recording:',recorder_csv)
                 else:
