@@ -2,6 +2,7 @@
 """Plot controller traces beside the independent ESP32 recording in a block folder."""
 import argparse
 import csv
+import json
 from pathlib import Path
 
 import matplotlib
@@ -25,6 +26,37 @@ def read_esp(path):
         raise ValueError(f'No ESP32 samples in {path}')
     return {key: np.array([int(row[key]) for row in rows], dtype=np.int64)
             for key in ('host_unix_ns', 'x_raw', 'y_raw')}
+
+
+def load_calibration(folder):
+    path = folder / 'joystick_adc_calibration.json'
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def angle_from_raw(values, specification, center_offset=0., limit_deg=35.):
+    raw = np.asarray(values, dtype=float) - center_offset
+    center = float(specification['center_raw'])
+    plus = float(specification['plus_limit_raw'])
+    minus = float(specification['minus_limit_raw'])
+    if not 0 <= plus < center < minus <= 4095:
+        raise ValueError('Invalid joystick ADC calibration endpoints')
+    angle = np.where(raw <= center,
+                     limit_deg * (center - raw) / (center - plus),
+                     -limit_deg * (raw - center) / (minus - center))
+    return np.clip(angle, -limit_deg, limit_deg)
+
+
+def measured_angles(x, y, calibration, observed_center_x=None, observed_center_y=None):
+    mapping = calibration['mapping']
+    limit = float(calibration['nominal_limit_deg'])
+    base_x = mapping['base_x_deg']
+    base_y = mapping['base_y_deg']
+    offset_x = (observed_center_x - float(base_y['center_raw'])
+                if observed_center_x is not None and np.isfinite(observed_center_x) else 0.)
+    offset_y = (observed_center_y - float(base_x['center_raw'])
+                if observed_center_y is not None and np.isfinite(observed_center_y) else 0.)
+    return (angle_from_raw(y, base_x, offset_y, limit),
+            angle_from_raw(x, base_y, offset_x, limit))
 
 
 def column(rows, key):
@@ -63,7 +95,7 @@ def interact_origin(rows):
     return next((int(row['host_time_ns']) for row in rows if row['mode'] == 'interact'), None)
 
 
-def draw_trial(trace, esp):
+def draw_trial(trace, esp, calibration=None):
     rows = read_rows(trace)
     if not rows:
         return None
@@ -91,12 +123,24 @@ def draw_trial(trace, esp):
     axes[2].legend(loc='upper right')
     sensor_t, x, y = sensor_window(esp, origin, -2., end + 2.)
     center_x, center_y = sensor_center(esp, origin)
-    for values, center, label, style in ((x, center_x, 'ESP32 X', '--'),
-                                         (y, center_y, 'ESP32 Y', '-')):
-        if np.isfinite(center):
-            plot_t, plot_y = smooth_sensor(sensor_t, values - center)
+    if calibration:
+        angle_x, angle_y = measured_angles(x, y, calibration, center_x, center_y)
+        for values, label, style in ((angle_x, 'Base X angle', '-'),
+                                     (angle_y, 'Base Y angle', '--')):
+            plot_t, plot_y = smooth_sensor(sensor_t, values)
             axes[3].plot(plot_t, plot_y, style, label=label)
-    axes[3].set_ylabel('ADC change (counts)')
+            if label == 'Base X angle':
+                axes[0].plot(plot_t, plot_y, color='#15936e', alpha=.8,
+                             label='Measured Base X angle')
+        axes[0].legend(loc='best', fontsize=8)
+        axes[3].set_ylabel('Joystick angle (deg)')
+    else:
+        for values, center, label, style in ((x, center_x, 'ESP32 X', '--'),
+                                             (y, center_y, 'ESP32 Y', '-')):
+            if np.isfinite(center):
+                plot_t, plot_y = smooth_sensor(sensor_t, values - center)
+                axes[3].plot(plot_t, plot_y, style, label=label)
+        axes[3].set_ylabel('ADC change (counts)')
     axes[3].legend(loc='best')
     if sensor_logged:
         axes[4].plot(time, column(rows, 'sensor_signal_strength'), color='#7554a3',
@@ -149,7 +193,9 @@ def draw_trial(trace, esp):
     result = f'fault: {fault}' if fault else ('retract incomplete' if rows[-1]['retract_incomplete'] == 'True'
                                               else rows[-1]['mode'])
     fig.suptitle(f'{trace.parent.name}: {LABELS[condition]} — {result}')
-    detail = 'ESP32 values are raw ADC counts, not calibrated angle. Requested force is not measured contact force.'
+    detail = ('ESP32 angle uses a ±35° endpoint interpolation; near-stop values are approximate. '
+              if calibration else 'ESP32 values are raw ADC counts, not calibrated angle. ')
+    detail += 'Requested force is not measured contact force.'
     if fault_row and sensor_logged:
         row = fault_row[0]
         detail += (f'\nFault sample: contact={row["sensor_contact"]}, '
@@ -171,7 +217,7 @@ def draw_trial(trace, esp):
     return output
 
 
-def pair_data(traces, esp):
+def pair_data(traces, esp, calibration=None):
     data = {}
     for condition, trace in traces.items():
         rows = read_rows(trace)
@@ -182,18 +228,20 @@ def pair_data(traces, esp):
         time = (np.array([int(row['host_time_ns']) for row in active]) - origin) / 1e9
         point = column(active, 'point_m_x')
         reference = column(active, 'reference_m_x')
-        sensor_t, _, y = sensor_window(esp, origin, -2., 15.)
-        _, center_y = sensor_center(esp, origin)
-        if not np.isfinite(center_y):
+        sensor_t, x, y = sensor_window(esp, origin, -2., 15.)
+        center_x, center_y = sensor_center(esp, origin)
+        if not np.isfinite(center_y) or not np.isfinite(center_x):
             continue
-        y_t, y_change = smooth_sensor(sensor_t, y - center_y)
+        values = (measured_angles(x, y, calibration, center_x, center_y)[0]
+                  if calibration else y - center_y)
+        y_t, y_change = smooth_sensor(sensor_t, values)
         data[condition] = (time, point, reference, column(active, 'theta_d_rad'),
                            y_t, y_change)
     return data
 
 
-def draw_pair(repeat_folder, traces, esp):
-    data = pair_data(traces, esp)
+def draw_pair(repeat_folder, traces, esp, calibration=None):
+    data = pair_data(traces, esp, calibration)
     if len(data) != 2:
         return None
     fig, axes = plt.subplots(3, 1, figsize=(11, 8), sharex=True)
@@ -209,7 +257,8 @@ def draw_pair(repeat_folder, traces, esp):
         axes[2].plot(y_t, y_change, color=color, label=label)
     axes[0].set_ylabel('Virtual angle (deg)')
     axes[1].set_ylabel('X displacement (mm)')
-    axes[2].set_ylabel('ESP32 Y change (ADC counts)')
+    axes[2].set_ylabel('Joystick Base X angle (deg)' if calibration else
+                       'ESP32 Y change (ADC counts)')
     axes[2].set_xlabel('Time from interaction start (s)')
     axes[0].legend(loc='best')
     axes[1].legend(loc='best', fontsize=8, ncol=2)
@@ -219,7 +268,8 @@ def draw_pair(repeat_folder, traces, esp):
         axis.grid(alpha=.25)
     axes[-1].set_xlim(-2, 15)
     fig.suptitle(f'{repeat_folder.name}: joystick baseline versus EIT')
-    fig.text(.5, .015, 'ESP32 change is relative to its pre-interaction median; raw ADC counts are not calibrated to angle.',
+    fig.text(.5, .015, 'Endpoint angle interpolation is approximate near the stops.' if calibration else
+             'ESP32 change is relative to its pre-interaction median; raw ADC counts are not calibrated to angle.',
              ha='center', fontsize=9)
     fig.subplots_adjust(left=.11, right=.97, bottom=.11, top=.91, hspace=.11)
     output = repeat_folder / 'comparison.png'
@@ -228,7 +278,7 @@ def draw_pair(repeat_folder, traces, esp):
     return output
 
 
-def draw_block(folder, pairs):
+def draw_block(folder, pairs, calibration=None):
     if not pairs:
         return None
     fig, axes = plt.subplots(len(pairs), 1, figsize=(11, max(3.5, 2.6 * len(pairs))),
@@ -239,13 +289,14 @@ def draw_block(folder, pairs):
                 y_t, y_change = data[condition][4:]
                 axis.plot(y_t, y_change, color=COLORS[condition],
                           label=LABELS[condition])
-        axis.set_ylabel(f'{name}\nADC change')
+        axis.set_ylabel(f'{name}\n'+('Base X angle (deg)' if calibration else 'ADC change'))
         axis.grid(alpha=.25)
         axis.legend(loc='best', fontsize=8)
     axes[-1, 0].set_xlim(-2, 15)
     axes[-1, 0].set_xlabel('Time from interaction start (s)')
-    fig.suptitle('Joystick baseline versus EIT: ESP32 Y by repeat')
-    fig.text(.5, .01, 'Raw ADC counts relative to pre-interaction median; no angle calibration or success claim.',
+    fig.suptitle('Joystick baseline versus EIT: '+('Base X angle' if calibration else 'ESP32 Y')+' by repeat')
+    fig.text(.5, .01, 'Angle from ±35° endpoint interpolation; success requires independent review.' if calibration else
+             'Raw ADC counts relative to pre-interaction median; no angle calibration or success claim.',
              ha='center', fontsize=9)
     fig.subplots_adjust(left=.12, right=.97, bottom=max(.08, .32 / len(pairs)), top=.91, hspace=.22)
     output = folder / 'block_comparison.png'
@@ -256,6 +307,7 @@ def draw_block(folder, pairs):
 
 def plot_block(folder):
     esp = read_esp(folder / 'joystick_esp32.csv')
+    calibration = load_calibration(folder)
     outputs = []
     pairs = []
     for repeat_folder in sorted(folder.glob('repeat_*')):
@@ -264,15 +316,15 @@ def plot_block(folder):
             candidates = sorted(repeat_folder.glob(f'joystick_{condition}_*.csv'))
             if candidates:
                 traces[condition] = candidates[-1]
-                output = draw_trial(candidates[-1], esp)
+                output = draw_trial(candidates[-1], esp, calibration)
                 if output:
                     outputs.append(output)
         if len(traces) == 2:
-            output = draw_pair(repeat_folder, traces, esp)
+            output = draw_pair(repeat_folder, traces, esp, calibration)
             if output:
                 outputs.append(output)
-                pairs.append((repeat_folder.name, pair_data(traces, esp)))
-    output = draw_block(folder, pairs)
+                pairs.append((repeat_folder.name, pair_data(traces, esp, calibration)))
+    output = draw_block(folder, pairs, calibration)
     if output:
         outputs.append(output)
     return outputs

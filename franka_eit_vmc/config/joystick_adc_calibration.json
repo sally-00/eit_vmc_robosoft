@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "nominal_limit_deg": 35.0,
+  "supply_v": 3.3,
+  "source_csv": "/home/birl/eit_trials/joystick_calibration/supply3v3_2026-10-25_15-33-07_+0900/samples.csv",
+  "base_frame": "joystick tip displacement in robot Base X/Y",
+  "endpoints": {
+    "center": {
+      "x_raw": 2043.0,
+      "y_raw": 1987.0,
+      "count": 800,
+      "x_clipped_fraction": 0.0,
+      "y_clipped_fraction": 0.0
+    },
+    "base_plus_x": {
+      "x_raw": 2046.0,
+      "y_raw": 0.0,
+      "count": 300,
+      "x_clipped_fraction": 0.0,
+      "y_clipped_fraction": 1.0
+    },
+    "base_minus_x": {
+      "x_raw": 2045.0,
+      "y_raw": 4095.0,
+      "count": 400,
+      "x_clipped_fraction": 0.0,
+      "y_clipped_fraction": 1.0
+    },
+    "base_plus_y": {
+      "x_raw": 0.0,
+      "y_raw": 1988.0,
+      "count": 300,
+      "x_clipped_fraction": 1.0,
+      "y_clipped_fraction": 0.0
+    },
+    "base_minus_y": {
+      "x_raw": 4095.0,
+      "y_raw": 1986.0,
+      "count": 400,
+      "x_clipped_fraction": 1.0,
+      "y_clipped_fraction": 0.0
+    },
+    "center_final": {
+      "x_raw": 2043.0,
+      "y_raw": 1986.0,
+      "count": 500,
+      "x_clipped_fraction": 0.0,
+      "y_clipped_fraction": 0.0
+    }
+  },
+  "mapping": {
+    "base_x_deg": {
+      "channel": "y_raw",
+      "plus_limit_raw": 0.0,
+      "center_raw": 1987.0,
+      "minus_limit_raw": 4095.0
+    },
+    "base_y_deg": {
+      "channel": "x_raw",
+      "plus_limit_raw": 0.0,
+      "center_raw": 2043.0,
+      "minus_limit_raw": 4095.0
+    }
+  },
+  "method": "piecewise linear interpolation through center and each measured +/-35 degree mechanical stop; clipped to +/-35 degrees",
+  "limitation": "ADC reaches 0/4095 at the stops, so angle near each stop is approximate and should be checked at known intermediate angles if accurate error metrics are needed."
+}

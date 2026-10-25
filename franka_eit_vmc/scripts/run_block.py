@@ -5,6 +5,7 @@ import csv
 import json
 import math
 import os
+import shutil
 import signal
 import statistics
 import subprocess
@@ -189,10 +190,21 @@ def main():
     p.add_argument('--config-dir',type=Path,help='Directory containing the same YAML files used to launch the controller; defaults to EIT_CONFIG_DIR or this checkout')
     p.add_argument('--joystick-port',help='ESP32 serial port; defaults to CH340 auto-detection')
     p.add_argument('--manual',action='store_true',help='Keep ready/run keyboard prompts for joystick blocks')
-    p.add_argument('--center-x-raw',type=int,default=3190,help='ESP32 upright X reading for automatic joystick blocks')
-    p.add_argument('--center-y-raw',type=int,default=3095,help='ESP32 upright Y reading for automatic joystick blocks')
+    p.add_argument('--center-x-raw',type=int,help='Override the calibrated upright ESP32 X reading')
+    p.add_argument('--center-y-raw',type=int,help='Override the calibrated upright ESP32 Y reading')
     p.add_argument('--center-tolerance-raw',type=int,default=80,help='Allowed ADC difference from upright on each axis')
     a=p.parse_args()
+    calibration_path=config_directory(a.config_dir)/'joystick_adc_calibration.json'
+    calibration=None
+    if a.task=='joystick':
+        if not calibration_path.is_file():
+            raise RuntimeError(f'Missing joystick ADC calibration: {calibration_path}')
+        calibration=json.loads(calibration_path.read_text())
+        center=calibration['endpoints']['center']
+        if a.center_x_raw is None:a.center_x_raw=round(center['x_raw'])
+        if a.center_y_raw is None:a.center_y_raw=round(center['y_raw'])
+    if a.center_x_raw is None:a.center_x_raw=0
+    if a.center_y_raw is None:a.center_y_raw=0
     blocks=['center','x_minus','x_plus'] if a.task=='joystick' else ['undisturbed','push']
     if a.block not in blocks or not 1<=a.repeats<=100:p.error('Choose a valid block and 1–100 repeats')
     if a.center_tolerance_raw<=0 or not all(0<=value<=4095 for value in
@@ -204,6 +216,8 @@ def main():
     stamp=created.astimezone().strftime('%Y-%m-%d_%H-%M-%S_%f_%z')
     folder=a.output/a.task/(a.block+'_'+stamp)
     folder.mkdir(parents=True,exist_ok=False)
+    if calibration is not None:
+        shutil.copyfile(calibration_path,folder/'joystick_adc_calibration.json')
     (folder/'block.json').write_text(json.dumps(vars(a)|{'output':str(a.output),'config_dir':str(config_directory(a.config_dir)),'created_utc':created.isoformat(),'automatic_joystick':auto,'checked_controller_parameters':checked,
         'joystick_recorder_csv':str(folder/'joystick_esp32.csv') if a.task=='joystick' else None,
         'note':'Operator must launch the matching offset/config. Actual outcome comes from independent measurement, not controller done.'},indent=2)+'\n')

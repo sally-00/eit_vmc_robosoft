@@ -66,6 +66,10 @@ class BlockTests(unittest.TestCase):
             self.assertEqual(plot.call_count,1)
             stop_recorder.assert_called_once_with(recorder)
             stop_controller.assert_called_once()
+            folder=next(Path(d).rglob('block.json')).parent
+            saved=json.loads((folder/'block.json').read_text())
+            self.assertEqual((saved['center_x_raw'],saved['center_y_raw']),(2043,1987))
+            self.assertTrue((folder/'joystick_adc_calibration.json').is_file())
             trials=[c.args[0] for c in run.call_args_list if 'trial' in c.args[0]]
             self.assertEqual([x[x.index('--condition')+1] for x in trials],['baseline','eit'])
 
