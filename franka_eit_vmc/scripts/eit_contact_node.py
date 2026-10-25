@@ -35,7 +35,7 @@ class SensorNode(Node):
                 raise ValueError('Sensor configuration differs from training: '+key)
             cfg[key]=trained[key]
         self.reader=EITReader(cfg);self.frame_id=args.frame;self.stop=threading.Event()
-        self.baseline_requested=threading.Event();self.frames=deque(maxlen=20)
+        self.baseline_requested=threading.Event();self.baseline_complete=threading.Event();self.frames=deque(maxlen=20)
         self.sequence=0;self.failed=None;self.output=deque(maxlen=100)
         self.publisher=self.create_publisher(EitContact,'/eit/contact',10)
         self.service=self.create_service(Trigger,'~/calibrate_baseline',self.calibrate)
@@ -58,7 +58,18 @@ class SensorNode(Node):
         if self.failed:
             response.success=False;response.message=str(self.failed)
         else:
-            self.baseline_requested.set();response.success=True;response.message='Queued: leave pad unloaded for 20 fresh electrical frames'
+            self.baseline_complete.clear()
+            self.baseline_requested.set()
+            deadline=time.monotonic()+20.
+            while not self.baseline_complete.wait(.05) and time.monotonic()<deadline:
+                if self.failed:break
+            response.success=self.baseline_complete.is_set()
+            if response.success:
+                response.message='Baseline calibrated from 20 fresh electrical frames; pad must be unloaded'
+            elif self.failed:
+                response.message='EIT baseline calibration failed: '+str(self.failed)
+            else:
+                response.message='EIT baseline calibration timed out after 20 s'
         return response
 
     def receive(self):
@@ -77,7 +88,7 @@ class SensorNode(Node):
                     try:frame=parse_frame(line,len(self.reader.protocol))
                     except ValueError:
                         self.sequence+=1
-                        self.output.append((received_ns,self.sequence,{'contact':False,'measurement_valid':False,'position_valid':False,'x_m':0.,'y_m':0.,'signal_strength':0.,'contact_threshold':self.engine.contact_threshold,'numbering':self.engine.model.metadata['numbering'],'model_is_physical':False,'model_sha256':self.engine.sha256}))
+                        self.output.append((received_ns,self.sequence,{'contact':False,'contact_candidate':False,'measurement_valid':False,'position_valid':False,'x_m':0.,'y_m':0.,'signal_strength':0.,'contact_threshold':self.engine.contact_threshold,'pattern_distance':0.,'pattern_support_limit':self.engine.model.support_limit,'predicted_radius_mm':0.,'numbering':self.engine.model.metadata['numbering'],'model_is_physical':False,'model_sha256':self.engine.sha256}))
                         continue
                     if self.baseline_requested.is_set():
                         self.baseline_requested.clear();collecting=True;baseline=[]
@@ -87,6 +98,7 @@ class SensorNode(Node):
                         baseline.append(frame)
                         if len(baseline)>=20:
                             self.engine.set_baseline({'frames':baseline});collecting=False
+                            self.baseline_complete.set()
                     self.sequence+=1
                     self.output.append((received_ns,self.sequence,self.engine.step(frame)))
             except Exception as exc:

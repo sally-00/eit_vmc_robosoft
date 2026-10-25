@@ -113,6 +113,9 @@ class Bridge : public rclcpp::Node {
     P(approach_speed);
     P(approach_distance);
     P(approach_timeout);
+    P(approach_contact_confirm_s);
+    P(approach_contact_speed);
+    P(approach_contact_travel_m);
     P(retract_distance);
     P(preload);
     P(preload_time);
@@ -182,8 +185,15 @@ class Bridge : public rclcpp::Node {
             value.sequence = m->sequence;
             value.acquired_steady_s = steady_s() - std::max(age, 0.);
             value.contact = m->contact;
+            value.contact_candidate = m->contact_candidate;
             value.position_valid = m->position_valid;
             value.physical_model = m->model_is_physical && m->measurement_valid;
+            value.measurement_valid = m->measurement_valid;
+            value.signal_strength = m->signal_strength;
+            value.contact_threshold = m->contact_threshold;
+            value.pattern_distance = m->pattern_distance;
+            value.pattern_support_limit = m->pattern_support_limit;
+            value.predicted_radius_mm = m->predicted_radius_mm;
             value.x = m->x_m;
             value.y = m->y_m;
           }
@@ -269,6 +279,19 @@ class Bridge : public rclcpp::Node {
     s.fault_name = fault_name(o.fault);
     s.use_eit = o.use_eit;
     s.retract_incomplete = o.retract_incomplete;
+    s.sensor_sequence = o.sensor_sequence;
+    s.sensor_contact = o.sensor_contact;
+    s.sensor_contact_candidate = o.sensor_contact_candidate;
+    s.sensor_fresh = o.sensor_fresh;
+    s.sensor_measurement_valid = o.sensor_measurement_valid;
+    s.sensor_position_valid = o.sensor_position_valid;
+    s.sensor_physical_model = o.sensor_physical_model;
+    s.sensor_age_s = o.sensor_age_s;
+    s.sensor_signal_strength = o.sensor_signal_strength;
+    s.sensor_contact_threshold = o.sensor_contact_threshold;
+    s.sensor_pattern_distance = o.sensor_pattern_distance;
+    s.sensor_pattern_support_limit = o.sensor_pattern_support_limit;
+    s.sensor_predicted_radius_mm = o.sensor_predicted_radius_mm;
     s.trial_time_s = o.trial_time;
     s.progress_m = o.progress;
     s.progress_velocity_m_s = o.progress_velocity;

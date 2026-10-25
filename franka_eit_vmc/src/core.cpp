@@ -53,6 +53,9 @@ void Config::validate() const {
                              approach_speed,
                              approach_distance,
                              approach_timeout,
+                             approach_contact_confirm_s,
+                             approach_contact_speed,
+                             approach_contact_travel_m,
                              retract_distance,
                              preload,
                              preload_time,
@@ -110,7 +113,10 @@ void Config::validate() const {
       initial_ball_x + roll_distance > workspace_max.x() || active_radius > .045 ||
       max_period > .02 || idle_max_period > .02 || idle_max_period < max_period ||
       preload > normal_force_limit || ready_speed >= point_speed_limit ||
-      approach_speed >= point_speed_limit || joystick_angle > .35 || sensor_timeout > 1. ||
+      approach_speed >= point_speed_limit || sensor_timeout > 1. ||
+      approach_contact_confirm_s >= approach_timeout ||
+      approach_contact_speed > approach_speed ||
+      approach_contact_travel_m >= approach_distance ||
       joystick_duration <= preload_time || ball_duration <= preload_time)
     throw std::invalid_argument("Invalid task geometry or timing bounds");
 }
@@ -152,6 +158,10 @@ void Core::activate(const Sample& s) {
   mode_ = Mode::Hold;
   fault_ = Fault::None;
   phase_time_ = 0.;
+  approach_progress_m_ = 0.;
+  approach_confirm_time_ = 0.;
+  approach_confirm_frames_ = 0;
+  approach_contact_start_progress_m_ = 0.;
   settle_time_ = 0.;
   unloaded_retract_time_ = 0.;
   retract_incomplete_ = false;
@@ -230,6 +240,10 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
     else {
       mode_ = Mode::Approach;
       phase_time_ = 0.;
+      approach_progress_m_ = 0.;
+      approach_confirm_time_ = 0.;
+      approach_confirm_frames_ = 0;
+      approach_contact_start_progress_m_ = 0.;
       hold_ = pface;
       hold_rotation_ = Rp;
       last_sequence_ = contact.sequence;
@@ -280,40 +294,68 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
     if (phase_time_ > ready_duration_ + c_.ready_timeout) fail(Fault::ReadyTimeout);
   }
   if (mode_ == Mode::Approach) {
-    ref = hold_ - V3(0., 0., std::min(c_.approach_distance, c_.approach_speed * phase_time_));
-    vref = V3(0., 0., -c_.approach_speed);
-    if (contact.contact && sensor_fresh) {
-      const bool need_position =
-          c_.task == Task::Joystick ? use_eit_ : use_eit_ || c_.update_ball_attachment;
-      if (need_position &&
-          (!contact.position_valid || !std::isfinite(contact.x) || !std::isfinite(contact.y)))
-        fail(Fault::SensorPosition);
-      else {
-        attachment_ = V3::Zero();
-        if ((c_.task == Task::Joystick && use_eit_) ||
-            (c_.task == Task::Ball && c_.update_ball_attachment))
-          attachment_ = V3(contact.x, contact.y, 0.);
-        if (attachment_.head<2>().norm() > c_.active_radius)
-          fail(Fault::SensorPosition);
-        else {
-          point = pface + Rp * attachment_;
-          h0_ = point;
-          normal_anchor_ = point.z();
-          initial_face_ = pface;
-          trial_time_ = 0.;
-          phase_time_ = 0.;
-          z_ = c_.task == Task::Ball ? c_.initial_ball_x : 0.;
-          z0_ = z_;
-          dz_ = 0.;
-          observed_ = z_;
-          goal_ = c_.initial_ball_x + c_.roll_distance;
-          mode_ = Mode::Preload;
-          last_sequence_ = contact.sequence;
+    const bool need_position =
+        c_.task == Task::Joystick ? use_eit_ : use_eit_ || c_.update_ball_attachment;
+    const bool position_ok =
+        !need_position || (contact.position_valid && std::isfinite(contact.x) &&
+                           std::isfinite(contact.y) &&
+                           std::hypot(contact.x, contact.y) <= c_.active_radius);
+    const bool reported_contact = contact.contact && contact.contact_candidate &&
+                                  contact.measurement_valid && sensor_fresh;
+    // A provisional EIT report is followed by a bounded, slower descent.
+    // Preload needs sustained EIT contact through the commanded verification move;
+    // a contacting pad may resist and move less than the reference.
+    if (reported_contact) {
+      if (position_ok) {
+        if (approach_confirm_frames_ == 0) {
+          approach_contact_start_progress_m_ = approach_progress_m_;
         }
+        approach_confirm_time_ += safe_dt;
+        if (new_frame) ++approach_confirm_frames_;
+        const double confirm_end = std::min(c_.approach_distance,
+            approach_contact_start_progress_m_ + c_.approach_contact_travel_m);
+        if (approach_progress_m_ < confirm_end) {
+          approach_progress_m_ = std::min(confirm_end,
+              approach_progress_m_ + c_.approach_contact_speed * safe_dt);
+          vref = V3(0., 0., -c_.approach_contact_speed);
+        }
+      } else {
+        approach_confirm_time_ = 0.;
+        approach_confirm_frames_ = 0;
       }
+    } else {
+      approach_confirm_time_ = 0.;
+      approach_confirm_frames_ = 0;
+      approach_progress_m_ =
+          std::min(c_.approach_distance, approach_progress_m_ + c_.approach_speed * safe_dt);
+      vref = V3(0., 0., -c_.approach_speed);
+    }
+    ref = hold_ - V3(0., 0., approach_progress_m_);
+    if (position_ok && approach_confirm_time_ >= c_.approach_contact_confirm_s &&
+        approach_confirm_frames_ >= 2 &&
+        approach_progress_m_ - approach_contact_start_progress_m_ >=
+            c_.approach_contact_travel_m - 1e-9) {
+      attachment_ = V3::Zero();
+      if ((c_.task == Task::Joystick && use_eit_) ||
+          (c_.task == Task::Ball && c_.update_ball_attachment))
+        attachment_ = V3(contact.x, contact.y, 0.);
+      point = pface + Rp * attachment_;
+      h0_ = point;
+      normal_anchor_ = point.z();
+      initial_face_ = pface;
+      trial_time_ = 0.;
+      phase_time_ = 0.;
+      z_ = c_.task == Task::Ball ? c_.initial_ball_x : 0.;
+      z0_ = z_;
+      dz_ = 0.;
+      observed_ = z_;
+      goal_ = c_.initial_ball_x + c_.roll_distance;
+      mode_ = Mode::Preload;
+      last_sequence_ = contact.sequence;
     }
     if (mode_ == Mode::Approach && (phase_time_ > c_.approach_timeout ||
-                                    c_.approach_speed * phase_time_ > c_.approach_distance))
+                                    (!reported_contact &&
+                                     approach_progress_m_ >= c_.approach_distance)))
       fail(Fault::ApproachTimeout);
   }
   if (mode_ == Mode::Preload || mode_ == Mode::Interact) {
@@ -371,13 +413,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       G = V3(c_.joystick_length * std::cos(z_), 0., -c_.joystick_length * std::sin(z_));
       normal_ref = normal_anchor_ + c_.joystick_length * (std::cos(z_) - 1.);
       desired_rotation =
-          Eigen::AngleAxisd(z_, V3::UnitY()).toRotationMatrix() * c_.ready_pad_rotation;
+          Eigen::AngleAxisd(z_, V3::UnitY()).toRotationMatrix() * hold_rotation_;
     } else {
       ref = h0_ + 2. * V3::UnitX() * (z_ - z0_);
       desired_rotation = c_.ready_pad_rotation;
       if (Rp.col(2).dot(-V3::UnitZ()) < std::cos(.15)) fail(Fault::Tracking);
     }
-    fc = activation * (c_.coupling_k * (ref - point) + c_.coupling_d * (G * dz_ - velocity));
+    fc = c_.coupling_k * (ref - point) + c_.coupling_d * (G * dz_ - velocity);
     fc.z() = 0.;
     for (int i = 0; i < 2; ++i) fc[i] = clip(fc[i], -c_.force_xy_limit, c_.force_xy_limit);
     force = fc;
@@ -486,6 +528,19 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   out.trial_time = trial_time_;
   out.use_eit = use_eit_;
   out.retract_incomplete = retract_incomplete_;
+  out.sensor_sequence = contact.sequence;
+  out.sensor_contact = contact.contact;
+  out.sensor_contact_candidate = contact.contact_candidate;
+  out.sensor_fresh = sensor_fresh;
+  out.sensor_measurement_valid = contact.measurement_valid;
+  out.sensor_position_valid = contact.position_valid;
+  out.sensor_physical_model = contact.physical_model;
+  out.sensor_age_s = sensor_age;
+  out.sensor_signal_strength = contact.signal_strength;
+  out.sensor_contact_threshold = contact.contact_threshold;
+  out.sensor_pattern_distance = contact.pattern_distance;
+  out.sensor_pattern_support_limit = contact.pattern_support_limit;
+  out.sensor_predicted_radius_mm = contact.predicted_radius_mm;
   out.finished =
       (mode_ == Mode::Fault || mode_ == Mode::Stopping) && out.torque.cwiseAbs().maxCoeff() < 1e-4;
   last_sequence_ = contact.sequence;

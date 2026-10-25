@@ -46,6 +46,8 @@ struct Config {
   bool update_ball_attachment{false};
   double ready_speed{0.015}, ready_angular_speed{0.12}, ready_timeout{90.};
   double approach_speed{0.004}, approach_distance{0.020}, approach_timeout{8.};
+  double approach_contact_confirm_s{0.25};
+  double approach_contact_speed{0.002}, approach_contact_travel_m{0.001};
   double retract_distance{0.015}, preload{3.}, preload_time{0.55};
   double hold_k{600.}, hold_d{35.}, ready_k{600.}, ready_d{35.};
   double hold_kr{30.}, hold_dr{3.};
@@ -76,7 +78,10 @@ struct Sample {
 struct Contact {
   uint64_t sequence{0};
   double acquired_steady_s{-1.};
-  bool contact{false}, position_valid{false}, physical_model{false};
+  bool contact{false}, contact_candidate{false}, position_valid{false}, physical_model{false},
+      measurement_valid{false};
+  double signal_strength{0.}, contact_threshold{0.}, pattern_distance{0.},
+      pattern_support_limit{0.}, predicted_radius_mm{0.};
   double x{0.}, y{0.};
 };
 struct Output {
@@ -88,6 +93,12 @@ struct Output {
   V3 requested_force{V3::Zero()}, requested_moment{V3::Zero()};
   double progress{0.}, progress_velocity{0.}, goal{0.}, angle_command{0.}, trial_time{0.};
   bool use_eit{true}, finished{false}, retract_incomplete{false};
+  uint64_t sensor_sequence{0};
+  bool sensor_contact{false}, sensor_contact_candidate{false}, sensor_fresh{false}, sensor_measurement_valid{false},
+      sensor_position_valid{false}, sensor_physical_model{false};
+  double sensor_age_s{0.}, sensor_signal_strength{0.}, sensor_contact_threshold{0.};
+  double sensor_pattern_distance{0.}, sensor_pattern_support_limit{0.},
+      sensor_predicted_radius_mm{0.};
 };
 Eigen::Matrix3d skew(const V3& x);
 J67 point_jacobian(const J67& ee_jacobian, const V3& world_offset);
@@ -115,8 +126,11 @@ class Core {
   V3 phase_start_position_{V3::Zero()}, initial_face_{V3::Zero()};
   Eigen::Quaterniond phase_start_rotation_{Eigen::Quaterniond::Identity()};
   double phase_time_{0.}, trial_time_{0.}, settle_time_{0.}, ready_duration_{1.},
+      approach_progress_m_{0.}, approach_confirm_time_{0.},
+      approach_contact_start_progress_m_{0.},
       unloaded_retract_time_{0.},
       normal_anchor_{0.};
+  int approach_confirm_frames_{0};
   double z_{0.}, dz_{0.}, z0_{0.}, observed_{0.}, goal_{0.};
   int ready_stage_{0};
   uint64_t last_sequence_{0};

@@ -7,7 +7,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger,SetBool
-from franka_eit_vmc.msg import ExperimentState
+from franka_eit_vmc.msg import ExperimentState,EitContact
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
@@ -24,10 +24,13 @@ def main():
     def callback(message):
         latest[0]=message;rows.append(message)
     sub=node.create_subscription(ExperimentState,name+'/status',callback,100)
-    def call(kind,suffix,request):
-        client=node.create_client(kind,name+'/'+suffix)
+    sensor=[None]
+    sensor_sub=node.create_subscription(EitContact,'/eit/contact',lambda message:sensor.__setitem__(0,message),10)
+    def call(kind,suffix,request,timeout=5.):
+        service=suffix if suffix.startswith('/') else name+'/'+suffix
+        client=node.create_client(kind,service)
         if not client.wait_for_service(timeout_sec=5.):raise RuntimeError('Service unavailable: '+suffix)
-        future=client.call_async(request);deadline=time.monotonic()+5.
+        future=client.call_async(request);deadline=time.monotonic()+timeout
         while rclpy.ok() and not future.done() and time.monotonic()<deadline:rclpy.spin_once(node,timeout_sec=.02)
         if not future.done() or future.result() is None:raise RuntimeError('Service timed out: '+suffix)
         result=future.result()
@@ -48,7 +51,9 @@ def main():
             label=a.condition if a.action=='trial' else 'ready'
             log=(a.output/f'{a.task}_{label}_{stamp}.csv').open('x',newline='')
             writer=csv.writer(log)
-            writer.writerow(['host_time_ns','mode','fault','use_eit','retract_incomplete','trial_time_s','progress_m','progress_velocity_m_s','ball_goal_x_m','theta_d_rad','tracking_error_m']+[f'{prefix}_{axis}' for prefix in ['pad_m','point_m','reference_m','attachment_m','coupling_force_N','requested_force_N','requested_moment_Nm','external_force_N','external_moment_Nm'] for axis in ['x','y','z']]+[f'q{i}_rad' for i in range(1,8)]+[f'tau{i}_Nm' for i in range(1,8)])
+            writer.writerow(['host_time_ns','mode','fault','use_eit','retract_incomplete','trial_time_s','progress_m','progress_velocity_m_s','ball_goal_x_m','theta_d_rad','tracking_error_m',
+                             'sensor_sequence','sensor_contact','sensor_contact_candidate','sensor_fresh','sensor_measurement_valid','sensor_position_valid','sensor_physical_model','sensor_age_s','sensor_signal_strength','sensor_contact_threshold','sensor_pattern_distance','sensor_pattern_support_limit','sensor_predicted_radius_mm']+
+                            [f'{prefix}_{axis}' for prefix in ['pad_m','point_m','reference_m','attachment_m','coupling_force_N','requested_force_N','requested_moment_Nm','external_force_N','external_moment_Nm'] for axis in ['x','y','z']]+[f'q{i}_rad' for i in range(1,8)]+[f'tau{i}_Nm' for i in range(1,8)])
             print('Controller trace:',log.name)
         rows.clear()
         start_service='move_ready' if a.action=='ready' else 'start_trial'
@@ -71,11 +76,39 @@ def main():
                 message=rows.pop(0)
                 if log:
                     tracking_error=math.dist(message.pad_position_m,message.reference_m)
-                    writer.writerow([time.time_ns(),message.mode_name,message.fault_name,message.use_eit,message.retract_incomplete,message.trial_time_s,message.progress_m,message.progress_velocity_m_s,message.ball_goal_x_m,message.joystick_angle_command_rad,tracking_error]+list(message.pad_position_m)+list(message.controlled_point_m)+list(message.reference_m)+list(message.attachment_in_pad_m)+list(message.coupling_force_n)+list(message.requested_cartesian_force_n)+list(message.requested_cartesian_moment_nm)+list(message.external_force_n)+list(message.external_moment_nm)+list(message.joint_position_rad)+list(message.commanded_torque_nm))
+                    writer.writerow([time.time_ns(),message.mode_name,message.fault_name,message.use_eit,message.retract_incomplete,message.trial_time_s,message.progress_m,message.progress_velocity_m_s,message.ball_goal_x_m,message.joystick_angle_command_rad,tracking_error,
+                                     message.sensor_sequence,message.sensor_contact,message.sensor_contact_candidate,message.sensor_fresh,message.sensor_measurement_valid,message.sensor_position_valid,message.sensor_physical_model,message.sensor_age_s,message.sensor_signal_strength,message.sensor_contact_threshold,message.sensor_pattern_distance,message.sensor_pattern_support_limit,message.sensor_predicted_radius_mm]+
+                                    list(message.pad_position_m)+list(message.controlled_point_m)+list(message.reference_m)+list(message.attachment_in_pad_m)+list(message.coupling_force_n)+list(message.requested_cartesian_force_n)+list(message.requested_cartesian_moment_nm)+list(message.external_force_n)+list(message.external_moment_nm)+list(message.joint_position_rad)+list(message.commanded_torque_nm))
                 if message.fault:
-                    raise RuntimeError('Controller stopped: '+message.fault_name)
+                    detail=(f' (EIT contact={message.sensor_contact}, fresh={message.sensor_fresh}, '
+                            f'measurement_valid={message.sensor_measurement_valid}, '
+                            f'candidate={message.sensor_contact_candidate}, '
+                            f'signal={message.sensor_signal_strength:.6f}, '
+                            f'threshold={message.sensor_contact_threshold:.6f}, '
+                            f'pattern={message.sensor_pattern_distance:.3f}/{message.sensor_pattern_support_limit:.3f}, '
+                            f'radius={message.sensor_predicted_radius_mm:.1f} mm, '
+                            f'age={message.sensor_age_s:.3f} s)')
+                    raise RuntimeError('Controller stopped: '+message.fault_name+detail)
                 if message.mode_name not in ['hold','done']:active_seen=True
                 if active_seen and ((a.action=='ready' and message.mode_name=='hold') or (a.action=='trial' and message.mode_name=='done')):
+                    if a.action=='ready':
+                        print('Ready pose reached; calibrating unloaded EIT baseline...',flush=True)
+                        calibration=call(Trigger,'/eit_contact/calibrate_baseline',Trigger.Request(),timeout=25.)
+                        if latest[0].fault or latest[0].mode_name!='hold':
+                            raise RuntimeError('Controller left hold during baseline calibration')
+                        calibrated_at_ns=time.time_ns()
+                        sensor[0]=None
+                        sensor_deadline=time.monotonic()+5.
+                        while rclpy.ok() and time.monotonic()<sensor_deadline:
+                            rclpy.spin_once(node,timeout_sec=.02)
+                            reading=sensor[0]
+                            if (reading and reading.model_is_physical and reading.measurement_valid
+                                    and not reading.contact and
+                                    reading.header.stamp.sec*1_000_000_000+reading.header.stamp.nanosec>=calibrated_at_ns):
+                                break
+                        else:
+                            raise RuntimeError('No fresh EIT non-contact reading after ready-pose calibration')
+                        print(calibration.message,flush=True)
                     completed=True
                     if a.action=='trial' and message.retract_incomplete:
                         print('Manipulation finished; retract incomplete while EIT reported no contact. Confirm the next ready route before moving.')

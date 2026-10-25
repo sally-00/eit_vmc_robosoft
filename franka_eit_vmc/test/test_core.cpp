@@ -21,8 +21,14 @@ Contact electrical(double now, uint64_t seq = 1, bool touching = false) {
   c.acquired_steady_s = now;
   c.sequence = seq;
   c.physical_model = true;
+  c.measurement_valid = true;
   c.position_valid = true;
   c.contact = touching;
+  c.contact_candidate = touching;
+  c.signal_strength = touching ? .2 : .01;
+  c.contact_threshold = .05;
+  c.pattern_distance = touching ? .1 : .7;
+  c.pattern_support_limit = .4;
   c.x = .01;
   c.y = .02;
   return c;
@@ -43,6 +49,19 @@ int main() {
       rejected = true;
     }
     require(rejected, "negative X workspace accepted");
+    {
+      Config cfg;
+      cfg.joystick_angle = 45. * 3.141592653589793 / 180.;
+      cfg.validate();
+      cfg.joystick_angle = 0.;
+      bool zero_rejected = false;
+      try {
+        cfg.validate();
+      } catch (const std::invalid_argument&) {
+        zero_rejected = true;
+      }
+      require(zero_rejected, "nonpositive joystick command accepted");
+    }
     {
       Core core{Config{}};
       auto s = state();
@@ -138,10 +157,13 @@ int main() {
       cfg.approach_kr = 90.;
       cfg.approach_dr = 5.;
       cfg.approach_moment_limit = 4.;
+      cfg.approach_contact_confirm_s = .001;
+      cfg.approach_contact_travel_m = .000001;
       cfg.orientation_k = 3.;
       cfg.moment_limit = 1.;
       Core core(cfg);
       auto s = state();
+      s.ee_rotation = Eigen::AngleAxisd(.02, V3::UnitZ()).toRotationMatrix() * s.ee_rotation;
       core.activate(s);
       core.step(s, electrical(1.), 1., .001, true, Request::Start);
       s.ee_rotation = Eigen::AngleAxisd(.02, V3::UnitZ()).toRotationMatrix() * s.ee_rotation;
@@ -149,14 +171,22 @@ int main() {
       require(approaching.mode == Mode::Approach &&
                   std::abs(approaching.requested_moment.norm() - 1.8) < 1e-8,
               "approach did not use its own orientation stiffness");
-      auto touching = core.step(s, electrical(1.002, 3, true), 1.002, .001, true, Request::None);
+      core.step(s, electrical(1.002, 3, true), 1.002, .001, true, Request::None);
+      s.ee_position.z() -= .00001;
+      auto touching = core.step(s, electrical(1.003, 4, true), 1.003, .001, true, Request::None);
       require(touching.mode == Mode::Preload &&
                   std::abs(touching.requested_moment.norm() - 1.8) < 1e-8,
-              "preload did not retain approach orientation stiffness");
+              "preload changed the approach orientation target");
+      s.ee_position.x() += .001;
+      auto loaded = core.step(s, electrical(1.004, 5, true), 1.004, .001, true, Request::None);
+      require(std::abs(loaded.coupling_force.x() + cfg.coupling_k * .001) < 1e-8,
+              "contact-point spring was weak at the start of preload");
     }
     for (bool eit : {false, true}) {
       Config cfg;
       cfg.task = Task::Joystick;
+      cfg.approach_contact_confirm_s = .001;
+      cfg.approach_contact_travel_m = .000001;
       Core core(cfg);
       auto s = state();
       core.activate(s);
@@ -164,22 +194,87 @@ int main() {
       auto o = core.step(s, electrical(1.), 1., .001, true, Request::Start);
       require(o.mode == Mode::Approach, "trial did not approach");
       o = core.step(s, electrical(1.001, 2, true), 1.001, .001, true, Request::None);
+      require(o.mode == Mode::Approach, "first touch should remain provisional");
+      s.ee_position.z() -= .00001;
+      o = core.step(s, electrical(1.002, 3, true), 1.002, .001, true, Request::None);
       require(o.mode == Mode::Preload, "touch did not engage");
       require((o.attachment - (eit ? V3(.01, .02, 0.) : V3::Zero())).norm() < 1e-12,
               "wrong joystick attachment");
-      auto moved = electrical(1.002, 3, true);
+      auto moved = electrical(1.003, 4, true);
       moved.x = -.01;
       moved.y = -.01;
-      auto o2 = core.step(s, moved, 1.002, .001, true, Request::None);
+      auto o2 = core.step(s, moved, 1.003, .001, true, Request::None);
       require((o2.attachment - o.attachment).norm() < 1e-12,
               "joystick attachment changed after engagement");
       require(!core.set_condition(!eit), "condition changed during active trial");
-      auto loss = core.step(s, electrical(1.003, 4, false), 1.003, .001, true, Request::None);
-      require(loss.fault == Fault::ContactLoss, "contact loss not stopped");
+      auto loss = core.step(s, electrical(1.004, 5, false), 1.004, .001, true, Request::None);
+      require(loss.fault == Fault::ContactLoss && !loss.sensor_contact &&
+                  !loss.sensor_contact_candidate && loss.sensor_fresh &&
+                  loss.sensor_measurement_valid && loss.sensor_sequence == 5 &&
+                  std::abs(loss.sensor_signal_strength - .01) < 1e-12 &&
+                  std::abs(loss.sensor_pattern_distance - .7) < 1e-12,
+              "contact loss telemetry did not capture the triggering sensor state");
+    }
+    {
+      Config cfg;
+      cfg.approach_contact_confirm_s = .05;
+      cfg.approach_contact_travel_m = .0001;
+      Core core(cfg);
+      auto s = state();
+      core.activate(s);
+      double now = 1.;
+      core.step(s, electrical(now), now, .01, true, Request::Start);
+      now += .01;
+      auto descending = core.step(s, electrical(now, 2), now, .01, true, Request::None);
+      const double z_before_touch = descending.reference.z();
+      for (int i = 0; i < 3; ++i) {
+        now += .01;
+        auto provisional = core.step(s, electrical(now, 3 + i, true), now, .01, true,
+                                     Request::None);
+        require(provisional.mode == Mode::Approach && provisional.fault == Fault::None &&
+                    provisional.reference.z() <= z_before_touch &&
+                    provisional.reference.z() >= z_before_touch - cfg.approach_contact_travel_m - 1e-12,
+                "provisional contact did not use bounded slow descent");
+      }
+      now += .01;
+      auto resumed = core.step(s, electrical(now, 6, false), now, .01, true, Request::None);
+      require(resumed.mode == Mode::Approach && resumed.fault == Fault::None &&
+                  resumed.reference.z() < z_before_touch,
+              "a vanished provisional contact did not resume approach");
+      for (int i = 0; i < 6; ++i) {
+        now += .01;
+        s.ee_position.z() -= .00002;
+        auto stable = core.step(s, electrical(now, 7 + i, true), now, .01, true,
+                                Request::None);
+        require(stable.fault == Fault::None, "valid confirming contact caused a fault");
+        if (i == 5) require(stable.mode == Mode::Preload, "stable contact did not engage");
+      }
+    }
+    {
+      Config cfg;
+      cfg.approach_contact_confirm_s = .02;
+      cfg.approach_contact_travel_m = .0001;
+      Core core(cfg);
+      auto s = state();
+      core.activate(s);
+      core.step(s, electrical(1.), 1., .01, true, Request::Start);
+      Output seated;
+      for (int i = 0; i < 7; ++i) {
+        const double now = 1.01 + .01 * i;
+        seated = core.step(s, electrical(now, 2 + i, true), now, .01, true,
+                           Request::None);
+        if (i < 4)
+          require(seated.mode == Mode::Approach && seated.fault == Fault::None,
+                  "contact engaged before the verification descent finished");
+      }
+      require(seated.mode == Mode::Preload && seated.fault == Fault::None,
+              "stable contact with pad resistance did not engage");
     }
     {
       Config cfg;
       cfg.task = Task::Ball;
+      cfg.approach_contact_confirm_s = .001;
+      cfg.approach_contact_travel_m = .000001;
       Core core(cfg);
       auto s = state();
       core.activate(s);
@@ -190,8 +285,12 @@ int main() {
       auto a = core.step(s, touch, 1.001, .001, true, Request::None);
       touch.sequence = 3;
       touch.acquired_steady_s = 1.002;
+      s.ee_position.z() -= .00001;
+      a = core.step(s, touch, 1.002, .001, true, Request::None);
+      touch.sequence = 4;
+      touch.acquired_steady_s = 1.003;
       touch.x = .01;
-      auto b = core.step(s, touch, 1.002, .001, true, Request::None);
+      auto b = core.step(s, touch, 1.003, .001, true, Request::None);
       require(b.progress > a.progress, "EIT did not correct progress");
       require((a.reference - b.reference).norm() < 1e-12,
               "state correction changed spring extension");
@@ -218,6 +317,8 @@ int main() {
       Config cfg;
       cfg.joystick_duration = .5;
       cfg.preload_time = .1;
+      cfg.approach_contact_confirm_s = .001;
+      cfg.approach_contact_travel_m = .000001;
       Core core(cfg);
       auto s = state();
       core.activate(s);
@@ -226,6 +327,7 @@ int main() {
       auto o = core.step(s, electrical(now, sequence, false), now, .009, true, Request::Start);
       now += .009;
       o = core.step(s, electrical(now, ++sequence, true), now, .009, true, Request::None);
+      s.ee_position.z() -= .00001;
       for (int i = 0; i < 200 && o.mode != Mode::Retract; ++i) {
         now += .009;
         o = core.step(s, electrical(now, ++sequence, true), now, .009, true, Request::None);
@@ -250,6 +352,8 @@ int main() {
       Config stiff_cfg;
       stiff_cfg.joystick_duration = .5;
       stiff_cfg.preload_time = .1;
+      stiff_cfg.approach_contact_confirm_s = .001;
+      stiff_cfg.approach_contact_travel_m = .000001;
       stiff_cfg.ready_k = 3000.;
       stiff_cfg.ready_d = stiff_cfg.hold_d;
       Config soft_cfg = stiff_cfg;
@@ -265,6 +369,7 @@ int main() {
       Output a, b;
       for (int i = 0; i < 200; ++i) {
         now += .009;
+        if (i == 1) s.ee_position.z() -= .00001;
         auto contact = electrical(now, ++sequence, true);
         a = stiff.step(s, contact, now, .009, true, Request::None);
         b = soft.step(s, contact, now, .009, true, Request::None);

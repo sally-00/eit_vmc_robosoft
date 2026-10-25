@@ -95,7 +95,9 @@ class Tests(unittest.TestCase):
         for _ in range(3):
             output = engine.step(frame)
         self.assertTrue(output['contact'])
+        self.assertTrue(output['contact_candidate'])
         self.assertTrue(output['position_valid'])
+        self.assertLessEqual(output['pattern_distance'],output['pattern_support_limit'])
         self.assertEqual(output['contact_threshold'], 0.0)
         np.testing.assert_allclose([output['x_m'], output['y_m']],
                                    model.estimate(features)[0][0] / 1000, atol=1e-10)
@@ -103,6 +105,7 @@ class Tests(unittest.TestCase):
         for _ in range(2):
             output = engine.step(frame)
         self.assertFalse(output['contact'])
+        self.assertFalse(output['contact_candidate'])
         self.assertEqual(output['contact_threshold'],engine.contact_threshold)
         with self.assertRaises(ValueError):engine.set_contact_threshold(-1.)
         engine.set_contact_threshold(0.)

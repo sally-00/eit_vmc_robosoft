@@ -72,7 +72,11 @@ def draw_trial(trace, esp):
     end = max(1., time[-1])
     condition = 'eit' if '_eit_' in trace.name else 'baseline'
     color = COLORS[condition]
-    fig, axes = plt.subplots(4, 1, figsize=(11, 9), sharex=True)
+    sensor_logged = 'sensor_contact' in rows[0]
+    pattern_logged = 'sensor_pattern_distance' in rows[0]
+    panels = 6 if pattern_logged else 5 if sensor_logged else 4
+    fig, axes = plt.subplots(panels, 1, figsize=(11, 13 if pattern_logged else 11 if sensor_logged else 9),
+                            sharex=True)
     axes[0].plot(time, np.rad2deg(column(rows, 'theta_d_rad')), color=color)
     axes[0].set_ylabel('Virtual angle (deg)')
     point = column(rows, 'point_m_x')
@@ -94,6 +98,29 @@ def draw_trial(trace, esp):
             axes[3].plot(plot_t, plot_y, style, label=label)
     axes[3].set_ylabel('ADC change (counts)')
     axes[3].legend(loc='best')
+    if sensor_logged:
+        axes[4].plot(time, column(rows, 'sensor_signal_strength'), color='#7554a3',
+                     label='EIT signal strength')
+        axes[4].plot(time, column(rows, 'sensor_contact_threshold'), '--',
+                     color='#a35050', label='Contact threshold')
+        axes[4].set_ylabel('EIT signal / cutoff')
+        flags = axes[4].twinx()
+        flags.step(time, [row['sensor_contact'] == 'True' for row in rows],
+                   where='post', color='#047857', label='EIT contact')
+        flags.step(time, [row['sensor_fresh'] == 'True' for row in rows],
+                   where='post', color='#888888', alpha=.7, linestyle=':', label='Fresh')
+        flags.set_ylim(-.1, 1.2)
+        flags.set_yticks([0, 1])
+        flags.set_ylabel('Contact / fresh')
+        axes[4].legend(loc='upper left', fontsize=8)
+        flags.legend(loc='upper right', fontsize=8)
+    if pattern_logged:
+        axes[5].plot(time, column(rows, 'sensor_pattern_distance'), color='#7355a1',
+                     label='Pattern distance')
+        axes[5].plot(time, column(rows, 'sensor_pattern_support_limit'), '--',
+                     color='#a35050', label='Model support limit')
+        axes[5].set_ylabel('Pattern distance')
+        axes[5].legend(loc='best', fontsize=8)
     previous = None
     for row, at in zip(rows, time):
         mode = row['mode']
@@ -107,15 +134,37 @@ def draw_trial(trace, esp):
             previous = mode
     for axis in axes:
         axis.grid(alpha=.25)
+    fault_row = next(((row, at) for row, at in zip(rows, time)
+                      if row['fault'] != 'none'), None)
+    if fault_row:
+        for axis in axes:
+            axis.axvline(fault_row[1], color='#b42318', linewidth=1.5)
+        axes[0].annotate('FAULT: '+fault_row[0]['fault'],
+                         (fault_row[1], 1), xycoords=('data', 'axes fraction'),
+                         xytext=(4, -24), textcoords='offset points',
+                         color='#b42318', fontsize=9, rotation=90, va='top')
     axes[-1].set_xlim(-2., end + 2.)
     axes[-1].set_xlabel('Time from trial trace start (s)')
     fault = next((row['fault'] for row in rows if row['fault'] != 'none'), None)
     result = f'fault: {fault}' if fault else ('retract incomplete' if rows[-1]['retract_incomplete'] == 'True'
                                               else rows[-1]['mode'])
     fig.suptitle(f'{trace.parent.name}: {LABELS[condition]} — {result}')
-    fig.text(.5, .015, 'ESP32 values are raw ADC counts, not calibrated angle. Requested force is not measured contact force.',
-             ha='center', fontsize=9)
-    fig.subplots_adjust(left=.11, right=.97, bottom=.10, top=.91, hspace=.10)
+    detail = 'ESP32 values are raw ADC counts, not calibrated angle. Requested force is not measured contact force.'
+    if fault_row and sensor_logged:
+        row = fault_row[0]
+        detail += (f'\nFault sample: contact={row["sensor_contact"]}, '
+                   f'candidate={row.get("sensor_contact_candidate", "--")}, '
+                   f'fresh={row["sensor_fresh"]}, signal={float(row["sensor_signal_strength"]):.6f}, '
+                   f'threshold={float(row["sensor_contact_threshold"]):.6f}')
+        if pattern_logged:
+            detail += (f', pattern={float(row["sensor_pattern_distance"]):.3f}/'
+                       f'{float(row["sensor_pattern_support_limit"]):.3f}, '
+                       f'radius={float(row["sensor_predicted_radius_mm"]):.1f} mm')
+        detail += '.'
+    fig.text(.5, .015, detail,
+             ha='center', fontsize=8 if sensor_logged else 9)
+    fig.subplots_adjust(left=.11, right=.90 if sensor_logged else .97,
+                        bottom=.12 if sensor_logged else .10, top=.91, hspace=.12)
     output = trace.with_name(trace.stem + '_analysis.png')
     fig.savefig(output, dpi=150)
     plt.close(fig)

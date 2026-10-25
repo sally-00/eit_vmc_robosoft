@@ -31,8 +31,10 @@ class Inference:
         self.on=0;self.off=0;self.contact=False
 
     def step(self,frame):
-        result={'contact':False,'measurement_valid':False,'position_valid':False,'x_m':0.,'y_m':0.,
+        result={'contact':False,'contact_candidate':False,'measurement_valid':False,'position_valid':False,'x_m':0.,'y_m':0.,
                 'signal_strength':0.,'contact_threshold':self.contact_threshold,
+                'pattern_distance':0.,'pattern_support_limit':self.model.support_limit,
+                'predicted_radius_mm':0.,
                 'numbering':self.model.metadata['numbering'],'model_is_physical':self.physical,'model_sha256':self.sha256}
         if self.baseline is None:
             return result
@@ -40,6 +42,9 @@ class Inference:
         try:
             predicted=self.model.predict(capture,self.baseline,self.contact_threshold)
             strength=predicted['strength']
+            result.update(contact_candidate=predicted['state']=='contact',
+                          pattern_distance=float(predicted['pattern_distance']),
+                          predicted_radius_mm=float(np.linalg.norm(predicted['xy_mm'])))
             if predicted['state']=='contact':
                 self.on+=1;self.off=0
             else:
