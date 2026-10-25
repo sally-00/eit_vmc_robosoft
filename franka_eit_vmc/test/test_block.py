@@ -14,6 +14,11 @@ block=importlib.util.module_from_spec(spec);spec.loader.exec_module(block)
 
 
 class BlockTests(unittest.TestCase):
+    def setUp(self):
+        # Existing legacy tests do not spawn the calibrated-recording ROS node.
+        stub=patch.object(block,'start_shaft_feedback',return_value=(None,Path('/tmp/feedback.log')))
+        stub.start();self.addCleanup(stub.stop)
+
     def test_landing_offsets_come_from_block_yaml(self):
         with tempfile.TemporaryDirectory() as d:
             config=Path(d)
@@ -130,5 +135,44 @@ class BlockTests(unittest.TestCase):
         with patch.object(sys,'argv',['run_block.py','--task','joystick','--block','x_plus']),patch.object(block,'check_controller',side_effect=RuntimeError('wrong offset')),patch.object(block.subprocess,'run') as run:
             with self.assertRaisesRegex(RuntimeError,'wrong offset'):block.main()
         run.assert_not_called()
+
+    def test_new_mechanism_is_applied_before_motion_and_starts_shared_feedback(self):
+        with tempfile.TemporaryDirectory() as d:
+            recorder=Mock();feedback=Mock();feedback.poll.return_value=None
+            checked=dict(joystick_mechanism='inward_arc',joystick_inward_arc_m=.01,
+                         joystick_length=.02,joystick_angle_deg=30.,joystick_feedback_topic='/joystick/shaft')
+            args=['run_block.py','--task','joystick','--block','center','--repeats','1','--manual',
+                  '--mechanism','inward_arc','--inward-arc-m','0.010','--output',d]
+            with patch.object(sys,'argv',args),patch.object(block,'configure_joystick_mechanism') as configure,patch.object(block,'check_controller',return_value=checked),patch.object(block,'start_joystick_recorder',side_effect=lambda folder,port:(recorder,folder/'joystick_esp32.csv',folder/'joystick_recorder.log')),patch.object(block,'start_shaft_feedback',return_value=(feedback,Path(d)/'feedback.log')) as start_feedback,patch.object(block,'wait_for_shaft_feedback') as wait,patch.object(block,'check_joystick_recorder'),patch.object(block,'stop_joystick_recorder') as stop,patch.object(block,'plot_joystick_block'),patch.object(block.subprocess,'run') as run,patch('builtins.input',side_effect=['ready','run','ready','run']):
+                block.main()
+            configure.assert_called_once_with('inward_arc',.01)
+            start_feedback.assert_called_once();wait.assert_called_once()
+            self.assertEqual(run.call_count,4)
+            self.assertEqual(stop.call_count,2)
+            saved=json.loads(next(Path(d).rglob('block.json')).read_text())
+            self.assertEqual(saved['checked_controller_parameters']['joystick_inward_arc_m'],.01)
+
+    def test_feedback_failure_prevents_first_ready_motion(self):
+        with tempfile.TemporaryDirectory() as d:
+            recorder=Mock();feedback=Mock()
+            checked=dict(joystick_mechanism='inward_arc',joystick_inward_arc_m=.01,
+                         joystick_length=.02,joystick_angle_deg=30.,joystick_feedback_topic='/joystick/shaft')
+            with patch.object(sys,'argv',['run_block.py','--task','joystick','--block','center','--manual','--output',d]),patch.object(block,'check_controller',return_value=checked),patch.object(block,'start_joystick_recorder',side_effect=lambda folder,port:(recorder,folder/'joystick_esp32.csv',folder/'recorder.log')),patch.object(block,'start_shaft_feedback',return_value=(feedback,Path(d)/'feedback.log')),patch.object(block,'wait_for_shaft_feedback',side_effect=RuntimeError('No fresh shaft')),patch.object(block,'stop_joystick_recorder'),patch.object(block,'plot_joystick_block'),patch.object(block.subprocess,'run') as run:
+                with self.assertRaisesRegex(RuntimeError,'No fresh shaft'):block.main()
+            run.assert_not_called()
+
+    def test_out_of_calibration_angle_and_invalid_depth_prevent_motion(self):
+        cal={'nominal_limit_deg':35.}
+        cfg=dict(joystick_mechanism='inward_arc',joystick_length=.02,joystick_inward_arc_m=.01,joystick_angle_deg=45.)
+        with self.assertRaisesRegex(RuntimeError,'calibrated'):block.validate_inward_configuration(cfg,cal)
+        cfg.update(joystick_angle_deg=30.,joystick_inward_arc_m=.02)
+        with self.assertRaisesRegex(RuntimeError,'physical joystick_length'):block.validate_inward_configuration(cfg,cal)
+
+    def test_mechanism_flags_reject_ball_and_nonfinite_depth(self):
+        for args in [['--task','ball','--block','push','--mechanism','inward_arc'],
+                     ['--task','joystick','--block','center','--inward-arc-m','nan']]:
+            with patch.object(sys,'argv',['run_block.py']+args),patch.object(block,'configure_joystick_mechanism') as configure:
+                with self.assertRaises(SystemExit) as raised:block.main()
+            self.assertEqual(raised.exception.code,2);configure.assert_not_called()
 
 if __name__=='__main__':unittest.main()

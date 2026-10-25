@@ -34,3 +34,18 @@ float64[3] external_force_n
 float64[3] external_moment_nm
 float64[7] joint_position_rad
 float64[7] commanded_torque_nm
+
+# New-mechanism diagnostics (legacy mode reports its selection, feedback optional).
+string joystick_mechanism
+float64 joystick_inward_arc_m
+float64 joystick_shaft_angle_rad
+float64 joystick_shaft_rate_rad_s
+float64 joystick_shaft_age_s
+bool joystick_shaft_fresh
+bool joystick_shaft_clipped
+float64 joystick_force_scale
+float64[2] joystick_slider_m
+bool joystick_slider_at_stop
+float64[3] joystick_alignment_force_n
+float64[3] joystick_alignment_centre_m
+float64[3] joystick_alignment_target_m

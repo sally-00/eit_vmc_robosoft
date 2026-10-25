@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "franka_eit_vmc/core.hpp"
+#include "franka_eit_vmc/joystick_mechanism.hpp"
 using namespace franka_eit_vmc;
 void require(bool x, const char* m) {
   if (!x) throw std::runtime_error(m);
@@ -428,6 +429,108 @@ int main() {
       auto o = core.step(s, electrical(1.), 1., .001, true, Request::None);
       require(o.fault == Fault::Nonfinite && o.torque.allFinite(),
               "nonfinite previous command propagated to output");
+    }
+
+    // Smaller task radius includes an initial inward offset and the correct derivative.
+    for (double theta : {-.7, -.2, 0., .3, .7}) {
+      const V3 anchor(.45, 0., .35);
+      const double rate = .3, eps = 1e-6;
+      const auto short_arc = inward_arc(anchor, .092, .01, theta, rate);
+      const auto full_arc = inward_arc(anchor, .092, 0., theta, rate);
+      const V3 axis(std::sin(theta), 0., std::cos(theta));
+      require((short_arc.position-full_arc.position+.01*axis).norm()<1e-12,
+              "task arc is not exactly 10 mm inward at each angle");
+      const auto plus=inward_arc(anchor,.092,.01,theta+eps*rate,rate);
+      const auto minus=inward_arc(anchor,.092,.01,theta-eps*rate,rate);
+      require(((plus.position-minus.position)/(2*eps)-short_arc.velocity).norm()<1e-9,
+              "short task arc velocity uses the wrong radius");
+      const auto R=(Eigen::AngleAxisd(theta,V3::UnitY())*
+          Eigen::AngleAxisd(3.141592653589793,V3::UnitX())).toRotationMatrix();
+      const V3 surface=anchor+.092*(axis-V3::UnitZ());
+      const auto links=slider_alignment(surface,R,V3::Zero(),V3::Zero(),surface-.01*axis,
+          V3::Zero(),R,V3::Zero(),Eigen::Vector2d::Zero(),.08,234.375,78.125,.036);
+      require((links.force+9.375*axis).norm()<1e-10 && links.moment.norm()<1e-10,
+              "alignment preload is not inward along the current shaft at alignment");
+      require((R.leftCols<2>().transpose()*links.force).norm()<1e-10,
+              "free planar slider transmitted tangential preload");
+    }
+    {
+      const auto I=Eigen::Matrix3d::Identity();
+      const auto Q=Eigen::AngleAxisd(.2,V3::UnitY()).toRotationMatrix();
+      const auto links=slider_alignment(V3::Zero(),I,V3::Zero(),V3::Zero(),V3(.01,.02,-.01),
+          V3::Zero(),Q,V3::Zero(),Eigen::Vector2d::Zero(),.08,234.375,78.125,.036);
+      require(links.force.head<2>().norm()<1e-10 &&
+              std::abs(links.moment.y()-3.*std::sin(.2))<1e-10,
+              "symmetric slider links lost force balance or orientation spring moment");
+      const auto stop=slider_alignment(V3::Zero(),I,V3::Zero(),V3::Zero(),V3(.06,0.,0.),
+          V3::Zero(),I,V3::Zero(),Eigen::Vector2d(.036,0.),.08,234.375,78.125,.036);
+      require(stop.at_stop && std::abs(stop.rate.x())<1e-10 && stop.force.x()>0.,
+              "slider travel stop did not transmit the blocked force");
+    }
+    {
+      Config cfg; cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      cfg.joystick_length=.01;
+      bool rejected_depth=false;
+      try { cfg.validate(); } catch(const std::invalid_argument&) {rejected_depth=true;}
+      require(rejected_depth,"inward depth reached or exceeded the physical length");
+    }
+    for (int bad : {0,1,2}) {
+      Config cfg; cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      Core core(cfg);auto s=state();core.activate(s);
+      ShaftFeedback shaft;shaft.sequence=1;shaft.valid=true;shaft.acquired_steady_s=1.;
+      if(bad==0)shaft.valid=false;
+      if(bad==1)shaft.acquired_steady_s=.5;
+      if(bad==2)shaft.clipped=true;
+      auto o=core.step(s,electrical(1.),1.,.001,true,Request::Start,shaft);
+      require(o.fault==Fault::JoystickFeedback,"new mode accepted unusable live angle feedback");
+    }
+    {
+      Config cfg;cfg.joystick_mechanism=JoystickMechanism::InwardArc;
+      cfg.approach_contact_confirm_s=.001;cfg.approach_contact_travel_m=.000001;
+      cfg.preload_time=.05;cfg.torque_rate=1000000.;
+      auto s=state();
+      cfg.joystick_pivot_m=cfg.ready_pad_position-V3(0.,0.,cfg.joystick_length)+V3(.015,0.,0.);
+      Config changed=cfg;changed.preload=6.;changed.orientation_k=25.;changed.orientation_d=3.;
+      Core core(cfg),other(changed);core.activate(s);other.activate(s);
+      double now=1.;uint64_t seq=1;
+      ShaftFeedback shaft;shaft.valid=true;
+      auto advance=[&](bool touching,Request request) {
+        shaft.acquired_steady_s=now;shaft.sequence=seq;
+        auto c=electrical(now,seq++,touching);
+        auto a=core.step(s,c,now,.001,true,request,shaft);
+        auto b=other.step(s,c,now,.001,true,request,shaft);
+        require((a.requested_force-b.requested_force).norm()<1e-10 &&
+                (a.requested_moment-b.requested_moment).norm()<1e-10,
+                "legacy preload/orientation gains leaked into the inward mechanism");
+        now+=.001;return a;
+      };
+      advance(false,Request::Start);advance(true,Request::None);
+      s.ee_position.z()-=.00001;
+      Output o;
+      for(int i=0;i<70;++i)o=advance(true,Request::None);
+      require(o.mode==Mode::Interact && o.fault==Fault::None,
+              "new mechanism did not engage with fresh angle and contact");
+      require(std::abs(o.requested_force.z())<=cfg.normal_force_limit+1e-10 &&
+              o.force_scale<1. && o.alignment_force.z()<0.,
+              "summed branch force was not capped or inward preload was absent");
+      const auto jt=point_jacobian(s.jacobian,o.point-s.ee_position);
+      const auto js=point_jacobian(s.jacobian,o.alignment_centre-s.ee_position);
+      const V7 expected=jt.topRows<3>().transpose()*(o.requested_force-o.alignment_force)+
+          js.topRows<3>().transpose()*o.alignment_force+
+          s.jacobian.bottomRows<3>().transpose()*o.requested_moment;
+      require((o.torque-expected).norm()<1e-9,
+              "alignment force was mapped at the task contact instead of the slider");
+      require(!core.set_joystick_mechanism(JoystickMechanism::Legacy,.01),
+              "mechanism could change during active control");
+      const V3 previous=o.alignment_target;
+      shaft.angle=.2;o=advance(true,Request::None);
+      const V3 delta=(cfg.joystick_length-cfg.joystick_inward_arc_m)*
+          V3(std::sin(.2),0.,std::cos(.2)-1.);
+      require((o.alignment_target-previous-delta).norm()<1e-10,
+              "alignment followed task command instead of current shaft angle");
+      shaft.acquired_steady_s=now-.3;
+      auto stale=core.step(s,electrical(now,seq,true),now,.001,true,Request::None,shaft);
+      require(stale.fault==Fault::JoystickFeedback,"stale shaft feedback did not stop an active trial");
     }
     std::cout << "Core geometry, matched-condition, rebase and fault tests passed\n";
     return 0;

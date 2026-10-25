@@ -20,6 +20,7 @@
 
 #include "franka_eit_vmc/msg/eit_contact.hpp"
 #include "franka_eit_vmc/msg/experiment_state.hpp"
+#include "franka_eit_vmc/msg/joystick_state.hpp"
 
 namespace franka_eit_vmc {
 namespace {
@@ -159,6 +160,18 @@ class Bridge : public rclcpp::Node {
         declare_parameter<double>("joystick_angle_deg", c.joystick_angle * 180. / 3.141592653589793);
     c.joystick_angle = joystick_angle_deg * 3.141592653589793 / 180.;
     P(joystick_duration);
+    P(joystick_inward_arc_m);
+    P(joystick_alignment_half_span_m);
+    P(joystick_slider_radius_m);
+    P(joystick_alignment_spring_k);
+    P(joystick_alignment_spring_d);
+    P(joystick_feedback_timeout);
+    c.joystick_pivot_m = vector("joystick_pivot_m", c.joystick_pivot_m);
+    const auto mechanism = declare_parameter<std::string>("joystick_mechanism", "legacy");
+    if (mechanism != "legacy" && mechanism != "inward_arc")
+      throw std::invalid_argument("joystick_mechanism must be legacy or inward_arc");
+    c.joystick_mechanism = mechanism == "inward_arc" ? JoystickMechanism::InwardArc : JoystickMechanism::Legacy;
+    requested_mechanism.store(mechanism == "inward_arc" ? c.joystick_inward_arc_m : -1.);
     P(angle_speed);
     P(angle_acceleration);
     P(initial_ball_x);
@@ -198,6 +211,22 @@ class Bridge : public rclcpp::Node {
             value.y = m->y_m;
           }
           contacts.push(value);
+        });
+    shaft_sub = create_subscription<msg::JoystickState>(
+        declare_parameter<std::string>("joystick_feedback_topic", "/joystick/shaft"),
+        rclcpp::SensorDataQoS().keep_last(1), [this](msg::JoystickState::ConstSharedPtr m) {
+          ShaftFeedback value;
+          const double age = (get_clock()->now() - rclcpp::Time(m->header.stamp)).seconds();
+          value.sequence = m->sequence;
+          value.angle = m->angle_rad;
+          value.rate = m->angular_velocity_rad_s;
+          value.clipped = m->clipped;
+          value.valid = m->measurement_valid && m->header.frame_id == "franka_base" &&
+              std::isfinite(age) && age >= -.01 && age <= c.joystick_feedback_timeout &&
+              std::isfinite(value.angle) && std::isfinite(value.rate) &&
+              std::abs(value.angle) < 1.5707963267948966;
+          value.acquired_steady_s = value.valid ? steady_s() - age : -1.;
+          shafts.push(value);
         });
     heartbeat_sub = create_subscription<std_msgs::msg::Bool>(
         "~/heartbeat", rclcpp::QoS(1).best_effort(), [this](std_msgs::msg::Bool::ConstSharedPtr m) {
@@ -246,10 +275,36 @@ class Bridge : public rclcpp::Node {
     status_pub = create_publisher<msg::ExperimentState>("~/status", 10);
     joint_pub = create_publisher<sensor_msgs::msg::JointState>("~/joint_states", 10);
     timer = create_wall_timer(std::chrono::milliseconds(20), [this] { publish(); });
-    parameter_guard = add_on_set_parameters_callback([](const std::vector<rclcpp::Parameter>&) {
+    parameter_guard = add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter>& parameters) {
       rcl_interfaces::msg::SetParametersResult result;
       result.successful = false;
-      result.reason = "Restart to apply configuration; use ~/use_eit service between trials";
+      if (c.task != Task::Joystick || (mode.load() != Mode::Hold && mode.load() != Mode::Done) ||
+          request.load() != Request::None) {
+        result.reason = "Change joystick mechanism only between trials in hold/done";
+        return result;
+      }
+      try {
+        std::string selected = get_parameter("joystick_mechanism").as_string();
+        double depth = get_parameter("joystick_inward_arc_m").as_double();
+        for (const auto& p : parameters) {
+          if (p.get_name() == "joystick_mechanism") selected = p.as_string();
+          else if (p.get_name() == "joystick_inward_arc_m") depth = p.as_double();
+          else {
+            result.reason = "Restart to change other parameters; only mechanism/depth can change between trials";
+            return result;
+          }
+        }
+        if (selected != "legacy" && selected != "inward_arc")
+          throw std::invalid_argument("joystick_mechanism must be legacy or inward_arc");
+        Config candidate = c;
+        candidate.joystick_mechanism = JoystickMechanism::InwardArc;
+        candidate.joystick_inward_arc_m = depth;
+        candidate.validate();
+        // One atomic value encodes the pair: negative=legacy, nonnegative=inward depth.
+        // Applied by Core only while holding/done; telemetry acknowledges actual mode.
+        requested_mechanism.store(selected == "inward_arc" ? depth : -1.);
+        result.successful = true;
+      } catch (const std::exception& e) { result.reason = e.what(); }
       return result;
     });
   }
@@ -257,6 +312,8 @@ class Bridge : public rclcpp::Node {
   std::string host, pad_frame, pad_numbering, expected_model;
   bool geometry_confirmed = false, mounting_confirmed = false;
   Ring<Contact, 64> contacts;
+  Ring<ShaftFeedback, 64> shafts;
+  std::atomic<double> requested_mechanism{-1.};
   Ring<Telemetry, 64> telemetry;
   std::atomic<Request> request{Request::None};
   std::atomic<bool> use_eit{true};
@@ -279,6 +336,21 @@ class Bridge : public rclcpp::Node {
     s.fault_name = fault_name(o.fault);
     s.use_eit = o.use_eit;
     s.retract_incomplete = o.retract_incomplete;
+    s.joystick_mechanism = mechanism_name(o.joystick_mechanism);
+    s.joystick_inward_arc_m = o.inward_arc_m;
+    s.joystick_shaft_angle_rad = o.shaft_angle;
+    s.joystick_shaft_rate_rad_s = o.shaft_rate;
+    s.joystick_shaft_age_s = o.shaft_age_s;
+    s.joystick_shaft_fresh = o.shaft_fresh;
+    s.joystick_shaft_clipped = o.shaft_clipped;
+    s.joystick_force_scale = o.force_scale;
+    s.joystick_slider_at_stop = o.slider_at_stop;
+    for (int i = 0; i < 2; ++i) s.joystick_slider_m[i] = o.slider[i];
+    for (int i = 0; i < 3; ++i) {
+      s.joystick_alignment_force_n[i] = o.alignment_force[i];
+      s.joystick_alignment_centre_m[i] = o.alignment_centre[i];
+      s.joystick_alignment_target_m[i] = o.alignment_target[i];
+    }
     s.sensor_sequence = o.sensor_sequence;
     s.sensor_contact = o.sensor_contact;
     s.sensor_contact_candidate = o.sensor_contact_candidate;
@@ -322,6 +394,7 @@ class Bridge : public rclcpp::Node {
   std::vector<std::string> joint_names;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_guard;
   rclcpp::Subscription<msg::EitContact>::SharedPtr contact_sub;
+  rclcpp::Subscription<msg::JoystickState>::SharedPtr shaft_sub;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr heartbeat_sub;
   std::vector<rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr> services;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr condition_service;
@@ -367,6 +440,7 @@ int run_controller(int argc, char** argv, Task task) {
     std::thread spin([&] { executor.spin(); });
     try {
       Contact contact;
+      ShaftFeedback shaft;
       bool first = true, ready_requested = false, ready_seen = false;
       unsigned ticks = 0;
       double previous_robot_time = -1., stale = 0.;
@@ -378,6 +452,11 @@ int run_controller(int argc, char** argv, Task task) {
           [&](const franka::RobotState& state, franka::Duration duration) -> franka::Torques {
             Contact fresh;
             while (node->contacts.pop(fresh)) contact = fresh;
+            ShaftFeedback new_shaft;
+            while (node->shafts.pop(new_shaft)) shaft = new_shaft;
+            const double mechanism = node->requested_mechanism.load();
+            core.set_joystick_mechanism(mechanism < 0. ? JoystickMechanism::Legacy : JoystickMechanism::InwardArc,
+                mechanism < 0. ? core.config().joystick_inward_arc_m : mechanism);
             double dt = duration.toSec();
             if (first && dt == 0.) dt = .001;
             first = false;
@@ -416,7 +495,7 @@ int run_controller(int argc, char** argv, Task task) {
               if (ready_seen && core.mode() == Mode::Hold) request = Request::Stop;
             }
             const Sample measured = sample(state, model);
-            const auto out = core.step(measured, contact, steady_s(), dt, heartbeat, request);
+            const auto out = core.step(measured, contact, steady_s(), dt, heartbeat, request, shaft);
             node->mode.store(out.mode);
             if (++ticks % 20 == 0 || out.finished)
               node->telemetry.push(Telemetry{out, measured.q, measured.external_force,

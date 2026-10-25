@@ -10,6 +10,7 @@ using V3 = Eigen::Vector3d;
 using V7 = Eigen::Matrix<double, 7, 1>;
 using J67 = Eigen::Matrix<double, 6, 7>;
 enum class Task { Ready, Joystick, Ball };
+enum class JoystickMechanism { Legacy, InwardArc };
 enum class Mode { Hold, Ready, Approach, Preload, Interact, Retract, Done, Stopping, Fault };
 enum class Fault {
   None,
@@ -28,7 +29,8 @@ enum class Fault {
   Tracking,
   Heartbeat,
   Robot,
-  RetractTimeout
+  RetractTimeout,
+  JoystickFeedback
 };
 enum class Request { None, Ready, Start, Stop };
 struct Config {
@@ -63,6 +65,13 @@ struct Config {
          idle_max_period{0.020};
   double active_radius{0.036};
   double joystick_length{0.092}, joystick_angle{0.20943951023931953}, joystick_duration{9.1};
+  // Only InwardArc uses these geometry/guide settings and live shaft feedback.
+  JoystickMechanism joystick_mechanism{JoystickMechanism::Legacy};
+  double joystick_inward_arc_m{.010};
+  V3 joystick_pivot_m{.45, 0., .035};
+  double joystick_alignment_half_span_m{.080}, joystick_slider_radius_m{.036};
+  double joystick_alignment_spring_k{234.375}, joystick_alignment_spring_d{78.125};
+  double joystick_feedback_timeout{.20};
   double angle_speed{0.28}, angle_acceleration{2.0};
   double initial_ball_x{0.45}, roll_distance{0.020}, ball_duration{8.};
   double virtual_mass{0.6}, virtual_damping{6.}, goal_k{80.}, goal_force_limit{2.},
@@ -84,6 +93,11 @@ struct Contact {
       pattern_support_limit{0.}, predicted_radius_mm{0.};
   double x{0.}, y{0.};
 };
+struct ShaftFeedback {
+  uint64_t sequence{0};
+  double acquired_steady_s{-1.}, angle{0.}, rate{0.};
+  bool valid{false}, clipped{false};
+};
 struct Output {
   Mode mode{Mode::Hold};
   Fault fault{Fault::None};
@@ -93,6 +107,11 @@ struct Output {
   V3 requested_force{V3::Zero()}, requested_moment{V3::Zero()};
   double progress{0.}, progress_velocity{0.}, goal{0.}, angle_command{0.}, trial_time{0.};
   bool use_eit{true}, finished{false}, retract_incomplete{false};
+  JoystickMechanism joystick_mechanism{JoystickMechanism::Legacy};
+  double inward_arc_m{0.}, shaft_angle{0.}, shaft_rate{0.}, shaft_age_s{0.}, force_scale{1.};
+  bool shaft_fresh{false}, shaft_clipped{false}, slider_at_stop{false};
+  V3 alignment_force{V3::Zero()}, alignment_centre{V3::Zero()}, alignment_target{V3::Zero()};
+  Eigen::Vector2d slider{Eigen::Vector2d::Zero()};
   uint64_t sensor_sequence{0};
   bool sensor_contact{false}, sensor_contact_candidate{false}, sensor_fresh{false}, sensor_measurement_valid{false},
       sensor_position_valid{false}, sensor_physical_model{false};
@@ -108,9 +127,10 @@ class Core {
   explicit Core(Config config);
   void activate(const Sample& s);
   bool set_condition(bool use_eit);
+  bool set_joystick_mechanism(JoystickMechanism mechanism, double inward_arc_m);
   void robot_fault() { fail(Fault::Robot); }
   Output step(const Sample& s, const Contact& contact, double now, double dt, bool heartbeat,
-              Request request);
+              Request request, const ShaftFeedback& shaft = ShaftFeedback{});
   Mode mode() const { return mode_; }
   Fault fault() const { return fault_; }
   const Config& config() const { return c_; }
@@ -132,6 +152,7 @@ class Core {
       normal_anchor_{0.};
   int approach_confirm_frames_{0};
   double z_{0.}, dz_{0.}, z0_{0.}, observed_{0.}, goal_{0.};
+  Eigen::Vector2d slider_{Eigen::Vector2d::Zero()};
   int ready_stage_{0};
   uint64_t last_sequence_{0};
   bool activated_{false}, retract_incomplete_{false};
@@ -142,6 +163,7 @@ class Core {
   void begin_retract(const Sample& s);
   bool inside(const V3& p) const;
 };
+const char* mechanism_name(JoystickMechanism mechanism);
 const char* mode_name(Mode mode);
 const char* fault_name(Fault fault);
 }  // namespace franka_eit_vmc

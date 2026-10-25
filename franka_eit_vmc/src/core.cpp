@@ -1,4 +1,5 @@
 #include "franka_eit_vmc/core.hpp"
+#include "franka_eit_vmc/joystick_mechanism.hpp"
 
 #include <Eigen/Cholesky>
 #include <algorithm>
@@ -119,6 +120,19 @@ void Config::validate() const {
       approach_contact_travel_m >= approach_distance ||
       joystick_duration <= preload_time || ball_duration <= preload_time)
     throw std::invalid_argument("Invalid task geometry or timing bounds");
+  if (joystick_mechanism == JoystickMechanism::InwardArc) {
+    if (task != Task::Joystick || !std::isfinite(joystick_inward_arc_m) ||
+        joystick_inward_arc_m < 0. || joystick_inward_arc_m >= joystick_length ||
+        !joystick_pivot_m.allFinite() || joystick_alignment_half_span_m <= 0. ||
+        !std::isfinite(joystick_alignment_half_span_m) || joystick_slider_radius_m <= 0. ||
+        joystick_slider_radius_m > active_radius || !std::isfinite(joystick_slider_radius_m) ||
+        !std::isfinite(joystick_alignment_spring_k) || joystick_alignment_spring_k <= 0. ||
+        !std::isfinite(joystick_alignment_spring_d) || joystick_alignment_spring_d <= 0. ||
+        !std::isfinite(joystick_feedback_timeout) || joystick_feedback_timeout <= 0. ||
+        joystick_feedback_timeout > .5)
+      throw std::invalid_argument("Invalid inward-arc joystick parameters (depth must be below physical length)");
+  }
+
 }
 Eigen::Matrix3d skew(const V3& x) {
   Eigen::Matrix3d m;
@@ -173,6 +187,13 @@ bool Core::set_condition(bool use_eit) {
   use_eit_ = use_eit;
   return true;
 }
+bool Core::set_joystick_mechanism(JoystickMechanism mechanism, double depth) {
+  if (c_.task != Task::Joystick || (mode_ != Mode::Hold && mode_ != Mode::Done) ||
+      !std::isfinite(depth) || depth < 0. || depth >= c_.joystick_length) return false;
+  c_.joystick_mechanism = mechanism;
+  c_.joystick_inward_arc_m = depth;
+  return true;
+}
 void Core::begin_ready(const Sample& s) {
   mode_ = Mode::Ready;
   ready_stage_ = 0;
@@ -193,7 +214,7 @@ void Core::begin_retract(const Sample& s) {
   hold_rotation_ = pad_rotation(s);
 }
 Output Core::step(const Sample& s, const Contact& contact, double now, double dt, bool heartbeat,
-                  Request request) {
+                  Request request, const ShaftFeedback& shaft) {
   Output out;
   const double safe_dt = std::isfinite(dt) && dt > 0. ? std::min(dt, c_.max_period) : .001;
   const double period_limit =
@@ -224,6 +245,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
                             std::isfinite(sensor_age) && sensor_age >= -.01 &&
                             sensor_age <= c_.sensor_timeout;
   const bool new_frame = contact.sequence != last_sequence_;
+  const bool inward = c_.task == Task::Joystick &&
+                      c_.joystick_mechanism == JoystickMechanism::InwardArc;
+  const double shaft_age = now - shaft.acquired_steady_s;
+  const bool shaft_fresh = shaft.sequence > 0 && shaft.valid && !shaft.clipped &&
+      std::isfinite(shaft.angle) && std::isfinite(shaft.rate) &&
+      std::isfinite(shaft_age) && shaft_age >= -.01 && shaft_age <= c_.joystick_feedback_timeout;
+  if (inward && in_trial && !shaft_fresh) fail(Fault::JoystickFeedback);
   if (in_trial && !sensor_fresh) fail(Fault::SensorStale);
   if (!heartbeat && mode_ != Mode::Hold && mode_ != Mode::Done && mode_ != Mode::Fault &&
       mode_ != Mode::Stopping)
@@ -232,7 +260,9 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   if (request == Request::Ready && (mode_ == Mode::Hold || mode_ == Mode::Done) && heartbeat)
     begin_ready(s);
   if (request == Request::Start && (mode_ == Mode::Hold || mode_ == Mode::Done) && heartbeat) {
-    if (!sensor_fresh || contact.contact)
+    if (inward && !shaft_fresh)
+      fail(Fault::JoystickFeedback);
+    else if (!sensor_fresh || contact.contact)
       fail(Fault::SensorStale);
     else if ((pface - c_.ready_pad_position).norm() > kTrialStartPositionTolerance ||
              orientation_error(Rp, c_.ready_pad_rotation).norm() > .05)
@@ -252,6 +282,11 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   V3 force = V3::Zero(), moment = V3::Zero(), fc = V3::Zero(), point = pface, ref = hold_,
      vref = V3::Zero();
   J67 jc = jf;
+  V7 alignment_torque_correction = V7::Zero();
+  V3 alignment_force = V3::Zero(), alignment_centre = pface, alignment_target = pface;
+  Eigen::Vector2d slider_used = slider_;
+  bool slider_at_stop = false;
+  double force_scale = 1.;
   Eigen::Matrix3d desired_rotation = hold_rotation_;
   phase_time_ += safe_dt;
   if (mode_ == Mode::Ready) {
@@ -343,6 +378,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       h0_ = point;
       normal_anchor_ = point.z();
       initial_face_ = pface;
+      if (inward) {
+        const V3 tip = c_.joystick_pivot_m + c_.joystick_length *
+            V3(std::sin(shaft.angle), 0., std::cos(shaft.angle));
+        slider_ = (Rp.transpose() * (tip - pface)).head<2>();
+        if (slider_.norm() > c_.joystick_slider_radius_m)
+          slider_ *= c_.joystick_slider_radius_m / slider_.norm();
+      }
       trial_time_ = 0.;
       phase_time_ = 0.;
       z_ = c_.task == Task::Ball ? c_.initial_ball_x : 0.;
@@ -419,20 +461,59 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
       desired_rotation = c_.ready_pad_rotation;
       if (Rp.col(2).dot(-V3::UnitZ()) < std::cos(.15)) fail(Fault::Tracking);
     }
-    fc = c_.coupling_k * (ref - point) + c_.coupling_d * (G * dz_ - velocity);
-    fc.z() = 0.;
-    for (int i = 0; i < 2; ++i) fc[i] = clip(fc[i], -c_.force_xy_limit, c_.force_xy_limit);
-    force = fc;
-    force.z() =
-        clip(c_.normal_k * (normal_ref - c_.preload * activation / c_.normal_k - point.z()) -
-                 c_.normal_d * velocity.z(),
-             -c_.normal_force_limit, c_.normal_force_limit);
-    const bool establishing_contact = mode_ == Mode::Preload;
-    moment = limit_norm(
-        (establishing_contact ? c_.approach_kr : c_.orientation_k) *
-                orientation_error(Rp, desired_rotation) -
-            (establishing_contact ? c_.approach_dr : c_.orientation_d) * omega,
-        establishing_contact ? c_.approach_moment_limit : c_.moment_limit);
+    if (inward && mode_ != Mode::Fault) {
+      const auto arc = inward_arc(h0_, c_.joystick_length, c_.joystick_inward_arc_m, z_, dz_);
+      ref = arc.position;
+      const V3 K(c_.coupling_k, c_.coupling_k, c_.normal_k);
+      const V3 D(c_.coupling_d, c_.coupling_d, c_.normal_d);
+      fc = activation * (K.cwiseProduct(ref - point) + D.cwiseProduct(arc.velocity - velocity));
+      const double radius = c_.joystick_length - c_.joystick_inward_arc_m;
+      const V3 axis(std::sin(shaft.angle), 0., std::cos(shaft.angle));
+      alignment_target = c_.joystick_pivot_m + radius * axis;
+      const V3 target_velocity = radius * shaft.rate *
+          V3(std::cos(shaft.angle), 0., -std::sin(shaft.angle));
+      desired_rotation = Eigen::AngleAxisd(shaft.angle, V3::UnitY()).toRotationMatrix() * hold_rotation_;
+      slider_used = slider_;
+      const auto links = slider_alignment(pface, Rp, vface, omega,
+          alignment_target, target_velocity, desired_rotation, shaft.rate * V3::UnitY(),
+          slider_, c_.joystick_alignment_half_span_m, c_.joystick_alignment_spring_k,
+          c_.joystick_alignment_spring_d, c_.joystick_slider_radius_m);
+      alignment_centre = links.centre;
+      alignment_force = activation * links.force;
+      moment = limit_norm(activation * links.moment, c_.moment_limit);
+      const V3 total = fc + alignment_force;
+      for (int i = 0; i < 3; ++i) {
+        const double limit = i == 2 ? c_.normal_force_limit : c_.force_xy_limit;
+        if (std::abs(total[i]) > limit) force_scale = std::min(force_scale, limit / std::abs(total[i]));
+      }
+      fc *= force_scale;
+      alignment_force *= force_scale;
+      force = fc + alignment_force;
+      const auto js = point_jacobian(s.jacobian, alignment_centre - s.ee_position);
+      alignment_torque_correction =
+          (js.topRows<3>() - jc.topRows<3>()).transpose() * alignment_force;
+      slider_at_stop = links.at_stop;
+      slider_ += safe_dt * links.rate;
+      if (slider_.norm() > c_.joystick_slider_radius_m)
+        slider_ *= c_.joystick_slider_radius_m / slider_.norm();
+      if (!inside(alignment_centre) || !inside(alignment_target) ||
+          !slider_.allFinite() || !force.allFinite() || !moment.allFinite()) fail(Fault::Workspace);
+    } else {
+      fc = c_.coupling_k * (ref - point) + c_.coupling_d * (G * dz_ - velocity);
+      fc.z() = 0.;
+      for (int i = 0; i < 2; ++i) fc[i] = clip(fc[i], -c_.force_xy_limit, c_.force_xy_limit);
+      force = fc;
+      force.z() =
+          clip(c_.normal_k * (normal_ref - c_.preload * activation / c_.normal_k - point.z()) -
+                   c_.normal_d * velocity.z(),
+               -c_.normal_force_limit, c_.normal_force_limit);
+      const bool establishing_contact = mode_ == Mode::Preload;
+      moment = limit_norm(
+          (establishing_contact ? c_.approach_kr : c_.orientation_k) *
+                  orientation_error(Rp, desired_rotation) -
+              (establishing_contact ? c_.approach_dr : c_.orientation_d) * omega,
+          establishing_contact ? c_.approach_moment_limit : c_.moment_limit);
+    }
     if (c_.task == Task::Ball && trial_time_ > c_.preload_time) {
       const double effort =
           clip(c_.goal_k * (goal_ - z_), -c_.goal_force_limit, c_.goal_force_limit);
@@ -486,6 +567,8 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
                               : approach ? c_.approach_moment_limit : c_.moment_limit);
     point = pface;
     jc = jf;
+    alignment_torque_correction.setZero();
+    alignment_force.setZero();
   }
   if (mode_ != Mode::Fault && mode_ != Mode::Stopping) {
     if (!inside(ref) || !inside(point)) fail(Fault::Workspace);
@@ -500,7 +583,7 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
         Eigen::Matrix<double, 7, 7>::Identity() - s.jacobian.transpose() * inverse * s.jacobian;
     const V7 posture_torque = projector * (c_.null_k * (posture_ - s.q) - c_.null_d * s.dq);
     target = jc.topRows<3>().transpose() * force + s.jacobian.bottomRows<3>().transpose() * moment +
-             posture_torque + s.coriolis;
+             alignment_torque_correction + posture_torque + s.coriolis;
   }
   if (!target.allFinite()) {
     fail(Fault::Nonfinite);
@@ -528,6 +611,13 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   out.trial_time = trial_time_;
   out.use_eit = use_eit_;
   out.retract_incomplete = retract_incomplete_;
+  out.joystick_mechanism = c_.joystick_mechanism;
+  out.inward_arc_m = c_.joystick_inward_arc_m;
+  out.shaft_angle = shaft.angle; out.shaft_rate = shaft.rate; out.shaft_age_s = shaft_age;
+  out.shaft_fresh = shaft_fresh; out.shaft_clipped = shaft.clipped;
+  out.force_scale = force_scale; out.alignment_force = alignment_force;
+  out.alignment_centre = alignment_centre; out.alignment_target = alignment_target;
+  out.slider = slider_used; out.slider_at_stop = slider_at_stop;
   out.sensor_sequence = contact.sequence;
   out.sensor_contact = contact.contact;
   out.sensor_contact_candidate = contact.contact_candidate;
@@ -546,6 +636,9 @@ Output Core::step(const Sample& s, const Contact& contact, double now, double dt
   last_sequence_ = contact.sequence;
   reference_ = ref;
   return out;
+}
+const char* mechanism_name(JoystickMechanism m) {
+  return m == JoystickMechanism::InwardArc ? "inward_arc" : "legacy";
 }
 const char* mode_name(Mode x) {
   static const char* names[] = {"hold",    "ready", "approach", "preload", "interact",
@@ -569,7 +662,8 @@ const char* fault_name(Fault x) {
                                 "tracking",
                                 "heartbeat",
                                 "robot",
-                                "retract_timeout"};
+                                "retract_timeout",
+                                "joystick_feedback_stale_invalid_or_clipped"};
   return names[static_cast<int>(x)];
 }
 }  // namespace franka_eit_vmc

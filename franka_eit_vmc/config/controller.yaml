@@ -74,11 +74,11 @@
     approach_dr: 5.0           # Nm.s/rad
     approach_moment_limit: 15.0 # Nm cap on requested orientation moment
 
-    # 4. PRELOAD: after confirmed EIT contact, engage the contact-point
+    # 4. PRELOAD (legacy joystick / ball): after confirmed EIT contact, engage the contact-point
     #    spring/damper immediately; only the downward preload ramps. The
     #    orientation target stays at the approach target, with no joystick
     #    angle motion yet. Rotation still uses approach_kr/dr and its limit.
-    preload: 3.0            # N downward force target
+    preload: 3.0            # N; legacy joystick/ball only. Ignored by inward_arc.
     preload_time: 0.55      # s ramp duration from first contact
     coupling_k: 3500.0      # N/m horizontal contact-point spring, active at contact
     coupling_d: 30.0        # N.s/m horizontal contact-point damping
@@ -86,13 +86,42 @@
     normal_d: 60.0          # N.s/m vertical contact-point damping
     force_xy_limit: 15.0     # N cap per horizontal force component
     normal_force_limit: 7.0 # N cap on requested vertical force magnitude
-    # 5. INTERACT: move through joystick_angle_deg in joystick.yaml (+ then -).
+    # 5. INTERACT (legacy joystick / ball): move through joystick_angle_deg in joystick.yaml (+ then -).
     #    Translation keeps coupling_k/d and normal_k/d from Preload, while
     #    rotation switches to the softer gains below and moment_limit from
     #    Hold. Baseline attaches at pad centre; EIT attaches at the detected
     #    location when contact first begins.
-    orientation_k: 3.0      # Nm/rad
-    orientation_d: 1.0      # Nm.s/rad
+    orientation_k: 3.0      # Nm/rad; legacy joystick/ball only during contact
+    orientation_d: 1.0      # Nm.s/rad; legacy joystick/ball only during contact
+
+    # OPTIONAL JOYSTICK MECHANISM (selectable by run_block.py --mechanism).
+    # legacy preserves the existing controller. inward_arc shortens BOTH the
+    # task arc and current-shaft alignment radius and removes world-Z preload.
+    # Geometry/guide gains below are ONLY USED by inward_arc. Feedback topic/
+    # timeout also label/check recorded diagnostics in legacy, without controlling it.
+    # Hold/Ready/Approach/Retract keep their existing gains in either mode.
+    joystick_mechanism: 'legacy'   # legacy | inward_arc; change only in Hold/Done
+    joystick_inward_arc_m: 0.010   # NEW ONLY: metres inward for BOTH virtual radii;
+                                  # require 0 <= depth < physical joystick_length.
+                                  # With L=0.020, virtual radius is 0.010 m.
+    joystick_pivot_m: [0.45, 0.0, 0.035] # NEW ONLY: measured physical pivot in Base.
+                                  # Example: upright tip Z=.055 minus L=.020.
+                                  # Keep fixed for all landing-offset blocks.
+    joystick_alignment_half_span_m: 0.080 # NEW ONLY: virtual cross-arm half-span
+    joystick_alignment_spring_k: 234.375  # NEW ONLY: N/m PER alignment link (4 links)
+    joystick_alignment_spring_d: 78.125   # NEW ONLY: Ns/m PER alignment link
+    joystick_slider_radius_m: 0.036 # NEW ONLY: common palm-slider radial travel, m
+    joystick_feedback_topic: '/joystick/shaft' # NEW CONTROL ONLY; also recorded in legacy
+    joystick_feedback_timeout: 0.20 # NEW CONTROL ONLY: seconds; bad feedback stops inward_arc.
+                                  # In legacy this only labels feedback freshness.
+    # NEW MODE ALSO USES shared coupling_k/d, normal_k/d, preload_time,
+    # force_xy_limit, normal_force_limit and moment_limit. Both spring branches
+    # ramp in all components over preload_time. For 10 mm inward at upright:
+    # task normal_k*.01 = 8 N + alignment 4*k*.01 = 9.375 N BEFORE force limits.
+    # A common force scale caps their SUM; this is not measured force regulation.
+    # preload and orientation_k/d are NOT used by the new contact mechanism.
+    # The current ESP32 calibration ends at +/-35 deg. Use a command below that
+    # (e.g. launch joystick_angle_deg:=30); feedback at an ADC rail is invalid.
 
     # 6. RETRACT: move upward, using ready_k/d for translation and hold_kr/dr
     #    plus moment_limit for rotation. DONE then holds the final pose with

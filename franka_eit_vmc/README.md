@@ -10,7 +10,7 @@ The package is self-contained with respect to research code: it contains the con
 
 **Model selection:** The EIT node and pad viewer select the most recently modified `position_model.npz` or `position_model_mlp.npz` under `eit_position_toolkit/contact_position_runs/*/` when they start. The selected file path and SHA-256 are printed. The ROS decoder currently supports trained RBF checkpoints; if the newest file is an unsupported MLP checkpoint, loading stops with an error. Use `--model PATH` to select a specific checkpoint. The ROS package does not collect touches or train a model.
 
-The controllers have not been run on a physical robot. See `VALIDATION.md` for the checks actually performed.
+The new inward-arc implementation was validated offline. See `VALIDATION.md` for the checks actually performed.
 
 ## Robot interface and the VMC Transformer reference
 
@@ -44,16 +44,65 @@ The update-period guard allows up to `max_period: 0.010` s during motion and `id
 
 ### Joystick
 
-At electrical contact, the condition chooses the pad centre or the inferred EIT location. This attachment remains fixed in pad coordinates throughout manipulation. The commanded angle `theta_d` drives both the geometric arc and the desired palm orientation:
+The default `joystick_mechanism: legacy` preserves the existing control. At electrical contact, the condition chooses the pad centre or the inferred EIT location. This attachment remains fixed in pad coordinates throughout manipulation. The commanded angle `theta_d` drives both the geometric arc and the desired palm orientation:
 
 ```
 h(theta_d) = h0 + [L*sin(theta_d), 0, L*(cos(theta_d)-1)]
 R_pad_desired = rotation_about_Base_Y(theta_d) * R_pad_ready
 ```
 
-Set the commanded amplitude in `config/joystick.yaml` with `joystick_angle_deg` (currently 45.0); the controller converts it to radians internally and requests +angle, then -angle. The value must be finite and positive; there is no additional command-angle cap in this package. The angle reference has bounded speed and acceleration. `L` is the supplied pivot-to-contact radius (`joystick_length`), shared by both conditions. Actual joystick angle is **not** supplied to the controller. Measure it independently for evaluation.
+Set the commanded amplitude in `config/joystick.yaml` with `joystick_angle_deg` (currently 45.0); the controller converts it to radians internally and requests +angle, then -angle. The value must be finite and positive; there is no additional command-angle cap in this package. The angle reference has bounded speed and acceleration. `L` is the supplied pivot-to-contact radius (`joystick_length`), shared by both conditions. In legacy mode the measured angle is recorded for evaluation and does not drive control. The optional `inward_arc` mode below uses live measured shaft angle for alignment.
 
 Horizontal spring–damper forces act at the selected point. A separate normal spring–damper ramps a nominal downward preload (example 3 N), and orientation control follows `theta_d`. Preload is an impedance bias, not force feedback from EIT. Both conditions receive the same contact detector, trajectory, gains, supplied geometry and limits.
+
+### Optional joystick mechanism: both arcs inward
+
+Use `run_block.py --mechanism inward_arc --inward-arc-m 0.010` to select the new mechanism and shorten **both** virtual radii by 10 mm. Omit the depth argument to use `joystick_inward_arc_m` from `controller.yaml`. Omitting both arguments keeps the controller's current selection; `--mechanism legacy` explicitly restores the original mechanism. These options apply only to joystick blocks. Mechanism/depth updates are accepted only in Hold/Done before motion, and the runner waits for acknowledgment from the realtime controller.
+
+The physical `joystick_length` is unchanged. With the current physical radius `L=0.020` m and inward depth `delta=0.010` m, both virtual radii are 0.010 m. The depth must satisfy `0 <= delta < L`. This is the same geometric design as the simulation, using the hardware's own dimensions and existing force limits rather than the simulation's 92 mm joystick.
+
+```text
+s(theta) = [sin(theta), 0, cos(theta)]
+main task target = h0 - L*[0,0,1] + (L-delta)*s(theta_command)
+alignment target = measured_physical_pivot + (L-delta)*s(theta_measured)
+```
+
+The main reference is already `delta` inward at the upright pose; it does not merely reduce displacement along an arc starting at the surface. The task virtual pivot remains contact-defined. The alignment frame follows the **current measured shaft angle** and rotates perpendicular to it; it does not use the final goal or commanded angle. Its physical pivot comes from `joystick_pivot_m` and stays fixed across offset blocks. With the example upright tip at Base Z=0.055 m and physical length 0.020 m, the example pivot is `[0.45,0,0.035]` m. Enter the measured pivot for the actual fixture.
+
+Four spring–damper links join the alignment frame to one common massless planar slider on the palm. All four anchors move together. Tangential force balance sets the slider velocity; the guide transmits normal force and rotation, plus tangential force at its radial stop. The main task force is mapped at the centre/EIT contact attachment, the alignment resultant at the slider centre, and the alignment couple through the angular Jacobian. The EIT attachment stays fixed after contact in both joystick mechanisms.
+
+The new mechanism uses a full 3D main coupling with shared `coupling_k/d` and `normal_k/d`; it ignores the fixed world-Z `preload` and the legacy `orientation_k/d` during contact. Both spring branches ramp over `preload_time` in all force components. One common scale bounds their **summed** force using `force_xy_limit` and `normal_force_limit`; `moment_limit` caps the alignment couple by vector norm. Hold, Ready, Approach and Retract retain their original controls and guards. With the example gains and 10 mm depth, the upright elastic requests are 8 N from the task spring plus 9.375 N from the alignment links **before** force limiting. These are spring requests, not measured contact-force regulation.
+
+Parameters specific to this mechanism are grouped in `config/controller.yaml`: inward depth, physical pivot, alignment half-span and per-link gains, and slider travel are marked `NEW ONLY`. Feedback topic and timeout are marked `NEW CONTROL ONLY` because legacy also records their diagnostics without using them for control. Shared parameters and legacy-only contact gains are also identified in comments. Restart to change geometry/gains; only the mechanism selector and inward depth may change between trials.
+
+The block runner starts the existing single-owner ESP32 recorder and a `joystick_feedback_node.py` process that tails its CSV. No second process opens the serial port. The calibrated Base-X tilt corresponds to positive shaft rotation about Base +Y. The same measured angle/rate is available to both EIT and non-EIT conditions. CSV receipt timestamps are preserved through ROS publication, so replayed or backlogged file records do not become fresh by being republished. USB acquisition/transport delay is not independently measured. The angle is piecewise-linear from the supplied ADC calibration, and rate uses a 50 ms first-order filter. Upright ADC overrides supplied to the block runner also apply to feedback conversion.
+
+Stale, invalid or clipped shaft feedback blocks trial start or stops an active new-mechanism trial; there is no fallback to commanded angle. The current calibration covers approximately ±35° and reaches ADC rails at the endpoints, so run a command **below** that range, such as 30°. `run_block.py` checks this before motion. Rebuild the package before using these options because the status message and feedback interface changed.
+
+For example, after starting EIT inference, launch the centre-block controller in terminal B:
+
+```bash
+ros2 launch franka_eit_vmc controller.launch.py task:=joystick \
+  config:=$EIT_CONFIG_DIR/controller.yaml \
+  overrides:=$EIT_CONFIG_DIR/joystick_center.yaml joystick_angle_deg:=30
+```
+
+Then in terminal C:
+
+```bash
+ros2 run franka_eit_vmc run_block.py --task joystick --block center \
+  --mechanism inward_arc --inward-arc-m 0.010 --repeats 5 --output ~/eit_trials
+```
+
+For off-centre blocks, restart with `joystick_x_minus.yaml` or `joystick_x_plus.yaml` and use the corresponding `--block x_minus` or `--block x_plus`. Keep `joystick_pivot_m` fixed. To compare the old mechanism at the same 30° command, restart the same launch and run the block with `--mechanism legacy`. Automatic blocks still stop the controller when finished, so each new block needs a new launch as in the original procedure.
+
+### Joystick angle recordings
+
+Every joystick block now saves both `joystick_esp32.csv` (the original raw ADC recording) and `joystick_calibrated.csv`. The latter retains source timestamps and raw counts and adds `shaft_angle_rad`, `shaft_angle_deg`, `shaft_rate_rad_s`, `measurement_valid` and `clipped`. Calibration comes from the block's copied `joystick_adc_calibration.json`; the calibrated shaft angle describes tip motion in Base X, or shaft rotation about Base Y. Values at an ADC rail/calibrated endpoint are flagged invalid/clipped even if a bounded angle estimate is written. The first sample has no measured rate and is marked invalid. Keep the validity flags when evaluating errors.
+
+Both mechanisms record this calibrated stream. Only `inward_arc` uses it for control. Trial CSVs also record the controller's received angle/rate, feedback age/freshness/clipping, actual mechanism/depth, slider position and travel-stop flag, alignment force/target/centre and combined-force scale. These fields distinguish the measured shaft angle from `theta_d_rad`, the commanded angle. The shared clock allows alignment with raw joystick, EIT decision and robot traces. The new mechanism's shaft sensor is feedback, so it is not an independent ground-truth validation of that same sensor.
+
+The recorder is stopped first at block end, then the feedback node drains remaining complete samples and closes the calibrated CSV. The runner starts these processes automatically; do not start another joystick reader or feedback publisher for the same block. Standalone `joystick_hardware/run_joystick.sh` still saves its original raw format.
 
 ### Ball rolling
 
@@ -92,7 +141,7 @@ The package does not apply its own stop threshold to Franka's estimated external
 
 `start_trial` approaches downward. At the first valid electrical contact report, it slows to `approach_contact_speed` and commands another `approach_contact_travel_m` (defaults 5 mm/s and 1 mm). Preload begins after EIT contact remains valid for `approach_contact_confirm_s` (default 0.25 s) across at least two frames and the verification descent completes. The pad may move down or meet resistance; both responses count. If EIT contact disappears, normal approach resumes. The total approach distance and time limits still apply. These signals support contact establishment but do not independently prove physical contact. Contact loss during preload or interaction stops the trial. At the common time horizon the robot retracts upward and holds. If retraction times out but the EIT stream has reported no contact continuously for at least 0.5 s, the controller holds its measured pose and reports `done` with `retract_incomplete=true`; the next block repeat still requires the operator to type `ready` or `r`. A stale stream or continued contact still produces `retract_timeout`. `done` means the commanded manipulation finished; it does not mean the object met externally measured task-success criteria. The CSV records whether retraction was incomplete. Check the physical route before the next ready move.
 
-During preload, the horizontal contact-point spring is active immediately while the downward preload ramps. The orientation target remains continuous with approach and the joystick angle is commanded relative to the measured ready orientation. This avoids the orientation-command jump and weak initial lateral support visible in the failed x_plus traces.
+In legacy mode, during preload the horizontal contact-point spring is active immediately while the downward preload ramps. The orientation target remains continuous with approach and the joystick angle is commanded relative to the measured ready orientation. This avoids the orientation-command jump and weak initial lateral support visible in the failed x_plus traces.
 
 Stop/fault handling slews applied torque toward zero before ending FCI when the callback remains operational. Franka native reflexes and communication failures can terminate control independently. A fault requires restarting the executable; there is no automatic error recovery.
 
@@ -363,9 +412,9 @@ Ball total: **2 physical conditions × 2 feedback conditions × 5 repeats = 20 t
 
 ### 8. Save results and finish
 
-The five blocks produce **50 planned trials**. CSVs are saved under `~/eit_trials/<task>/<block_timestamp>/repeat_XX/`; `block.json` records the block/config check and `outcomes.jsonl` records observation status. Joystick blocks save the continuous ESP32 angle CSV and write `pending_esp32_review` after each completed trial. In automatic mode, plotting waits until the block has ended and the controller stop has been requested, so plotting cannot interrupt the next trial. The runner then saves `joystick_<condition>_<timestamp>_analysis.png` beside each trace, `repeat_XX/comparison.png` for paired repeats, and `block_comparison.png` in the block folder; it also plots a partial attempt after a fault. For new blocks with the copied calibration, these plots show the virtual angle, estimated joystick Base X/Y angle, measured point and reference, requested force, and the EIT signal/contact decision sampled by the controller. The angle uses piecewise linear interpolation between centre and the measured ±35° stops; readings at the ADC rails are approximate. A red line marks the fault time. The EIT panels show signal versus cutoff, contact and freshness flags, and pattern distance versus model support limit; the fault message also prints these values. A positive signal can still produce no contact if its pattern is outside model support, its predicted point is outside the pad, or the contact hysteresis has not engaged. Older CSVs lack these EIT diagnostic fields, so replotting them can mark the fault but cannot recover the missing EIT evidence. Older blocks without a copied calibration still plot raw ESP32 counts. Pending status does not claim object success. The plots can be regenerated with `ros2 run franka_eit_vmc plot_joystick_results.py <block-folder>`. Ball blocks still ask for a camera-based observation. Record unsuccessful attempts and faults; if rerunning a failed block, keep the original attempt files and identify the additional trials explicitly.
+The original five-block procedure produces **50 planned trials**. Additional mechanism comparisons are separate blocks and must not be pooled without their mechanism/depth labels. CSVs are saved under `~/eit_trials/<task>/<block_timestamp>/repeat_XX/`; `block.json` records the block/config check, selected mechanism/depth and both joystick CSV paths and `outcomes.jsonl` records observation status. Joystick blocks save the continuous ESP32 angle CSV and write `pending_esp32_review` after each completed trial. In automatic mode, plotting waits until the block has ended and the controller stop has been requested, so plotting cannot interrupt the next trial. The runner then saves `joystick_<condition>_<timestamp>_analysis.png` beside each trace, `repeat_XX/comparison.png` for paired repeats, and `block_comparison.png` in the block folder; it also plots a partial attempt after a fault. For new blocks with the copied calibration, these plots show the virtual angle, estimated joystick Base X/Y angle, measured point and reference, requested force, and the EIT signal/contact decision sampled by the controller. The angle uses piecewise linear interpolation between centre and the measured ±35° stops; readings at the ADC rails are approximate. A red line marks the fault time. The EIT panels show signal versus cutoff, contact and freshness flags, and pattern distance versus model support limit; the fault message also prints these values. A positive signal can still produce no contact if its pattern is outside model support, its predicted point is outside the pad, or the contact hysteresis has not engaged. Older CSVs lack these EIT diagnostic fields, so replotting them can mark the fault but cannot recover the missing EIT evidence. Older blocks without a copied calibration still plot raw ESP32 counts. Pending status does not claim object success. The plots can be regenerated with `ros2 run franka_eit_vmc plot_joystick_results.py <block-folder>`. Ball blocks still ask for a camera-based observation. Record unsuccessful attempts and faults; if rerunning a failed block, keep the original attempt files and identify the additional trials explicitly.
 
-Controller `done` means its sequence finished, not object success. Controller CSVs do not contain measured joystick angle or camera ball ground truth. Define the success tolerance before examining results. Plot joystick errors by offset/condition and ball final errors/recovery traces by disturbance/feedback condition.
+Controller `done` means its sequence finished, not object success. New controller CSVs include received calibrated joystick angle and its validity/freshness; camera ball ground truth is still external. The continuous calibrated joystick CSV is saved for both mechanisms. Define the success tolerance before examining results. Plot joystick errors by offset/condition and ball final errors/recovery traces by disturbance/feedback condition.
 
 To end a running task through the operator tool (terminal C):
 

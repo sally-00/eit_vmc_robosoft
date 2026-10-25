@@ -161,6 +161,10 @@ def check_controller(task,block,config_dir=None):
         client=node.create_client(GetParameters,name+'/get_parameters')
         if not client.wait_for_service(timeout_sec=5.):raise RuntimeError('Launch the task controller first')
         names=['landing_offset_x_m','landing_offset_y_m','update_ball_attachment']
+        if task=='joystick':names += ['joystick_mechanism','joystick_inward_arc_m','joystick_length',
+            'joystick_angle_deg','joystick_pivot_m','joystick_alignment_half_span_m',
+            'joystick_slider_radius_m','joystick_alignment_spring_k','joystick_alignment_spring_d',
+            'joystick_feedback_topic','joystick_feedback_timeout']
         future=client.call_async(GetParameters.Request(names=names))
         rclpy.spin_until_future_complete(node,future,timeout_sec=5.)
         if not future.done() or future.result() is None:raise RuntimeError('Cannot read task configuration')
@@ -176,9 +180,89 @@ def check_controller(task,block,config_dir=None):
                                f'active X={x:+.6f} m, Y={y:+.6f} m; '
                                f'configured X={expected_x:+.6f} m, Y={expected_y:+.6f} m')
         if task=='ball' and values[2].bool_value:raise RuntimeError('Ball comparison requires update_ball_attachment=false')
-        return {key:(v.bool_value if v.type==1 else v.double_value) for key,v in zip(names,values)}
+        return {key:parameter_value(v) for key,v in zip(names,values)}
     finally:
         node.destroy_node();rclpy.shutdown()
+
+
+def parameter_value(value):
+    fields={1:'bool_value',2:'integer_value',3:'double_value',4:'string_value',8:'double_array_value'}
+    if value.type not in fields:raise RuntimeError('Unsupported/incomplete controller parameter')
+    result=getattr(value,fields[value.type])
+    return list(result) if value.type==8 else result
+
+
+def configure_joystick_mechanism(mechanism,depth):
+    """Change only while holding; wait for actual realtime-core acknowledgment."""
+    import rclpy
+    from rclpy.parameter import Parameter
+    from rcl_interfaces.srv import SetParametersAtomically
+    from franka_eit_vmc.msg import ExperimentState
+    rclpy.init();node=rclpy.create_node('eit_block_mechanism_config')
+    latest=[None]
+    sub=node.create_subscription(ExperimentState,'/eit_joystick/status',lambda m:latest.__setitem__(0,m),10)
+    try:
+        deadline=time.monotonic()+5.
+        while latest[0] is None and time.monotonic()<deadline:rclpy.spin_once(node,timeout_sec=.05)
+        if latest[0] is None or latest[0].mode_name not in ('hold','done'):
+            raise RuntimeError('Launch the joystick controller and leave it in hold/done before changing mechanism')
+        client=node.create_client(SetParametersAtomically,'/eit_joystick/set_parameters_atomically')
+        if not client.wait_for_service(timeout_sec=5.):raise RuntimeError('Controller parameter service unavailable')
+        parameters=[Parameter('joystick_mechanism',value=mechanism).to_parameter_msg()]
+        if depth is not None:parameters.append(Parameter('joystick_inward_arc_m',value=depth).to_parameter_msg())
+        future=client.call_async(SetParametersAtomically.Request(parameters=parameters))
+        rclpy.spin_until_future_complete(node,future,timeout_sec=5.)
+        if not future.done() or future.result() is None:raise RuntimeError('Mechanism update timed out')
+        if not future.result().result.successful:raise RuntimeError(future.result().result.reason)
+        latest[0]=None;deadline=time.monotonic()+5.
+        while time.monotonic()<deadline:
+            rclpy.spin_once(node,timeout_sec=.05);m=latest[0]
+            if m and m.mode_name in ('hold','done') and m.joystick_mechanism==mechanism and (
+                    depth is None or math.isclose(m.joystick_inward_arc_m,depth,abs_tol=1e-9)):
+                return
+        raise RuntimeError('Realtime controller did not acknowledge the selected mechanism/depth')
+    finally:node.destroy_node();rclpy.shutdown()
+
+
+def validate_inward_configuration(checked,calibration):
+    if checked.get('joystick_mechanism')!='inward_arc':return
+    depth=checked['joystick_inward_arc_m'];length=checked['joystick_length']
+    if not all(math.isfinite(x) for x in (depth,length)) or not 0<=depth<length:
+        raise RuntimeError('Inward arc must be nonnegative and below physical joystick_length')
+    limit=float(calibration['nominal_limit_deg']);angle=checked['joystick_angle_deg']
+    if not math.isfinite(limit) or not math.isfinite(angle) or not 0<angle<limit:
+        raise RuntimeError(f'Inward-arc live feedback is calibrated to ±{limit:g} deg; '
+                           f'active joystick_angle_deg={angle:g}. Launch with joystick_angle_deg:=30 '
+                           '(or another positive value below the calibrated stop).')
+
+
+def start_shaft_feedback(folder,csv_path,topic,center_x=None,center_y=None):
+    script=Path(__file__).with_name('joystick_feedback_node.py')
+    log_path=folder/'joystick_feedback.log'
+    command=[sys.executable,str(script),'--csv',str(csv_path),
+        '--calibration',str(folder/'joystick_adc_calibration.json'),'--topic',topic,
+        '--output',str(folder/'joystick_calibrated.csv')]
+    if center_x is not None:command.extend(['--center-x-raw',str(center_x)])
+    if center_y is not None:command.extend(['--center-y-raw',str(center_y)])
+    with log_path.open('x') as log:
+        process=subprocess.Popen(command,
+            stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+    return process,log_path
+
+
+def wait_for_shaft_feedback(process,log_path):
+    import rclpy
+    from franka_eit_vmc.msg import ExperimentState
+    rclpy.init();node=rclpy.create_node('eit_block_shaft_check');latest=[None]
+    sub=node.create_subscription(ExperimentState,'/eit_joystick/status',lambda m:latest.__setitem__(0,m),10)
+    try:
+        deadline=time.monotonic()+8.
+        while time.monotonic()<deadline:
+            if process.poll() is not None:raise RuntimeError(f'Shaft feedback process stopped; see {log_path}')
+            rclpy.spin_once(node,timeout_sec=.05);m=latest[0]
+            if m and m.joystick_shaft_fresh and not m.joystick_shaft_clipped:return
+        raise RuntimeError(f'No fresh calibrated shaft feedback; see {log_path}')
+    finally:node.destroy_node();rclpy.shutdown()
 
 
 def main():
@@ -186,6 +270,8 @@ def main():
     p.add_argument('--task',choices=['joystick','ball'],required=True)
     p.add_argument('--block',required=True,help='Joystick: center, x_minus, x_plus. Ball: undisturbed, push.')
     p.add_argument('--repeats',type=int,default=5)
+    p.add_argument('--mechanism',choices=['legacy','inward_arc'],help='Joystick only: select mechanism between trials; omitted keeps controller configuration')
+    p.add_argument('--inward-arc-m',type=float,help='Joystick inward_arc only: inward shortening of BOTH arcs in metres, e.g. 0.010; default comes from controller.yaml')
     p.add_argument('--output',type=Path,default=Path.home()/'eit_trials')
     p.add_argument('--config-dir',type=Path,help='Directory containing the same YAML files used to launch the controller; defaults to EIT_CONFIG_DIR or this checkout')
     p.add_argument('--joystick-port',help='ESP32 serial port; defaults to CH340 auto-detection')
@@ -194,6 +280,11 @@ def main():
     p.add_argument('--center-y-raw',type=int,help='Override the calibrated upright ESP32 Y reading')
     p.add_argument('--center-tolerance-raw',type=int,default=80,help='Allowed ADC difference from upright on each axis')
     a=p.parse_args()
+    if a.task!='joystick' and (a.mechanism is not None or a.inward_arc_m is not None):p.error('Mechanism options apply only to joystick blocks')
+    if a.inward_arc_m is not None:
+        if not math.isfinite(a.inward_arc_m) or a.inward_arc_m<0:p.error('--inward-arc-m must be finite and nonnegative')
+        if a.mechanism=='legacy':p.error('--inward-arc-m is only used by --mechanism inward_arc')
+        if a.mechanism is None:a.mechanism='inward_arc'
     calibration_path=config_directory(a.config_dir)/'joystick_adc_calibration.json'
     calibration=None
     if a.task=='joystick':
@@ -210,7 +301,9 @@ def main():
     if a.center_tolerance_raw<=0 or not all(0<=value<=4095 for value in
             (a.center_x_raw,a.center_y_raw)):p.error('Choose valid ESP32 centre readings and tolerance')
     auto=a.task=='joystick' and not a.manual
+    if a.mechanism is not None:configure_joystick_mechanism(a.mechanism,a.inward_arc_m)
     checked=check_controller(a.task,a.block,a.config_dir)
+    if a.task=='joystick':validate_inward_configuration(checked,calibration)
     script=Path(__file__).with_name('experiment.py')
     created=datetime.now(timezone.utc)
     stamp=created.astimezone().strftime('%Y-%m-%d_%H-%M-%S_%f_%z')
@@ -220,23 +313,31 @@ def main():
         shutil.copyfile(calibration_path,folder/'joystick_adc_calibration.json')
     (folder/'block.json').write_text(json.dumps(vars(a)|{'output':str(a.output),'config_dir':str(config_directory(a.config_dir)),'created_utc':created.isoformat(),'automatic_joystick':auto,'checked_controller_parameters':checked,
         'joystick_recorder_csv':str(folder/'joystick_esp32.csv') if a.task=='joystick' else None,
-        'note':'Operator must launch the matching offset/config. Actual outcome comes from independent measurement, not controller done.'},indent=2)+'\n')
+        'joystick_calibrated_csv':str(folder/'joystick_calibrated.csv') if a.task=='joystick' else None,
+        'note':'Operator must launch the matching offset/config. Evaluate actual object motion, not controller done. Inward_arc uses the same calibrated ESP32 stream for feedback and recording.'},indent=2)+'\n')
     print('This runs the physical robot. Use the matching launch/config; record independent object motion.')
     print('Each repeat tests both conditions. Order alternates across repeats. Logs:',folder)
     if auto:print('Automatic joystick sequence: ready, approach, manipulate and retract for each condition; no keyboard prompts.',flush=True)
     recorder=None
     recorder_log=None
+    feedback=None
     try:
         if a.task=='joystick':
             print('Starting ESP32 recorder before any robot motion...',flush=True)
             recorder,recorder_csv,recorder_log=start_joystick_recorder(folder,a.joystick_port)
             print('ESP32 samples:',recorder_csv,flush=True)
+            feedback,feedback_log=start_shaft_feedback(folder,recorder_csv,
+                checked.get('joystick_feedback_topic','/joystick/shaft'),a.center_x_raw,a.center_y_raw)
+            if checked.get('joystick_mechanism')=='inward_arc':
+                wait_for_shaft_feedback(feedback,feedback_log)
+                print('Inward-arc mechanism: live ESP32 shaft feedback ready; depth',checked['joystick_inward_arc_m'],'m',flush=True)
         for repeat in range(1,a.repeats+1):
             order=['baseline','eit'] if repeat%2 else ['eit','baseline']
             for condition in order:
                 print(f'\n{a.task} / {a.block} / repeat {repeat}/{a.repeats} / {condition}')
                 destination=folder/f'repeat_{repeat:02d}'
                 if recorder:check_joystick_recorder(recorder,recorder_log)
+                if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 if auto:
                     wait_for_joystick_center(recorder_csv,recorder,recorder_log,
                                              a.center_x_raw,a.center_y_raw,a.center_tolerance_raw)
@@ -244,6 +345,7 @@ def main():
                 subprocess.run([sys.executable,str(script),'--task',a.task,'--action','ready',
                                 '--output',str(destination)],check=True)
                 if recorder:check_joystick_recorder(recorder,recorder_log)
+                if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 if auto:
                     wait_for_joystick_center(recorder_csv,recorder,recorder_log,
                                              a.center_x_raw,a.center_y_raw,a.center_tolerance_raw)
@@ -256,12 +358,14 @@ def main():
                 else:print('Do not apply an external push during this trial.')
                 if not auto and require_command('Type run or r and press Enter to approach and manipulate (q stops): ',('run','r')) is None:return
                 if recorder:check_joystick_recorder(recorder,recorder_log)
+                if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 try:
                     subprocess.run([sys.executable,str(script),'--task',a.task,'--action','trial',
                                     '--condition',condition,'--output',str(destination)],check=True)
                 finally:
                     if recorder and not auto:plot_joystick_block(folder)
                 if recorder:check_joystick_recorder(recorder,recorder_log)
+                if feedback and feedback.poll() is not None:raise RuntimeError(f'Shaft feedback stopped; see {feedback_log}')
                 if a.task=='joystick':
                     outcome=None
                     status='pending_esp32_review'
@@ -286,8 +390,9 @@ def main():
         raise SystemExit(130)
     finally:
         if auto and recorder:stop_controller(script,a.task)
+        if recorder:stop_joystick_recorder(recorder)
+        if feedback:stop_joystick_recorder(feedback)
         if recorder:
-            stop_joystick_recorder(recorder)
             print('ESP32 recording saved:',recorder_csv,flush=True)
             plot_joystick_block(folder)
 

@@ -20,8 +20,13 @@ def setup(context):
         if not Path(path).expanduser().is_file():
             raise RuntimeError(f'{name} parameter file does not exist: {path}. '
                                'Set EIT_CONFIG_DIR to the franka_eit_vmc/config directory in this terminal.')
+    parameters=[str(Path(path).expanduser()) for _,path in paths]
+    angle=LaunchConfiguration('joystick_angle_deg').perform(context)
+    if angle:
+        if task!='joystick':raise ValueError('joystick_angle_deg applies only to joystick')
+        parameters.append({'joystick_angle_deg':float(angle)})
     return [Node(package='franka_eit_vmc',executable=executables[task],output='screen',
-                 parameters=[str(Path(path).expanduser()) for _,path in paths])]
+                 parameters=parameters)]
 
 def generate_launch_description():
     share=Path(get_package_share_directory('franka_eit_vmc'))
@@ -31,4 +36,5 @@ def generate_launch_description():
         DeclareLaunchArgument('mount',default_value=''),
         DeclareLaunchArgument('posture',default_value=''),
         DeclareLaunchArgument('overrides',default_value=''),
+        DeclareLaunchArgument('joystick_angle_deg',default_value=''),
         OpaqueFunction(function=setup)])
