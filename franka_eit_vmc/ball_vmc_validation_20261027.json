@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-27",
+  "status": "passed",
+  "scope": "Ball controller only; existing user edits retained; no robot commands executed",
+  "configuration_files_unchanged": {
+    "config/controller.yaml": "a9e03cf942abf62100ee265ccbe7c5be9fae6c3da4dbe3d1ec2dd3ddfd82d6a9",
+    "config/joystick_x_minus.yaml": "c3476e946aadbf10530f29e92276dae85f31fa76398e018773f785ba53dae2ba",
+    "config/joystick_y_plus.yaml": "c05cb953b9c10c34543709c50db038a58ac90397715729fbb1ff9e9c73496f00",
+    "config/joystick_center.yaml": "e09412000855c2e9b8840483869fbe4bb244d15b8e3447d7051f5b0eb51223da",
+    "config/ball_y_minus_10cm.yaml": "3a0a7eac6800f49388889f0b228d71b52b68b32b3f745070594f38b8f8068595",
+    "config/joystick_x_plus.yaml": "9818b061576ff7f9c3a1eeb2474539bf4bfebae8a8298d66de65f22b03581c7e",
+    "config/joystick_y_minus.yaml": "0a22e373b6babd64f3c407b9340bb553ca4468b0ae48a7b867e7e857cd92284d",
+    "config/eit.json": "77fceae62057329c464ae134986d542d0fc9abbd082d21168d0bf2d6ec33e0fd",
+    "config/ball.yaml": "b5bd59410777323f40fc595d4b9f88538a9d4cbb9208974eaafcbde1ad4bc5df",
+    "config/mount.yaml": "8ea2d919eb21fe27811210fc02e7b8b7a1c8f716e64f8d4b75d83121956f5ad2",
+    "config/panda.yaml": "afe77e9ffe9ef520b9ac600080aecf2d37bb81546b48a34da6c31060dfd44263",
+    "config/joystick_adc_calibration.json": "3a26288d766689458a9ece095246bc5b2d77b02487d84366dcf8ecb9130f0b6f",
+    "config/joystick.yaml": "a959dae07b064a24bca8c005f1b7cd6bf293b5e4eeaa26b88027f560f415137c"
+  },
+  "existing_config_initializers_unchanged": 92,
+  "new_config_initializers": {
+    "ball_recover_contact": "true",
+    "ball_initial_attachment": "false",
+    "ball_goal_d": "20.",
+    "ball_force_slew": "10.",
+    "ball_goal_ramp_s": ".4",
+    "ball_normal_mass": ".4",
+    "ball_normal_damping": "20.",
+    "ball_normal_speed": ".015",
+    "ball_normal_travel": ".025",
+    "ball_normal_up_travel": ".002",
+    "ball_pause_k": "300.",
+    "ball_pause_d": "35.",
+    "ball_position_filter": ".35",
+    "ball_velocity_filter": ".25"
+  },
+  "build": "/tmp/eit-franka-ball-ros-build/franka_eit_vmc",
+  "install": "/tmp/eit-franka-ball-ros-install",
+  "test_suites_passed": 10,
+  "simulation_oracle_rows": 1080,
+  "limitations": [
+    "Preserved hardware startup/initial settling, gains, limits, physical sensor, and actuation differ from simulation",
+    "Existing goal_force_limit now caps direct drive rather than virtual transmission effort",
+    "No hardware execution or full Franka physics validation",
+    "Joystick mechanism remains unchanged"
+  ]
+}

@@ -1,0 +1,12 @@
+/**:
+  ros__parameters:
+    # Review the full route before launching: ball Y -0.135 -> -0.235 m;
+    # sliding baseline: nominal pad motion is 0.10 m, ending near Y=-0.235 m.
+    ball_axis: 'y'
+    initial_ball_y: -0.135
+    roll_distance: -0.10
+    ball_reference_advance_start_error_m: 0.10  # allow post-ramp extension if the ball is still short
+    ball_duration: 20.0  # common maximum; retracts sooner after sustained estimated goal
+    # This overlay deliberately extends the old Y=-0.18 m software bound.
+    # These bounds do not establish obstacle clearance or reachability.
+    workspace_min_m: [0.15, -0.32, 0.05]

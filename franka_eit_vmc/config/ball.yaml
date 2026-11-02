@@ -1,12 +1,37 @@
 /**:
   ros__parameters:
-    ready_pad_position_m: [0.45, -0.10, 0.35]  # ball operating lane; Base Y = -100 mm
+    # 20 mm diameter ball on a base whose top is at Base Z=45 mm:
+    # ball centre Z=55 mm, top Z=65 mm; ready pad face is 25 mm above it.
+    ready_pad_position_m: [0.45, -0.135, 0.09]
+    # Ball approach descends to workspace_min_m Z if contact is absent.
+    # Its force request is capped near the largest command in the last trace.
+    ball_approach_force_limit: 15.0  # N at the pad; tool-weight compensation is separate
+    # Ball-only normal contact settings. These override controller.yaml for task:=ball.
+    preload: 2.5             # N downward bias after contact; must be <= normal_force_limit
+    preload_time: 0.55       # s transition from bounded approach force to 3 N preload
+    normal_k: 800.0          # N/m vertical spring stiffness
+    normal_d: 60.0           # N.s/m vertical damping
+    normal_force_limit: 3.5  # N steady vertical cap after the approach-to-preload blend
     initial_ball_x: 0.45       # independently measured initial ball centre in Base X
+    initial_ball_y: -0.135    # measured ball centre in Base Y for the current setup
+    ball_axis: 'x'           # quote axis names; roll_distance is signed along this Base axis
     roll_distance: 0.020     # positive = roll toward Base +X; goal X = 0.47 m
+    ball_baseline_motion_ratio: 1.0  # sliding on the base: baseline estimates 1 m ball travel per 1 m pad travel
+    ball_contact_settle_s: 0.30  # EIT: stable electrical contact; baseline: elapsed settling time
+    ball_interact_dropout_grace_s: 0.04  # s; ignore isolated bad frames after engagement, then pause and recover
+    ball_goal_tolerance_m: 0.005 # progress threshold: at least goal travel minus 5 mm
+    ball_goal_dwell_s: 2.0       # s continuously past that threshold with valid contact
+    ball_contact_loss_grace_s: 0.50  # cautious descent after provisional contact in Approach
     ball_duration: 8.0         # common observation horizon after engagement
     virtual_mass: 0.6
     virtual_damping: 6.0
+    # Direct VMC applies these gains to palm force (old controller used a virtual mass).
     goal_k: 80.0
-    goal_force_limit: 2.0
+    goal_force_limit: 5.0
+    ball_reference_speed_m_s: 0.030  # m/s, 10 cm in about 3.3 s of valid lateral drive
+    ball_reference_advance_speed_m_s: 0.004  # m/s beyond the fixed goal if the estimate is still short
+    ball_reference_advance_limit_m: 0.050  # m maximum virtual goal extension
+    ball_reference_advance_start_error_m: 0.050  # m; start advancing within 5 cm of the goal
+    ball_pause_force_slew: 50.0  # N/s during contact loss; ball_force_slew remains 10 N/s while driving
     progress_speed: 0.0125
     update_ball_attachment: false  # centre attachment in BOTH progress-feedback conditions

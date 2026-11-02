@@ -4,7 +4,11 @@ uint8 fault
 string mode_name
 string fault_name
 bool use_eit
+string contact_source
+float64[3] joystick_tip_position_m
 bool retract_incomplete
+bool trial_contact_released
+bool joystick_slipped
 uint64 sensor_sequence
 bool sensor_contact
 bool sensor_contact_candidate
@@ -18,10 +22,22 @@ float64 sensor_contact_threshold
 float64 sensor_pattern_distance
 float64 sensor_pattern_support_limit
 float64 sensor_predicted_radius_mm
+float64[3] sensor_contact_pad_m
+float64[3] sensor_contact_base_m
 float64 trial_time_s
 float64 progress_m
 float64 progress_velocity_m_s
 float64 ball_goal_x_m
+float64 ball_goal_y_m
+float64 ball_goal_coordinate_m
+string ball_axis
+# Direct ball VMC: both estimators share contact response unless explicitly disabled.
+bool ball_contact_ready
+bool ball_contact_paused
+bool ball_goal_reached
+float64 ball_contact_loss_duration_s
+float64 ball_loaded_contact_duration_s
+float64 approach_distance_limit_m
 float64 joystick_angle_command_rad
 float64 joystick_angle_command_y_rad
 float64[3] pad_position_m
@@ -32,6 +48,7 @@ float64[3] reference_m
 float64[3] attachment_in_pad_m
 float64[3] coupling_force_n
 float64[3] requested_cartesian_force_n
+float64[3] tool_weight_compensation_force_n
 float64[3] requested_cartesian_moment_nm
 float64[3] external_force_n
 float64[3] external_moment_nm
@@ -40,6 +57,7 @@ float64[7] commanded_torque_nm
 
 # New-mechanism diagnostics (legacy mode reports its selection, feedback optional).
 string joystick_mechanism
+string joystick_axis
 float64 joystick_inward_arc_m
 float64 joystick_shaft_angle_rad
 float64 joystick_shaft_rate_rad_s
@@ -49,8 +67,22 @@ float64 joystick_shaft_age_s
 bool joystick_shaft_fresh
 bool joystick_shaft_clipped
 float64 joystick_force_scale
+# Independent elastic saturations; joystick_force_scale stays 1 (no aggregate cap).
+float64 joystick_task_spring_scale
+float64 joystick_alignment_min_spring_scale
 float64[2] joystick_slider_m
 bool joystick_slider_at_stop
 float64[3] joystick_alignment_force_n
 float64[3] joystick_alignment_centre_m
 float64[3] joystick_alignment_target_m
+
+# Upward-yielding normal carriage; force is a virtual command, not measured pressure.
+float64 ball_normal_position_m
+float64 ball_normal_velocity_m_s
+float64 ball_normal_origin_m
+float64 ball_normal_force_n
+float64 ball_estimated_velocity_m_s
+float64 ball_drive_reference_m
+bool ball_normal_brake
+bool ball_normal_at_stop
+bool ball_recover_contact

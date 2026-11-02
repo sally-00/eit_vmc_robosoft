@@ -1,7 +1,14 @@
 #pragma once
 #include "franka_eit_vmc/core.hpp"
+#include <limits>
 
 namespace franka_eit_vmc {
+struct SpringForce {
+  V3 force;
+  double energy{0.}, scale{1.};
+};
+// Radially saturate elastic force only; damping is added separately.
+SpringForce saturating_spring(const V3& extension, double stiffness, double force_limit);
 struct ArcReference { V3 position; V3 velocity; };
 struct ShaftGeometry {
   V3 axis, axis_rate, angular_velocity;
@@ -15,7 +22,7 @@ ArcReference inward_arc(const V3& upright_surface, double physical_length, doubl
 struct SliderAlignment {
   V3 centre, force, moment;
   Eigen::Vector2d rate;
-  double energy{0.};
+  double energy{0.}, min_spring_scale{1.};
   bool at_stop{false};
 };
 // Four symmetric links share ONE massless, frictionless planar guide. Normal
@@ -25,5 +32,5 @@ SliderAlignment slider_alignment(const V3& face, const Eigen::Matrix3d& palm_rot
     const V3& face_velocity, const V3& omega, const V3& target, const V3& target_velocity,
     const Eigen::Matrix3d& target_rotation, const V3& target_omega,
     const Eigen::Vector2d& slider, double half_span, double spring_k, double spring_d,
-    double radius);
+    double radius, double spring_force_limit=std::numeric_limits<double>::infinity());
 }  // namespace franka_eit_vmc

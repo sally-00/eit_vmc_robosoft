@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 import json
+import hashlib
+import importlib.util
+import threading
+from types import SimpleNamespace
 import math
 import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import numpy as np
 
@@ -70,6 +74,63 @@ class Tests(unittest.TestCase):
         self.assertEqual(reader.rx_gain_margin_steps, 2)
         self.assertEqual(reader.frequency, 50)
 
+    def test_sensor_selects_scan_from_model(self):
+        script=ROOT/'scripts/eit_contact_node.py'
+        spec=importlib.util.spec_from_file_location('eit_contact_scan_test',script)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        model=PositionModel.load(MODEL)
+        host=json.loads((ROOT/'config/eit.json').read_text())
+        host.update(eit_port='/dev/ttyACM0',contact_threshold=.25,
+                    eit_drive_pattern='adjacent',eit_frequency_khz=20)
+        effective,reader=module.acquisition_config_for_model(host,model)
+        self.assertEqual(effective['eit_drive_pattern'],'combined')
+        self.assertEqual(effective['eit_frequency_khz'],50)
+        self.assertEqual(effective['eit_port'],'/dev/ttyACM0')
+        self.assertEqual(effective['contact_threshold'],.25)
+        self.assertEqual(reader.protocol,model.protocol)
+        self.assertEqual(len(reader.protocol),304)
+        self.assertEqual(host['eit_drive_pattern'],'adjacent')
+
+        adjacent_settings=dict(model.metadata['eit_config'],eit_drive_pattern='adjacent')
+        adjacent_model=SimpleNamespace(metadata={'eit_config':adjacent_settings},
+            protocol=measurement_protocol(adjacent_settings['eit_electrode_pins'],'adjacent'),
+            channels=208)
+        adjacent,reader=module.acquisition_config_for_model(host,adjacent_model)
+        self.assertEqual(adjacent['eit_drive_pattern'],'adjacent')
+        self.assertEqual(len(reader.protocol),208)
+        with self.assertRaisesRegex(ValueError,'different measurement channels'):
+            module.acquisition_config_for_model(host,SimpleNamespace(
+                metadata=adjacent_model.metadata,protocol=model.protocol,channels=304))
+
+    def test_sensor_replaces_only_its_previous_port_owner(self):
+        script=ROOT/'scripts/eit_contact_node.py'
+        spec=importlib.util.spec_from_file_location('eit_contact_takeover_test',script)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        prior=['python3','/home/birl/franka_ros2_ws/install/franka_eit_vmc/lib/franka_eit_vmc/eit_contact_node.py']
+        logger=Mock()
+        with patch.object(module,'serial_port_owners',side_effect=[[123],[123],[]]), \
+             patch.object(module,'robot_controller_running',return_value=False), \
+             patch.object(module,'process_arguments',return_value=prior), \
+             patch.object(module.Path,'stat',return_value=SimpleNamespace(st_uid=os.getuid())), \
+             patch.object(module.os,'kill') as kill:
+            module.release_previous_eit_node('/dev/ttyACM0',logger)
+        kill.assert_called_once_with(123,module.signal.SIGINT)
+        logger.info.assert_called_once()
+        with patch.object(module,'serial_port_owners',return_value=[456]), \
+             patch.object(module,'robot_controller_running',return_value=False), \
+             patch.object(module,'process_arguments',return_value=['python3','contact_position_app.py']), \
+             patch.object(module.Path,'stat',return_value=SimpleNamespace(st_uid=os.getuid())), \
+             patch.object(module.os,'kill') as kill:
+            with self.assertRaisesRegex(RuntimeError,'held by PID 456'):
+                module.release_previous_eit_node('/dev/ttyACM0',logger)
+        kill.assert_not_called()
+        with patch.object(module,'serial_port_owners',return_value=[123]), \
+             patch.object(module,'robot_controller_running',return_value=True), \
+             patch.object(module.os,'kill') as kill:
+            with self.assertRaisesRegex(RuntimeError,'controller is running'):
+                module.release_previous_eit_node('/dev/ttyACM0',logger)
+        kill.assert_not_called()
+
     def test_reader_releases_port_when_stop_command_fails(self):
         model = PositionModel.load(MODEL)
         reader = EITReader(model.metadata['eit_config'])
@@ -121,6 +182,72 @@ class Tests(unittest.TestCase):
         self.assertFalse(output['position_valid'])
         frame['clipped'] = [True] * channels
         self.assertTrue(engine.step(frame)['measurement_valid'])  # Saved model allows clipping.
+
+    def test_startup_baseline_calibrates_once_after_a_connection_retry(self):
+        script=ROOT/'scripts/eit_contact_node.py'
+        spec=importlib.util.spec_from_file_location('eit_contact_startup_test',script)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        config=ROOT/'config/eit.json'
+        settings=json.loads(config.read_text())
+        class Stop:
+            done=False
+            def is_set(self):return self.done
+            def wait(self,seconds):return self.done
+        stop=Stop()
+        class Reader:
+            def __init__(self,settings):
+                self.protocol=measurement_protocol(settings['eit_electrode_pins'],
+                                                    settings['eit_drive_pattern'])
+                self.ser=SimpleNamespace(in_waiting=0)
+                self._rx_buffer=b'';self.opens=0;self.count=0
+            def open(self):self.opens+=1;self.count=0
+            def close(self):pass
+            def _line(self,deadline):
+                self.count+=1
+                if self.opens==1 and self.count==8:raise OSError('interrupted startup frame')
+                if self.opens==2 and self.count==25:stop.done=True
+                return f'{self.opens}:{self.count}'
+        class Engine:
+            def __init__(self,path,contact_threshold):
+                self.sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                protocol=measurement_protocol(settings['eit_electrode_pins'],settings['eit_drive_pattern'])
+                self.model=SimpleNamespace(metadata={'eit_config':settings},support_limit=1.,
+                                           protocol=protocol,channels=len(protocol))
+                self.physical=True;self.baseline=None;self.on=self.off=0;self.contact=False
+                self.contact_threshold=contact_threshold;self.captures=[]
+            def set_baseline(self,value):
+                self.captures.append(value);self.baseline=value
+            def step(self,frame):return {}
+        class Thread:
+            def __init__(self,target,daemon):self.target=target
+            def start(self):pass
+        args=SimpleNamespace(model=None,config=None,frame='eit_pad')
+        with patch.object(module.Node,'__init__',return_value=None), \
+             patch.object(module.SensorNode,'declare_parameter',return_value=SimpleNamespace(value=0.)), \
+             patch.object(module.SensorNode,'add_on_set_parameters_callback'), \
+             patch.object(module.SensorNode,'get_logger',return_value=Mock()), \
+             patch.object(module.SensorNode,'create_publisher'), \
+             patch.object(module.SensorNode,'create_service'), \
+             patch.object(module.SensorNode,'create_timer'), \
+             patch.object(module,'select_model',return_value=MODEL), \
+             patch.object(module,'eit_config_path',return_value=config), \
+             patch.object(module,'python_packets',return_value=[]), \
+             patch.object(module,'EITReader',Reader), \
+             patch.object(module,'Inference',Engine), \
+             patch.object(module.threading,'Thread',Thread), \
+             patch.object(module,'parse_frame',side_effect=lambda line,count: {'frame':line}):
+            sensor=module.SensorNode(args)
+            sensor.stop=stop
+            self.assertTrue(sensor.startup_baseline_pending)
+            self.assertTrue(sensor.baseline_requested.is_set())
+            sensor.receive()
+        self.assertEqual(sensor.reader.opens,2)
+        self.assertEqual(len(sensor.engine.captures),1)
+        samples=sensor.engine.captures[0]['frames']
+        self.assertEqual(len(samples),20)
+        self.assertTrue(all(frame['frame'].startswith('2:') for frame in samples))
+        self.assertFalse(sensor.startup_baseline_pending)
+        self.assertIsNotNone(sensor.baseline_time_ns)
 
     def test_invalid_checkpoint(self):
         with np.load(MODEL, allow_pickle=False) as data:

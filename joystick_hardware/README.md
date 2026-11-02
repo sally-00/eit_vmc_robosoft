@@ -64,7 +64,7 @@ The same `dialout` membership covers the ESP32 and EIT device when their serial 
 ./joystick_hardware/run_joystick.sh --port /dev/ttyUSB0
 ```
 
-The launcher ignores inherited Python environment variables from other software and saves each run to a new CSV file in `joystick_hardware/recordings/`. The live window plots both analog channels; close it or press Ctrl+C to stop.
+The launcher ignores inherited Python environment variables from other software and saves each run to a new CSV file in `joystick_hardware/recordings/`. It acquires an exclusive serial lock so a second recorder fails rather than sharing the data stream. When started by `run_block.py`, both the recorder and shaft-feedback node monitor the block runner and exit if it disappears. The live window plots both analog channels; close it or press Ctrl+C to stop.
 
 For recording without a plot:
 

@@ -3,6 +3,7 @@
 
 import argparse
 import csv
+import os
 from collections import deque
 from datetime import datetime
 from pathlib import Path
@@ -45,6 +46,7 @@ def main():
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument("--output", type=Path, help="CSV path; defaults to a new timestamped file")
     parser.add_argument("--no-plot", action="store_true", help="Save and print samples without a GUI")
+    parser.add_argument("--parent-pid", type=int, help="Stop if the supervising block runner exits")
     parser.add_argument("--window", type=float, default=15.0, help="Visible plot duration in seconds")
     args = parser.parse_args()
     if args.window <= 0:
@@ -70,7 +72,7 @@ def main():
     output = args.output or Path("recordings") / f"joystick_{datetime.now().astimezone():%Y%m%d_%H%M%S}.csv"
     output.parent.mkdir(parents=True, exist_ok=True)
 
-    with serial.Serial(port, args.baud, timeout=0.02) as device, output.open("x", newline="") as file:
+    with serial.Serial(port, args.baud, timeout=0.02, exclusive=True) as device, output.open("x", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["host_unix_ns", "host_monotonic_ns", "esp_ms", "x_raw", "y_raw", "pressed"])
         file.flush()
@@ -93,6 +95,9 @@ def main():
         last_print = time.monotonic()
         try:
             while plt is None or plt.fignum_exists(fig.number):
+                if args.parent_pid is not None and os.getppid() != args.parent_pid:
+                    print("Block runner exited; stopping ESP32 recorder", flush=True)
+                    break
                 raw = device.readline()
                 if raw:
                     host_monotonic_ns = time.monotonic_ns()

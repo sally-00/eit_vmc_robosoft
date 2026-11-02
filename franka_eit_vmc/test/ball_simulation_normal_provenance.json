@@ -1,0 +1,12 @@
+{
+  "sources": {
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_061.npz": "bc43993a315b9d997209378de768c1e3c0fb12f64c4a1dbc63fd55214ef5b10a",
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_063.npz": "bcd44760f88b09600051d9509adeade480732f722c7b2af36d359d415fa9f9a6",
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_065.npz": "e9e088188691128ff78f188a66490d8aba0c1752fc69982b7a69c678365bac9b",
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_067.npz": "e9f9440998b0129ad16adb912c18ee6ecc33987277d2bff186450a61f25134b6",
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_069.npz": "4cb762b0d8828d25d518bff41dbfb989bf971e8c213bc06562c946a1eb70fb07",
+    "/media/birl/Yi Cam data/09_EIT_vmc/ball_eit_yielding_20261027/trials/trial_071.npz": "fe8d6e9edd9d8837dc7baf50256526947e3f22a4cc64d5c176fef1d43b4c912f"
+  },
+  "stride": 7,
+  "columns": "zn vn point_z point_v brake valid dt origin force next_z next_v"
+}

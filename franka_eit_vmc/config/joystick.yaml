@@ -1,9 +1,19 @@
 /**:
   ros__parameters:
-    joystick_length: 0.020     # assumes reported 20 mm is pivot-to-contact radius
-    approach_distance: 0.030  # from 75 mm ready to 45 mm, preserving prior lower endpoint
+    # Shaft extended by 82.5 mm: pivot 35 mm + length 102.5 mm = tip 137.5 mm.
+    ready_pad_position_m: [0.45, 0.0, 0.1575]  # face 20 mm above upright tip
+    joystick_length: 0.1025
+    joystick_approach_below_tip_m: 0.010  # cap each approach at measured tip Z minus 10 mm
+    retract_distance: 0.045  # clears the upright tip after a tilted trial
+    approach_distance: 0.060  # budget for tilted shaft; actual descent capped using tip height
     approach_timeout: 10.0
-    joystick_angle_deg: 30.0  # commands +30 degrees, then -30 degrees
-    joystick_duration: 9.1
-    angle_speed: 0.28
+    # After engagement, no-contact readings hold the last EIT attachment and do not end the trial.
+    joystick_approach_final_hold_s: 2.0 # Hold the final reference for up to 2 s to confirm contact; no further descent
+    joystick_angle_deg: 20.0  # commands +20 degrees, then -20 degrees, then zero
+    joystick_axis: 'x'       # quote axis names; run_block --axis overrides between trials
+    joystick_alignment_enabled: false # true: orientation VMC on; false: task spring only during inward_arc contact
+    # Ready, approach and retract retain orientation control with either setting.
+    joystick_return_zero_start_s: 13.0 # s from contact: begin the smooth return to zero
+    joystick_duration: 19.0  # s from contact, including preload; final 6 s return toward zero before retract
+    angle_speed: 0.15
     angle_acceleration: 2.0

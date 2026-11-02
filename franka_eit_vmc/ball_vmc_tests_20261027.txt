@@ -1,0 +1,26 @@
+Internal ctest changing into directory: /tmp/eit-franka-ball-ros-build/franka_eit_vmc
+Test project /tmp/eit-franka-ball-ros-build/franka_eit_vmc
+      Start  1: core
+      Start  2: ball_vmc
+      Start  3: sdk_torque_path
+ 1/10 Test  #2: ball_vmc .........................   Passed    0.00 sec
+      Start  4: eit_model
+ 2/10 Test  #3: sdk_torque_path ..................   Passed    0.01 sec
+      Start  5: joystick_feedback
+ 3/10 Test  #5: joystick_feedback ................   Passed    0.03 sec
+      Start  6: experiment_block
+ 4/10 Test  #6: experiment_block .................   Passed    0.10 sec
+      Start  7: joystick_recorder
+ 5/10 Test  #4: eit_model ........................   Passed    0.19 sec
+      Start  8: operator_release
+ 6/10 Test  #7: joystick_recorder ................   Passed    0.14 sec
+      Start  9: joystick_plots
+ 7/10 Test  #9: joystick_plots ...................   Passed    0.81 sec
+      Start 10: experiment_recording
+ 8/10 Test #10: experiment_recording .............   Passed    0.13 sec
+ 9/10 Test  #1: core .............................   Passed    7.57 sec
+10/10 Test  #8: operator_release .................   Passed    9.84 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Total Test time (real) =  10.03 sec

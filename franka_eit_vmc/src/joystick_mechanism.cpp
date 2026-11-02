@@ -1,7 +1,19 @@
 #include "franka_eit_vmc/joystick_mechanism.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace franka_eit_vmc {
+SpringForce saturating_spring(const V3& extension, double stiffness, double force_limit) {
+  SpringForce out;
+  const double length = extension.norm();
+  const double elastic_norm = stiffness * length;
+  out.scale = elastic_norm > force_limit ? force_limit / elastic_norm : 1.;
+  out.force = out.scale * stiffness * extension;
+  out.energy = elastic_norm > force_limit
+      ? force_limit * (length - .5 * force_limit / stiffness)
+      : .5 * stiffness * length * length;
+  return out;
+}
 ShaftGeometry shaft_geometry(double angle_x, double angle_y, double rate_x, double rate_y) {
   const V3 unnormalised(std::tan(angle_x), std::tan(angle_y), 1.);
   const double length = unnormalised.norm();
@@ -26,13 +38,28 @@ ArcReference inward_arc(const V3& anchor, double length, double depth, double th
 SliderAlignment slider_alignment(const V3& face, const Eigen::Matrix3d& R,
     const V3& face_velocity, const V3& omega, const V3& target, const V3& target_velocity,
     const Eigen::Matrix3d& Q, const V3& target_omega, const Eigen::Vector2d& slider,
-    double a, double k, double d, double radius) {
+    double a, double k, double d, double radius, double spring_force_limit) {
   SliderAlignment out;
   const V3 arm = R * V3(slider.x(), slider.y(), 0.);
   out.centre = face + arm;
   const V3 material_velocity = face_velocity + omega.cross(arm);
+  const std::array<V3,4> local{V3(a,0.,0.), V3(-a,0.,0.), V3(0.,a,0.), V3(0.,-a,0.)};
+  std::array<V3,4> actual_arms, target_arms, elastic;
+  V3 elastic_sum = V3::Zero();
+  for (size_t i=0;i<local.size();++i) {
+    actual_arms[i] = R * local[i];
+    target_arms[i] = Q * local[i];
+    const auto spring = saturating_spring(
+        target + target_arms[i] - out.centre - actual_arms[i], k, spring_force_limit);
+    elastic[i] = spring.force;
+    elastic_sum += spring.force;
+    out.energy += spring.energy;
+    out.min_spring_scale = std::min(out.min_spring_scale, spring.scale);
+  }
+  // Saturated springs no longer sum to 4*k*centre_error. Solve tangential
+  // balance using their actual forces; the four linear dampers contribute 4*d.
   out.rate = R.leftCols<2>().transpose() *
-      (target_velocity - material_velocity + (k / d) * (target - out.centre));
+      (target_velocity - material_velocity + elastic_sum / (4. * d));
   const double norm = slider.norm();
   if (norm >= radius - 1e-10 && norm > 0. && slider.dot(out.rate) > 0.) {
     out.rate -= slider * slider.dot(out.rate) / (norm * norm);
@@ -40,15 +67,12 @@ SliderAlignment slider_alignment(const V3& face, const Eigen::Matrix3d& R,
   }
   const V3 centre_velocity = material_velocity + R.leftCols<2>() * out.rate;
   out.force.setZero(); out.moment.setZero();
-  for (const V3& local : {V3(a,0.,0.), V3(-a,0.,0.), V3(0.,a,0.), V3(0.,-a,0.)}) {
-    const V3 actual_arm = R * local, target_arm = Q * local;
-    const V3 extension = target + target_arm - out.centre - actual_arm;
-    const V3 relative_velocity = target_velocity + target_omega.cross(target_arm) -
-                                centre_velocity - omega.cross(actual_arm);
-    const V3 force = k * extension + d * relative_velocity;
+  for (size_t i=0;i<local.size();++i) {
+    const V3 relative_velocity = target_velocity + target_omega.cross(target_arms[i]) -
+                                centre_velocity - omega.cross(actual_arms[i]);
+    const V3 force = elastic[i] + d * relative_velocity;
     out.force += force;
-    out.moment += actual_arm.cross(force);
-    out.energy += .5 * k * extension.squaredNorm();
+    out.moment += actual_arms[i].cross(force);
   }
   return out;
 }

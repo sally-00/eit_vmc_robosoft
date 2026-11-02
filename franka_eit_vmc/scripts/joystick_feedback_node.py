@@ -5,12 +5,15 @@ import csv
 import io
 import json
 import math
+import os
 from pathlib import Path
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 from franka_eit_vmc.msg import JoystickState
 from franka_eit_tools.joystick import ShaftDecoder
+from franka_eit_tools.recording import file_packet,python_packets,json_default,process_identity
+from std_srvs.srv import Trigger
 
 
 class FeedbackNode(Node):
@@ -22,6 +25,9 @@ class FeedbackNode(Node):
         center=args.center_x_raw if channel=='x_raw' else args.center_y_raw
         center_y=args.center_x_raw if channel_y=='x_raw' else args.center_y_raw
         self.decoder = ShaftDecoder(calibration,observed_center=center,observed_center_y=center_y)
+        self.recording_args=vars(args).copy()
+        self.recording_artifacts=[file_packet(args.calibration,'loaded_joystick_calibration')]+python_packets(__file__)
+        self.recording_service=self.create_service(Trigger,'~/recording_state',self.recording_state)
         self.output=args.output.open('x',newline='') if args.output else None
         self.writer=csv.writer(self.output) if self.output else None
         if self.writer:
@@ -36,6 +42,14 @@ class FeedbackNode(Node):
         qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT)
         self.publisher = self.create_publisher(JoystickState, args.topic, qos)
         self.timer = self.create_timer(.01, self.read_latest)
+
+    def recording_state(self,request,response):
+        del request
+        response.success=True
+        response.message=json.dumps(dict(**process_identity(),arguments=self.recording_args,
+            decoder=vars(self.decoder),sequence=self.sequence,artifacts=self.recording_artifacts),
+            default=json_default,allow_nan=False)
+        return response
 
     def read_latest(self):
         # Bound each timer's work and publish the newest complete sample only.
@@ -95,13 +109,18 @@ def main():
     parser.add_argument('--output',type=Path,help='Continuous calibrated CSV alongside the raw recording')
     parser.add_argument('--center-x-raw',type=int)
     parser.add_argument('--center-y-raw',type=int)
+    parser.add_argument('--parent-pid',type=int,help='Stop if the supervising block runner exits')
     parser.add_argument('--topic', default='/joystick/shaft')
     args, ros = parser.parse_known_args()
     rclpy.init(args=ros)
     node = None
     try:
         node = FeedbackNode(args)
-        rclpy.spin(node)
+        while rclpy.ok():
+            if args.parent_pid is not None and os.getppid()!=args.parent_pid:
+                node.get_logger().info('Block runner exited; stopping shaft feedback')
+                break
+            rclpy.spin_once(node,timeout_sec=.1)
     except KeyboardInterrupt:
         pass
     finally:

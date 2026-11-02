@@ -3,6 +3,8 @@
 import argparse
 import csv
 import json
+import sys
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -11,21 +13,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-COLORS = {'baseline': '#1764ab', 'eit': '#d35400'}
-LABELS = {'baseline': 'without EIT', 'eit': 'with EIT'}
+CONDITIONS = ('baseline', 'eit', 'kinematic')
+COLORS = {'baseline': '#1764ab', 'eit': '#d35400', 'kinematic': '#15936e'}
+LABELS = {'baseline': 'without EIT', 'eit': 'with EIT', 'kinematic': 'kinematic tip reference'}
+
+
+def trace_condition(path):
+    return next((name for name in CONDITIONS if path.name.startswith(f'joystick_{name}_')), 'baseline')
+
+
+def conditions_in_folder(folder):
+    path = folder/'block.json'
+    metadata = json.loads(path.read_text()) if path.is_file() else {}
+    names = metadata.get('conditions', ['baseline', 'eit'])
+    present = [name for name in CONDITIONS if any(folder.glob(f'repeat_*/joystick_{name}_*.csv'))]
+    return [name for name in CONDITIONS if name in names or name in present]
 
 
 def read_rows(path):
     with path.open(newline='') as stream:
-        return list(csv.DictReader(stream))
+        return [row for row in csv.DictReader(stream)
+                if None not in row and all(value is not None for value in row.values())]
 
 
 def read_esp(path):
-    rows = read_rows(path)
-    if not rows:
-        raise ValueError(f'No ESP32 samples in {path}')
-    return {key: np.array([int(row[key]) for row in rows], dtype=np.int64)
-            for key in ('host_unix_ns', 'x_raw', 'y_raw')}
+    keys = ('host_unix_ns', 'x_raw', 'y_raw')
+    records = []
+    if path.is_file():
+        for row in read_rows(path):
+            try: records.append(tuple(int(row[key]) for key in keys))
+            except (KeyError, ValueError): continue
+    return {key: np.array([row[index] for row in records], dtype=np.int64)
+            for index, key in enumerate(keys)}
 
 
 def load_calibration(folder):
@@ -63,6 +82,30 @@ def column(rows, key):
     return np.array([float(row[key]) for row in rows])
 
 
+def selected_axis(rows):
+    # Old traces predate axis selection and always commanded Base X tilt.
+    return rows[0].get('joystick_axis', 'x')
+
+
+def command_column(rows):
+    return column(rows, 'theta_d_y_rad' if selected_axis(rows) == 'y' else 'theta_d_rad')
+
+
+def trace_status(rows):
+    if not rows:
+        return 'no samples saved'
+    fault = next((row.get('fault') for row in rows if row.get('fault', 'none') != 'none'), None)
+    if fault:
+        return 'FAULT: ' + fault
+    if rows[-1].get('mode') != 'done':
+        return 'INCOMPLETE: ended in ' + rows[-1].get('mode', 'unknown')
+    if rows[-1].get('trial_contact_released') == 'True':
+        return 'failed: joystick slip' if rows[-1].get('joystick_slipped') == 'True' else 'unsuccessful: contact release'
+    if rows[-1].get('retract_incomplete') == 'True':
+        return 'manipulation finished; retract incomplete'
+    return 'completed'
+
+
 def normal_columns(rows, prefix):
     return np.column_stack([column(rows, f'{prefix}_{axis}') for axis in 'xyz'])
 
@@ -80,9 +123,10 @@ def palm_orientation(rows):
     shaft_y = np.where(valid, shaft_y, np.nan)
     axis = np.column_stack((np.tan(shaft), np.tan(shaft_y), np.ones(len(shaft))))
     axis /= np.linalg.norm(axis, axis=1)[:, None]
-    actual_tilt = np.rad2deg(np.arctan2(-actual[:, 0], -actual[:, 2]))
-    desired_tilt = np.rad2deg(np.arctan2(-desired[:, 0], -desired[:, 2]))
-    shaft_tilt = np.rad2deg(shaft)
+    index = 1 if selected_axis(rows) == 'y' else 0
+    actual_tilt = np.rad2deg(np.arctan2(-actual[:, index], -actual[:, 2]))
+    desired_tilt = np.rad2deg(np.arctan2(-desired[:, index], -desired[:, 2]))
+    shaft_tilt = np.rad2deg(shaft_y if index else shaft)
     perpendicular_error = np.rad2deg(np.arccos(np.clip(-np.sum(actual * axis, axis=1), -1., 1.)))
     target_error = np.rad2deg(np.arccos(np.clip(np.sum(actual * desired, axis=1), -1., 1.)))
     return desired_tilt, actual_tilt, shaft_tilt, perpendicular_error, target_error
@@ -124,23 +168,25 @@ def draw_trial(trace, esp, calibration=None):
     rows = read_rows(trace)
     if not rows:
         return None
+    tilt_axis = selected_axis(rows)
     origin = trial_origin(rows)
     time = (np.array([int(row['host_time_ns']) for row in rows]) - origin) / 1e9
     end = max(1., time[-1])
-    condition = 'eit' if '_eit_' in trace.name else 'baseline'
+    condition = trace_condition(trace)
     color = COLORS[condition]
     sensor_logged = 'sensor_contact' in rows[0]
     pattern_logged = 'sensor_pattern_distance' in rows[0]
     panels = 7 if pattern_logged else 6 if sensor_logged else 5
     fig, axes = plt.subplots(panels, 1, figsize=(11, 15 if pattern_logged else 13 if sensor_logged else 11),
                             sharex=True)
-    axes[0].plot(time, np.rad2deg(column(rows, 'theta_d_rad')), color=color)
+    axes[0].plot(time, np.rad2deg(command_column(rows)), color=color,
+                 label=f'Desired Base {tilt_axis.upper()} angle')
     axes[0].set_ylabel('Virtual angle (deg)')
-    point = column(rows, 'point_m_x')
-    reference = column(rows, 'reference_m_x')
+    point = column(rows, f'point_m_{tilt_axis}')
+    reference = column(rows, f'reference_m_{tilt_axis}')
     axes[1].plot(time, (reference - point[0]) * 1000, '--', color=color, label='Reference')
     axes[1].plot(time, (point - point[0]) * 1000, color=color, label='Measured point')
-    axes[1].set_ylabel('X displacement (mm)')
+    axes[1].set_ylabel(f'{tilt_axis.upper()} displacement (mm)')
     axes[1].legend(loc='upper right')
     axes[2].plot(time, column(rows, 'requested_force_N_x'), color=color, label='X')
     axes[2].plot(time, column(rows, 'requested_force_N_y'), color='#15936e', label='Y')
@@ -160,9 +206,9 @@ def draw_trial(trace, esp, calibration=None):
                                      (angle_y, 'Base Y angle', '--')):
             plot_t, plot_y = smooth_sensor(sensor_t, values)
             axes[4].plot(plot_t, plot_y, style, label=label)
-            if label == 'Base X angle':
+            if label == f'Base {tilt_axis.upper()} angle':
                 axes[0].plot(plot_t, plot_y, color='#15936e', alpha=.8,
-                             label='Measured Base X angle')
+                             label=f'Measured Base {tilt_axis.upper()} angle')
         axes[0].legend(loc='best', fontsize=8)
         axes[4].set_ylabel('Joystick angle (deg)')
         axes[4].plot(time, np.rad2deg(column(rows, 'theta_d_rad')), '--',
@@ -223,11 +269,22 @@ def draw_trial(trace, esp, calibration=None):
                          (fault_row[1], 1), xycoords=('data', 'axes fraction'),
                          xytext=(4, -24), textcoords='offset points',
                          color='#b42318', fontsize=9, rotation=90, va='top')
+    release_row = next(((row, at) for row, at in zip(rows, time)
+                        if row.get('trial_contact_released') == 'True'), None)
+    if release_row:
+        for axis in axes:
+            axis.axvline(release_row[1], color='#b42318', linewidth=1.5)
+        axes[0].annotate('JOYSTICK SLIP' if release_row[0].get('joystick_slipped') == 'True' else 'CONTACT RELEASE',
+                         (release_row[1], 1),
+                         xycoords=('data', 'axes fraction'), xytext=(4, -24),
+                         textcoords='offset points', color='#b42318', fontsize=9,
+                         rotation=90, va='top')
     axes[-1].set_xlim(-2., end + 2.)
     axes[-1].set_xlabel('Time from trial trace start (s)')
-    fault = next((row['fault'] for row in rows if row['fault'] != 'none'), None)
-    result = f'fault: {fault}' if fault else ('retract incomplete' if rows[-1]['retract_incomplete'] == 'True'
-                                              else rows[-1]['mode'])
+    result = trace_status(rows)
+    if rows[-1]['mode'] != 'done':
+        for axis in axes:
+            axis.axvline(time[-1], color='#b42318', ls='--', lw=1.)
     fig.suptitle(f'{trace.parent.name}: {LABELS[condition]} — {result}')
     detail = ('ESP32 angle uses a ±35° endpoint interpolation; near-stop values are approximate. '
               if calibration else 'ESP32 values are raw ADC counts, not calibrated angle. ')
@@ -254,38 +311,117 @@ def draw_trial(trace, esp, calibration=None):
     return output
 
 
+def comparison_event(rows, origin, engaged=False):
+    event = next((row for row in rows if int(row['host_time_ns']) >= origin and (row.get('joystick_slipped') == 'True' or
+                  row.get('trial_contact_released') == 'True' or
+                  row.get('fault', 'none') != 'none')), None)
+    if event is None:
+        return None
+    reason = ('joystick slip' if event.get('joystick_slipped') == 'True' else
+              'contact release' if event.get('trial_contact_released') == 'True' else
+              event.get('fault', 'fault'))
+    time_s = (float(event['trial_time_s']) if engaged and event.get('trial_time_s')
+              else (int(event['host_time_ns'])-origin)/1e9)
+    return dict(time_s=time_s, reason=reason)
+
+
+def mark_comparison_event(axes, metadata, condition, index=0):
+    event = metadata.get('event')
+    if event is None:
+        return
+    t = event['time_s']
+    for axis in axes:
+        axis.axvline(t, color=COLORS[condition], ls=':', lw=1.)
+    axes[0].text(.01, .96-.13*index,
+                 f'{LABELS[condition]}: {event["reason"]} at {t:.2f} s',
+                 transform=axes[0].transAxes, color=COLORS[condition],
+                 fontsize=8, va='top')
+
+
+def comparison_limits(data):
+    ends = [max(value[0][-1], (value[8].get('event') or {}).get('time_s', 0.))
+            for value in data.values()]
+    return -2., max(1., max(ends))+.5
+
+
+def contact_state(rows):
+    """Logged classifier decision; unknown/stale readings are gaps, not no-contact."""
+    if not rows or 'sensor_contact' not in rows[0]:
+        return None
+    return np.array([float(row['sensor_contact']=='True')
+                     if row.get('sensor_fresh','True')=='True' and
+                        row.get('sensor_measurement_valid','True')=='True'
+                     else np.nan for row in rows])
+
+
+def draw_contact_lanes(axis, series):
+    # Separate condition lanes keep identical binary traces visible.
+    ticks=[];labels=[];available=False
+    for index,(condition,time,values) in enumerate(series):
+        offset=2.*(len(series)-1-index)
+        ticks.append(offset+.5);labels.append(LABELS[condition])
+        for level in [0.,1.]:
+            axis.axhline(offset+level,color='#dddddd',lw=.6,zorder=0)
+            axis.text(.995,offset+level,str(int(level)),transform=axis.get_yaxis_transform(),
+                      ha='right',va='bottom',fontsize=8,color='#666666')
+        if values is None:
+            axis.text(.5,offset+.5,'Contact state was not logged',
+                      transform=axis.get_yaxis_transform(),ha='center',fontsize=8)
+        else:
+            available=True
+            axis.step(time,offset+values,where='post',color=COLORS[condition],lw=1.2)
+    axis.set_yticks(ticks,labels);axis.set_ylim(-.25,2.*max(0,len(series)-1)+1.3)
+    axis.set_ylabel('EIT contact\n0 = No; 1 = Yes')
+    axis.grid(axis='x',alpha=.25)
+    return available
+
+
 def pair_data(traces, esp, calibration=None):
     data = {}
     for condition, trace in traces.items():
         rows = read_rows(trace)
-        origin = interact_origin(rows)
-        if origin is None:
+        if not rows:
             continue
-        active = [row for row in rows if row['mode'] == 'interact']
-        time = (np.array([int(row['host_time_ns']) for row in active]) - origin) / 1e9
-        point = column(active, 'point_m_x')
-        reference = column(active, 'reference_m_x')
-        sensor_t, x, y = sensor_window(esp, origin, -2., 15.)
+        active = [row for row in rows if row['mode'] in ('preload', 'interact')]
+        engaged = bool(active)
+        if not active:
+            active = [row for row in rows if row['mode'] == 'approach']
+        if not active:
+            continue
+        origin = int(active[0]['host_time_ns'])
+        # trial_time starts at confirmed contact; account for the first logged
+        # sample arriving later. Older traces without it use their first sample.
+        if engaged and active[0].get('trial_time_s'):
+            origin -= round(float(active[0]['trial_time_s'])*1e9)
+        metadata = dict(status=trace_status(rows), origin='contact' if engaged else 'approach start',
+                        event=comparison_event(rows, origin, engaged),
+                        contact_state=contact_state(active))
+        time = (column(active, 'trial_time_s') if engaged and all(row.get('trial_time_s') for row in active)
+                else (np.array([int(row['host_time_ns']) for row in active]) - origin) / 1e9)
+        tilt_axis = selected_axis(active)
+        point = column(active, f'point_m_{tilt_axis}')
+        reference = column(active, f'reference_m_{tilt_axis}')
+        end = max(time[-1], (metadata['event'] or {}).get('time_s', 0.))
+        sensor_t, x, y = sensor_window(esp, origin, -2., end)
         center_x, center_y = sensor_center(esp, origin)
-        if not np.isfinite(center_y) or not np.isfinite(center_x):
-            continue
-        values = (measured_angles(x, y, calibration)[0]
-                  if calibration else y - center_y)
+        values = (measured_angles(x, y, calibration)[1 if tilt_axis == 'y' else 0]
+                  if calibration else (x - center_x if tilt_axis == 'y' else y - center_y))
+        # Missing ESP32 data must not suppress the saved controller failure.
         y_t, y_change = smooth_sensor(sensor_t, values)
-        data[condition] = (time, point, reference, column(active, 'theta_d_rad'),
-                           y_t, y_change, palm_orientation(active))
+        data[condition] = (time, point, reference, command_column(active),
+                           y_t, y_change, palm_orientation(active), tilt_axis, metadata)
     return data
 
 
 def draw_pair(repeat_folder, traces, esp, calibration=None):
     data = pair_data(traces, esp, calibration)
-    if len(data) != 2:
+    if not data:
         return None
     fig, axes = plt.subplots(3, 1, figsize=(11, 8), sharex=True)
-    for condition in ('baseline', 'eit'):
-        time, point, reference, angle, y_t, y_change, _ = data[condition]
+    for condition in data:
+        time, point, reference, angle, y_t, y_change, _, tilt_axis, metadata = data[condition]
         color = COLORS[condition]
-        label = LABELS[condition]
+        label = LABELS[condition] + ' (' + trace_status(read_rows(traces[condition])) + ')'
         axes[0].plot(time, np.rad2deg(angle), '--', color=color, label=f'Desired {label}')
         axes[1].plot(time, (reference - point[0]) * 1000, '--', color=color,
                      label=f'Reference {label}')
@@ -299,19 +435,20 @@ def draw_pair(repeat_folder, traces, esp, calibration=None):
                          color=color, label=label)
         else:
             axes[2].plot(y_t, y_change, color=color, label=label)
+        mark_comparison_event(axes, metadata, condition, list(data).index(condition))
     axes[0].set_ylabel('Joystick angle (deg)' if calibration else 'Virtual angle (deg)')
-    axes[1].set_ylabel('X displacement (mm)')
+    axes[1].set_ylabel(f'{tilt_axis.upper()} displacement (mm)')
     axes[2].set_ylabel('Actual - desired (deg)' if calibration else
-                       'ESP32 Y change (ADC counts)')
-    axes[2].set_xlabel('Time from interaction start (s)')
+                       f'ESP32 {"X" if tilt_axis == "y" else "Y"} change (ADC counts)')
+    axes[2].set_xlabel('Time from contact / approach start for unengaged trials (s)')
     axes[0].legend(loc='best')
     axes[1].legend(loc='best', fontsize=8, ncol=2)
     axes[2].legend(loc='best')
     for axis in axes:
         axis.axvline(0, color='#555555', ls=':', lw=.8)
         axis.grid(alpha=.25)
-    axes[-1].set_xlim(-2, 15)
-    fig.suptitle(f'{repeat_folder.name}: joystick baseline versus EIT')
+    axes[-1].set_xlim(*comparison_limits(data))
+    fig.suptitle(f'{repeat_folder.name}: joystick condition comparison')
     fig.text(.5, .015, 'Endpoint angle interpolation is approximate near the stops.' if calibration else
              'ESP32 change is relative to its pre-interaction median; raw ADC counts are not calibrated to angle.',
              ha='center', fontsize=9)
@@ -323,15 +460,16 @@ def draw_pair(repeat_folder, traces, esp, calibration=None):
 
 
 def draw_orientation_pair(repeat_folder, data):
-    if any(condition not in data or data[condition][6] is None
-           for condition in ('baseline', 'eit')):
+    available = [condition for condition in data if data[condition][6] is not None]
+    if not available:
         return None
     fig, axes = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
-    for condition in ('baseline', 'eit'):
-        time, _, _, _, _, _, orientation = data[condition]
+    for condition in available:
+        time, _, _, _, _, _, orientation, tilt_axis, metadata = data[condition]
         desired, actual, shaft, perpendicular_error, target_error = orientation
         color = COLORS[condition]
-        label = LABELS[condition]
+        label = LABELS[condition] + ' (' + metadata['status'] + ')'
+        mark_comparison_event(axes, metadata, condition, available.index(condition))
         axes[0].plot(time, desired, '--', color=color, label=f'Desired palm {label}')
         axes[0].plot(time, actual, color=color, label=f'Actual palm {label}')
         axes[0].plot(time, shaft, ':', color=color, alpha=.75,
@@ -340,14 +478,14 @@ def draw_orientation_pair(repeat_folder, data):
                      label=f'Palm vs shaft {label}')
         axes[1].plot(time, target_error, '--', color=color,
                      label=f'Palm vs desired {label}')
-    axes[0].set_ylabel('Base X tilt (deg)')
+    axes[0].set_ylabel(f'Base {tilt_axis.upper()} tilt (deg)')
     axes[1].set_ylabel('3D normal error (deg)')
-    axes[1].set_xlabel('Time from interaction start (s)')
+    axes[1].set_xlabel('Time from contact / approach start for unengaged trials (s)')
     for axis in axes:
         axis.axvline(0, color='#555555', ls=':', lw=.8)
         axis.grid(alpha=.25)
         axis.legend(loc='best', fontsize=8, ncol=2)
-    axes[-1].set_xlim(0, 15)
+    axes[-1].set_xlim(*comparison_limits(data))
     fig.suptitle(f'{repeat_folder.name}: palm orientation versus joystick shaft')
     fig.text(.5, .015, 'Zero palm–shaft error means the pad face is perpendicular to the measured shaft. '
              'Stale shaft samples are omitted; ADC-rail angles are bounded estimates.', ha='center', fontsize=8)
@@ -363,26 +501,37 @@ def draw_block(folder, pairs, calibration=None):
         return None
     has_orientation = any(any(data[condition][6] is not None for condition in data)
                           for _, data in pairs)
-    rows_per_repeat = 2 if has_orientation else 1
+    rows_per_repeat = 3 if has_orientation else 2
+    heights = ([2.,1.5,1.2] if has_orientation else [2.,1.2]) * len(pairs)
     fig, axes = plt.subplots(rows_per_repeat * len(pairs), 1,
-                             figsize=(11, max(3.5, (4.5 if has_orientation else 2.6) * len(pairs))),
+                             figsize=(11, max(5., (6.5 if has_orientation else 4.8) * len(pairs))),
+                             gridspec_kw={'height_ratios':heights},
                              sharex=True, squeeze=False)
     for index, (name, data) in enumerate(pairs):
         axis = axes[rows_per_repeat * index, 0]
         orientation_axis = axes[rows_per_repeat * index + 1, 0] if has_orientation else None
-        for condition in ('baseline', 'eit'):
+        contact_axis = axes[rows_per_repeat * index + rows_per_repeat - 1, 0]
+        contact_series = [(condition,data[condition][0],data[condition][8].get('contact_state'))
+                          for condition in CONDITIONS if condition in data]
+        draw_contact_lanes(contact_axis,contact_series)
+        for condition in CONDITIONS:
             if condition in data:
                 y_t, y_change = data[condition][4:6]
                 time, angle = data[condition][0], data[condition][3]
+                status = data[condition][8]['status']
+                label = LABELS[condition] + ' (' + status + ')'
+                event_axes = [axis,contact_axis] + ([orientation_axis] if orientation_axis is not None else [])
+                mark_comparison_event(event_axes, data[condition][8], condition, list(data).index(condition))
                 if calibration:
                     axis.plot(time, np.rad2deg(angle), '--', color=COLORS[condition],
                               label=f'Desired {LABELS[condition]}')
                 axis.plot(y_t, y_change, color=COLORS[condition],
-                          label=f'Actual {LABELS[condition]}' if calibration else LABELS[condition])
+                          label=f'Actual {label}' if calibration else label)
                 if orientation_axis is not None and data[condition][6] is not None:
                     orientation_axis.plot(time, data[condition][6][3], color=COLORS[condition],
                                           label=LABELS[condition])
-        axis.set_ylabel(f'{name}\n'+('Base X angle (deg)' if calibration else 'ADC change'))
+        tilt_axis = next(iter(data.values()))[7]
+        axis.set_ylabel(f'{name}\n'+(f'Base {tilt_axis.upper()} angle (deg)' if calibration else 'ADC change'))
         axis.grid(alpha=.25)
         axis.legend(loc='best', fontsize=8)
         if orientation_axis is not None:
@@ -394,46 +543,104 @@ def draw_block(folder, pairs, calibration=None):
             else:
                 orientation_axis.text(.5, .5, 'Palm orientation was not logged',
                                       transform=orientation_axis.transAxes, ha='center')
-    axes[-1, 0].set_xlim(-2, 15)
-    axes[-1, 0].set_xlabel('Time from interaction start (s)')
-    fig.suptitle('Joystick baseline versus EIT: '+
-                 ('angle and palm perpendicularity' if has_orientation else
-                  ('Base X angle' if calibration else 'ESP32 Y')+' by repeat'))
+    axes[-1, 0].set_xlim(-2., max(comparison_limits(data)[1] for _, data in pairs))
+    axes[-1, 0].set_xlabel('Time from contact / approach start for unengaged trials (s)')
+    fig.suptitle('Joystick condition comparison: '+
+                 ('angle, palm perpendicularity and EIT contact' if has_orientation else
+                  ('Selected-axis angle' if calibration else 'ESP32 selected axis')+' and EIT contact by repeat'))
     fig.text(.5, .01, ('Zero perpendicularity error means the pad face is normal to the measured shaft; '
-                      'ADC-rail angles are bounded estimates.' if has_orientation else
+                      'ADC-rail angles are bounded estimates. Contact gaps = stale/invalid samples.' if has_orientation else
                       'Angle from ±35° endpoint interpolation; success requires independent review.') if calibration else
              'Raw ADC counts relative to pre-interaction median; no angle calibration or success claim.',
              ha='center', fontsize=9)
-    fig.subplots_adjust(left=.12, right=.97, bottom=max(.08, .18 / len(pairs)), top=.91, hspace=.22)
+    fig.subplots_adjust(left=.12, right=.97, bottom=max(.08, .18 / len(pairs)), top=.93, hspace=.30)
     output = folder / 'block_comparison.png'
     fig.savefig(output, dpi=150)
     plt.close(fig)
     return output
 
 
+def draw_run_summary(folder):
+    """Always produce a diagnostic, including ready-only and recorder-start failures."""
+    repeats = sorted(folder.glob('repeat_*')) or [folder]
+    conditions = conditions_in_folder(folder)
+    fig, axes = plt.subplots(2*len(repeats), len(conditions), figsize=(6*len(conditions), max(5, 4.7*len(repeats))),
+                             gridspec_kw={'height_ratios':[2.,1.]*len(repeats)}, squeeze=False)
+    for index, repeat in enumerate(repeats):
+        for column_index, condition in enumerate(conditions):
+            axis = axes[2*index, column_index]
+            contact_axis = axes[2*index+1,column_index]
+            candidates = sorted(repeat.glob(f'joystick_{condition}_*.csv'))
+            rows = read_rows(candidates[-1]) if candidates else []
+            axis.set_title(f'{repeat.name}: {LABELS[condition]}\n{trace_status(rows)}', fontsize=10)
+            if not rows:
+                ready = sorted(repeat.glob('joystick_ready_*.csv'))
+                detail = 'No trial samples saved'
+                if ready:
+                    ready_rows = read_rows(ready[-1])
+                    detail += '\nLast ready trace: ' + (ready_rows[-1].get('mode', 'unknown') if ready_rows else 'no samples')
+                axis.text(.5, .5, detail, transform=axis.transAxes, ha='center')
+                axis.set_axis_off()
+                contact_axis.set_axis_off()
+                continue
+            tilt_axis = selected_axis(rows)
+            times = (column(rows, 'host_time_ns') - int(rows[0]['host_time_ns'])) / 1e9
+            command = np.where([row['mode'] in ('preload', 'interact') for row in rows],
+                               command_column(rows), np.nan)
+            axis.plot(times, np.rad2deg(command), '--', label='Desired (manipulation)')
+            key = 'joystick_shaft_angle_y_rad' if tilt_axis == 'y' else 'joystick_shaft_angle_rad'
+            if key in rows[0]:
+                angles = column(rows, key)
+                if 'joystick_shaft_fresh' in rows[0]:
+                    angles = np.where([row['joystick_shaft_fresh']=='True' for row in rows], angles, np.nan)
+                axis.plot(times, np.rad2deg(angles), label='Measured')
+            axis.axvline(times[-1], color='#b42318' if rows[-1]['mode']!='done' else '#777777', ls=':')
+            axis.set_xlabel('Time from trial trace start (s)')
+            axis.set_ylabel(f'Base {tilt_axis.upper()} angle (deg)')
+            axis.legend(fontsize=8);axis.grid(alpha=.25)
+            draw_contact_lanes(contact_axis,[(condition,times,contact_state(rows))])
+            contact_axis.set_xlim(axis.get_xlim())
+            contact_axis.set_xlabel('Time from trial trace start (s)')
+    result_path = folder/'block_result.json'
+    result = json.loads(result_path.read_text()) if result_path.is_file() else {}
+    detail = result.get('status', 'Saved traces; completion assessed separately for each condition')
+    if result.get('error'):detail += ': ' + result['error']
+    fig.suptitle(folder.name, fontsize=11)
+    fig.text(.5, .025, textwrap.fill(detail, 130), ha='center', fontsize=8)
+    fig.tight_layout(rect=(0, .12, 1, .92))
+    output = folder/'run_summary.png'
+    fig.savefig(output, dpi=150);plt.close(fig)
+    return output
+
+
 def plot_block(folder):
+    # Save the summary first so one malformed trace cannot hide all diagnostics.
+    outputs = [draw_run_summary(folder)]
     esp = read_esp(folder / 'joystick_esp32.csv')
     calibration = load_calibration(folder)
-    outputs = []
     pairs = []
     for repeat_folder in sorted(folder.glob('repeat_*')):
         traces = {}
-        for condition in ('baseline', 'eit'):
+        for condition in CONDITIONS:
             candidates = sorted(repeat_folder.glob(f'joystick_{condition}_*.csv'))
             if candidates:
                 traces[condition] = candidates[-1]
-                output = draw_trial(candidates[-1], esp, calibration)
+                try:
+                    output = draw_trial(candidates[-1], esp, calibration)
+                    if output:outputs.append(output)
+                except (OSError, ValueError, KeyError, IndexError) as exc:
+                    print(f'Could not plot {candidates[-1].name}: {exc}', file=sys.stderr)
+        if traces:
+            try:
+                data = pair_data(traces, esp, calibration)
+                output = draw_pair(repeat_folder, traces, esp, calibration)
                 if output:
                     outputs.append(output)
-        if len(traces) == 2:
-            data = pair_data(traces, esp, calibration)
-            output = draw_pair(repeat_folder, traces, esp, calibration)
-            if output:
-                outputs.append(output)
-                pairs.append((repeat_folder.name, data))
-            output = draw_orientation_pair(repeat_folder, data)
-            if output:
-                outputs.append(output)
+                    pairs.append((repeat_folder.name, data))
+                output = draw_orientation_pair(repeat_folder, data)
+                if output:outputs.append(output)
+            except (OSError, ValueError, KeyError, IndexError) as exc:
+                print(f'Could not compare {repeat_folder.name}: {exc}', file=sys.stderr)
     output = draw_block(folder, pairs, calibration)
     if output:
         outputs.append(output)

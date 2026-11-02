@@ -5,18 +5,24 @@
 #include <franka/robot.h>
 
 #include <array>
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <memory>
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
+#include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <thread>
+#include <unistd.h>
+#include "recording_build.hpp"
 
 #include "franka_eit_vmc/msg/eit_contact.hpp"
 #include "franka_eit_vmc/msg/experiment_state.hpp"
@@ -56,6 +62,11 @@ struct Telemetry {
   V3 external_force;
   V3 external_moment;
 };
+struct JoystickSelection {
+  JoystickMechanism mechanism;
+  double depth;
+  JoystickAxis axis;
+};
 class Bridge : public rclcpp::Node {
  public:
   explicit Bridge(Task task)
@@ -63,6 +74,23 @@ class Bridge : public rclcpp::Node {
              : task == Task::Ball   ? "eit_ball_roll"
                                     : "eit_move_ready") {
     c.task = task;
+    rcl_interfaces::msg::ParameterDescriptor recording_description;
+    recording_description.read_only = true;
+    declare_parameter<int64_t>("recording_process_id", getpid(), recording_description, true);
+    std::string recording_boot_id, recording_stat, recording_start;
+    std::ifstream recording_boot_file("/proc/sys/kernel/random/boot_id");
+    std::ifstream recording_stat_file("/proc/self/stat");
+    if (!std::getline(recording_boot_file, recording_boot_id) || !std::getline(recording_stat_file, recording_stat))
+      throw std::runtime_error("Cannot identify the controller process for experiment recording");
+    std::istringstream recording_fields(recording_stat.substr(recording_stat.rfind(')') + 2));
+    for (int i = 0; i <= 19; ++i) recording_fields >> recording_start;
+    declare_parameter<std::string>("recording_process_boot_id", recording_boot_id, recording_description, true);
+    declare_parameter<int64_t>("recording_process_start_ticks", std::stoll(recording_start), recording_description, true);
+    declare_parameter<std::string>("recording_build_manifest", recording_build_manifest,
+                                   recording_description, true);
+    declare_parameter<bool>("recording_sdk_rate_limiting", true, recording_description, true);
+    declare_parameter<double>("recording_sdk_cutoff_hz", franka::kDefaultCutoffFrequency,
+                              recording_description, true);
     host = declare_parameter<std::string>("robot_ip", "192.168.1.1");
     geometry_confirmed = declare_parameter<bool>("tool_transform_confirmed", false);
     mounting_confirmed = declare_parameter<bool>("mount_orientation_confirmed", false);
@@ -114,12 +142,20 @@ class Bridge : public rclcpp::Node {
     P(approach_speed);
     P(approach_distance);
     P(approach_timeout);
+    P(joystick_approach_final_hold_s);
+    P(ball_approach_force_limit);
     P(approach_contact_confirm_s);
     P(approach_contact_speed);
     P(approach_contact_travel_m);
     P(retract_distance);
     P(preload);
     P(preload_time);
+    P(ball_contact_settle_s);
+    P(ball_goal_tolerance_m);
+    P(ball_goal_dwell_s);
+    P(ball_contact_loss_grace_s);
+    P(joystick_approach_below_tip_m);
+    P(tool_weight_compensation_mass_kg);
     P(hold_k);
     P(hold_d);
     P(ready_k);
@@ -143,12 +179,10 @@ class Bridge : public rclcpp::Node {
     P(moment_limit);
     P(null_k);
     P(null_d);
-    P(torque_rate);
     P(joint_margin);
     P(joint_speed_limit);
     P(point_speed_limit);
     P(angular_speed_limit);
-    P(q7_tolerance);
     P(sensor_timeout);
     P(heartbeat_timeout);
     P(max_period);
@@ -159,32 +193,73 @@ class Bridge : public rclcpp::Node {
     const double joystick_angle_deg =
         declare_parameter<double>("joystick_angle_deg", c.joystick_angle * 180. / 3.141592653589793);
     c.joystick_angle = joystick_angle_deg * 3.141592653589793 / 180.;
+    const auto axis = declare_parameter<std::string>("joystick_axis", "x");
+    if (axis != "x" && axis != "y")
+      throw std::invalid_argument("joystick_axis must be x or y (Base tilt direction)");
+    c.joystick_axis = axis == "y" ? JoystickAxis::Y : JoystickAxis::X;
     P(joystick_duration);
+    P(joystick_return_zero_start_s);
+    c.joystick_alignment_enabled =
+        declare_parameter<bool>("joystick_alignment_enabled", c.joystick_alignment_enabled);
+    c.joystick_task_spring_uses_shaft =
+        declare_parameter<bool>("joystick_task_spring_uses_shaft", c.joystick_task_spring_uses_shaft);
+    c.joystick_update_eit_attachment =
+        declare_parameter<bool>("joystick_update_eit_attachment", c.joystick_update_eit_attachment);
+    P(joystick_attachment_filter_tau_s);
+    P(joystick_slip_contact_mismatch_m);
+    P(joystick_slip_confirm_s);
+    P(joystick_task_spring_k);
+    P(joystick_task_spring_d);
+    P(joystick_task_spring_force_limit);
+    P(joystick_alignment_spring_force_limit);
     P(joystick_inward_arc_m);
     P(joystick_alignment_half_span_m);
     P(joystick_slider_radius_m);
     P(joystick_alignment_spring_k);
     P(joystick_alignment_spring_d);
     P(joystick_feedback_timeout);
+    P(joystick_release_window_s);
+    const auto release_angle = [this](const char* name, double value) {
+      return declare_parameter<double>(name, value * 180. / 3.141592653589793) *
+             3.141592653589793 / 180.;
+    };
+    c.joystick_release_drop = release_angle("joystick_release_drop_deg", c.joystick_release_drop);
+    c.joystick_release_upright = release_angle("joystick_release_upright_deg", c.joystick_release_upright);
+    c.joystick_release_min_command = release_angle("joystick_release_min_command_deg", c.joystick_release_min_command);
     c.joystick_pivot_m = vector("joystick_pivot_m", c.joystick_pivot_m);
     const auto mechanism = declare_parameter<std::string>("joystick_mechanism", "legacy");
     if (mechanism != "legacy" && mechanism != "inward_arc")
       throw std::invalid_argument("joystick_mechanism must be legacy or inward_arc");
     c.joystick_mechanism = mechanism == "inward_arc" ? JoystickMechanism::InwardArc : JoystickMechanism::Legacy;
-    requested_mechanism.store(mechanism == "inward_arc" ? c.joystick_inward_arc_m : -1.);
     P(angle_speed);
     P(angle_acceleration);
     P(initial_ball_x);
+    P(initial_ball_y);
+    const auto ball_axis = declare_parameter<std::string>("ball_axis", "x");
+    if (ball_axis != "x" && ball_axis != "y")
+      throw std::invalid_argument("ball_axis must be x or y");
+    c.ball_axis = ball_axis == "y" ? BallAxis::Y : BallAxis::X;
     P(roll_distance);
+    P(ball_baseline_motion_ratio);
+    P(ball_interact_dropout_grace_s);
+    P(ball_reference_speed_m_s);
+    P(ball_reference_advance_speed_m_s); P(ball_reference_advance_limit_m);
+    P(ball_reference_advance_start_error_m);
     P(ball_duration);
     P(virtual_mass);
     P(virtual_damping);
     P(goal_k);
     P(goal_force_limit);
     P(progress_speed);
+    P(ball_goal_d); P(ball_force_slew); P(ball_pause_force_slew); P(ball_goal_ramp_s);
+    P(ball_normal_mass); P(ball_normal_damping); P(ball_normal_speed);
+    P(ball_normal_travel); P(ball_normal_up_travel);
+    P(ball_pause_k); P(ball_pause_d); P(ball_position_filter); P(ball_velocity_filter);
 #undef P
+    c.ball_recover_contact = declare_parameter<bool>("ball_recover_contact", true);
+    c.ball_initial_attachment = declare_parameter<bool>("ball_initial_attachment", false);
     c.update_ball_attachment = declare_parameter<bool>("update_ball_attachment", false);
-    use_eit.store(declare_parameter<bool>("use_eit", true));
+    contact_source.store(declare_parameter<bool>("use_eit", true) ? ContactSource::Eit : ContactSource::Baseline);
     c.validate();
     contact_sub = create_subscription<msg::EitContact>(
         declare_parameter<std::string>("contact_topic", "/eit/contact"), rclcpp::SensorDataQoS(),
@@ -272,9 +347,18 @@ class Bridge : public rclcpp::Node {
                             std::shared_ptr<std_srvs::srv::SetBool::Response> a) {
           a->success = (mode.load() == Mode::Hold || mode.load() == Mode::Done) &&
                        request.load() == Request::None;
-          if (a->success) use_eit.store(q->data);
+          if (a->success) contact_source.store(q->data ? ContactSource::Eit : ContactSource::Baseline);
           a->message = a->success ? "Condition queued for the next control step"
                                   : "Change condition only between trials";
+        });
+    kinematic_service = create_service<std_srvs::srv::Trigger>(
+        "~/use_kinematic_position", [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>,
+                                           std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
+          response->success = c.task == Task::Joystick &&
+              (mode.load() == Mode::Hold || mode.load() == Mode::Done) && request.load() == Request::None;
+          if (response->success) contact_source.store(ContactSource::Kinematic);
+          response->message = response->success ? "Kinematic tip attachment queued for the next trial"
+                                                : "Select kinematic position only for joystick between trials";
         });
     status_pub = create_publisher<msg::ExperimentState>("~/status", 10);
     joint_pub = create_publisher<sensor_msgs::msg::JointState>("~/joint_states", 10);
@@ -282,31 +366,44 @@ class Bridge : public rclcpp::Node {
     parameter_guard = add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter>& parameters) {
       rcl_interfaces::msg::SetParametersResult result;
       result.successful = false;
+      // Startup declarations occur before the executor starts. Once declared,
+      // these fields are read-only and cannot be changed through this callback.
+      if (!parameters.empty() && std::all_of(parameters.begin(), parameters.end(), [this](const auto& p) {
+            return p.get_name().rfind("recording_robot_", 0) == 0 && !has_parameter(p.get_name());
+          })) {
+        result.successful = true;
+        return result;
+      }
       if (c.task != Task::Joystick || (mode.load() != Mode::Hold && mode.load() != Mode::Done) ||
           request.load() != Request::None) {
-        result.reason = "Change joystick mechanism only between trials in hold/done";
+        result.reason = "Change joystick mechanism/axis only between trials in hold/done";
         return result;
       }
       try {
         std::string selected = get_parameter("joystick_mechanism").as_string();
         double depth = get_parameter("joystick_inward_arc_m").as_double();
+        std::string axis = get_parameter("joystick_axis").as_string();
         for (const auto& p : parameters) {
           if (p.get_name() == "joystick_mechanism") selected = p.as_string();
           else if (p.get_name() == "joystick_inward_arc_m") depth = p.as_double();
+          else if (p.get_name() == "joystick_axis") axis = p.as_string();
           else {
-            result.reason = "Restart to change other parameters; only mechanism/depth can change between trials";
+            result.reason = "Restart to change other parameters; only mechanism/depth/axis can change between trials";
             return result;
           }
         }
         if (selected != "legacy" && selected != "inward_arc")
           throw std::invalid_argument("joystick_mechanism must be legacy or inward_arc");
+        if (axis != "x" && axis != "y")
+          throw std::invalid_argument("joystick_axis must be x or y (Base tilt direction)");
         Config candidate = c;
         candidate.joystick_mechanism = JoystickMechanism::InwardArc;
         candidate.joystick_inward_arc_m = depth;
         candidate.validate();
-        // One atomic value encodes the pair: negative=legacy, nonnegative=inward depth.
-        // Applied by Core only while holding/done; telemetry acknowledges actual mode.
-        requested_mechanism.store(selected == "inward_arc" ? depth : -1.);
+        // Transfer the complete selection together to the realtime thread.
+        if (!joystick_selections.push({selected == "inward_arc" ? JoystickMechanism::InwardArc : JoystickMechanism::Legacy,
+                                      depth, axis == "y" ? JoystickAxis::Y : JoystickAxis::X}))
+          throw std::runtime_error("Joystick configuration queue full; wait for status acknowledgment");
         result.successful = true;
       } catch (const std::exception& e) { result.reason = e.what(); }
       return result;
@@ -317,10 +414,10 @@ class Bridge : public rclcpp::Node {
   bool geometry_confirmed = false, mounting_confirmed = false;
   Ring<Contact, 64> contacts;
   Ring<ShaftFeedback, 64> shafts;
-  std::atomic<double> requested_mechanism{-1.};
+  Ring<JoystickSelection, 64> joystick_selections;
   Ring<Telemetry, 64> telemetry;
   std::atomic<Request> request{Request::None};
-  std::atomic<bool> use_eit{true};
+  std::atomic<ContactSource> contact_source{ContactSource::Eit};
   std::atomic<Mode> mode{Mode::Hold};
   std::atomic<double> last_heartbeat{-1.};
 
@@ -339,8 +436,15 @@ class Bridge : public rclcpp::Node {
     s.mode_name = mode_name(o.mode);
     s.fault_name = fault_name(o.fault);
     s.use_eit = o.use_eit;
+    s.contact_source = contact_source_name(o.contact_source);
+    for (int i = 0; i < 3; ++i) s.joystick_tip_position_m[i] = o.joystick_tip_position[i];
     s.retract_incomplete = o.retract_incomplete;
+    s.trial_contact_released = o.trial_contact_released;
+    s.joystick_slipped = o.joystick_slipped;
     s.joystick_mechanism = mechanism_name(o.joystick_mechanism);
+    s.joystick_axis = o.joystick_axis == JoystickAxis::Y ? "y" : "x";
+    for (int i = 0; i < 3; ++i)
+      s.tool_weight_compensation_force_n[i] = o.tool_weight_compensation_force[i];
     s.joystick_inward_arc_m = o.inward_arc_m;
     s.joystick_shaft_angle_rad = o.shaft_angle;
     s.joystick_shaft_rate_rad_s = o.shaft_rate;
@@ -350,6 +454,8 @@ class Bridge : public rclcpp::Node {
     s.joystick_shaft_fresh = o.shaft_fresh;
     s.joystick_shaft_clipped = o.shaft_clipped;
     s.joystick_force_scale = o.force_scale;
+    s.joystick_task_spring_scale = o.task_spring_scale;
+    s.joystick_alignment_min_spring_scale = o.alignment_min_spring_scale;
     s.joystick_slider_at_stop = o.slider_at_stop;
     for (int i = 0; i < 2; ++i) s.joystick_slider_m[i] = o.slider[i];
     for (int i = 0; i < 3; ++i) {
@@ -370,10 +476,32 @@ class Bridge : public rclcpp::Node {
     s.sensor_pattern_distance = o.sensor_pattern_distance;
     s.sensor_pattern_support_limit = o.sensor_pattern_support_limit;
     s.sensor_predicted_radius_mm = o.sensor_predicted_radius_mm;
+    for (int i = 0; i < 3; ++i) {
+      s.sensor_contact_pad_m[i] = o.sensor_contact_pad[i];
+      s.sensor_contact_base_m[i] = o.sensor_contact_base[i];
+    }
     s.trial_time_s = o.trial_time;
     s.progress_m = o.progress;
     s.progress_velocity_m_s = o.progress_velocity;
-    s.ball_goal_x_m = o.goal;
+    s.ball_normal_position_m = o.ball_normal_position;
+    s.ball_normal_velocity_m_s = o.ball_normal_velocity;
+    s.ball_normal_origin_m = o.ball_normal_origin;
+    s.ball_normal_force_n = o.ball_normal_force;
+    s.ball_normal_brake = o.ball_normal_brake;
+    s.ball_normal_at_stop = o.ball_normal_at_stop;
+    s.ball_recover_contact = o.ball_recover_contact;
+    s.ball_estimated_velocity_m_s = o.ball_estimated_velocity;
+    s.ball_drive_reference_m = o.ball_drive_reference;
+    s.ball_axis = o.ball_axis == BallAxis::Y ? "y" : "x";
+    s.ball_contact_ready = o.ball_contact_ready;
+    s.ball_contact_paused = o.ball_contact_paused;
+    s.ball_goal_reached = o.ball_goal_reached;
+    s.ball_contact_loss_duration_s = o.ball_contact_loss_duration_s;
+    s.ball_loaded_contact_duration_s = o.ball_loaded_contact_duration_s;
+    s.approach_distance_limit_m = o.approach_distance_limit_m;
+    s.ball_goal_coordinate_m = o.goal;
+    s.ball_goal_x_m = o.ball_axis == BallAxis::X ? o.goal : c.initial_ball_x;
+    s.ball_goal_y_m = o.ball_axis == BallAxis::Y ? o.goal : c.initial_ball_y;
     s.joystick_angle_command_rad = o.angle_command;
     s.joystick_angle_command_y_rad = o.angle_command_y;
     for (int i = 0; i < 3; ++i) {
@@ -407,6 +535,7 @@ class Bridge : public rclcpp::Node {
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr heartbeat_sub;
   std::vector<rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr> services;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr condition_service;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr kinematic_service;
   rclcpp::Publisher<msg::ExperimentState>::SharedPtr status_pub;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_pub;
   rclcpp::TimerBase::SharedPtr timer;
@@ -441,9 +570,35 @@ int run_controller(int argc, char** argv, Task task) {
                 "Connecting directly through libfranka. Other FCI drivers must be stopped.");
     franka::Robot robot(node->host, franka::RealtimeConfig::kEnforce);
     franka::Model model = robot.loadModel();
+    const auto initial_state = robot.readOnce();
+    // Immutable startup metadata; no allocation or filesystem I/O in the torque callback.
+    rcl_interfaces::msg::ParameterDescriptor recording_description;
+    recording_description.read_only = true;
+    node->declare_parameter<int64_t>("recording_robot_server_version", robot.serverVersion(), recording_description, true);
+    node->declare_parameter<std::string>("recording_robot_matrix_layout", "column-major", recording_description, true);
+    node->declare_parameter<double>("recording_robot_ee_mass_kg", initial_state.m_ee, recording_description, true);
+    node->declare_parameter<double>("recording_robot_load_mass_kg", initial_state.m_load, recording_description, true);
+    node->declare_parameter<double>("recording_robot_total_mass_kg", initial_state.m_total, recording_description, true);
+    auto record_array = [&](const std::string& name, const auto& value) {
+      node->declare_parameter<std::vector<double>>(name,
+          std::vector<double>(value.begin(), value.end()), recording_description, true);
+    };
+    record_array("recording_robot_initial_q_rad", initial_state.q);
+    record_array("recording_robot_initial_O_T_EE", initial_state.O_T_EE);
+    record_array("recording_robot_F_T_EE", initial_state.F_T_EE);
+    record_array("recording_robot_F_T_NE", initial_state.F_T_NE);
+    record_array("recording_robot_NE_T_EE", initial_state.NE_T_EE);
+    record_array("recording_robot_EE_T_K", initial_state.EE_T_K);
+    record_array("recording_robot_ee_inertia", initial_state.I_ee);
+    record_array("recording_robot_load_inertia", initial_state.I_load);
+    record_array("recording_robot_ee_center_of_mass", initial_state.F_x_Cee);
+    record_array("recording_robot_load_center_of_mass", initial_state.F_x_Cload);
+    RCLCPP_INFO(node->get_logger(),
+                "Robot tool model: end-effector mass %.6f kg, load mass %.6f kg, total %.6f kg",
+                initial_state.m_ee, initial_state.m_load, initial_state.m_total);
     Core core(node->c);
-    core.activate(sample(robot.readOnce(), model));
-    core.set_condition(node->use_eit.load());
+    core.activate(sample(initial_state, model));
+    core.set_condition(node->contact_source.load());
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(node);
     std::thread spin([&] { executor.spin(); });
@@ -463,9 +618,11 @@ int run_controller(int argc, char** argv, Task task) {
             while (node->contacts.pop(fresh)) contact = fresh;
             ShaftFeedback new_shaft;
             while (node->shafts.pop(new_shaft)) shaft = new_shaft;
-            const double mechanism = node->requested_mechanism.load();
-            core.set_joystick_mechanism(mechanism < 0. ? JoystickMechanism::Legacy : JoystickMechanism::InwardArc,
-                mechanism < 0. ? core.config().joystick_inward_arc_m : mechanism);
+            JoystickSelection selection;
+            while (node->joystick_selections.pop(selection)) {
+              core.set_joystick_mechanism(selection.mechanism, selection.depth);
+              core.set_joystick_axis(selection.axis);
+            }
             double dt = duration.toSec();
             if (first && dt == 0.) dt = .001;
             first = false;
@@ -490,7 +647,7 @@ int run_controller(int argc, char** argv, Task task) {
               core.robot_fault();
             }
             previous_robot_time = rt;
-            core.set_condition(node->use_eit.load());
+            core.set_condition(node->contact_source.load());
             Request request = node->request.exchange(Request::None);
             if (!rclcpp::ok()) request = Request::Stop;
             bool heartbeat = steady_s() - node->last_heartbeat.load() < node->c.heartbeat_timeout;
@@ -516,7 +673,7 @@ int run_controller(int argc, char** argv, Task task) {
             }
             return franka::Torques(tau);
           },
-          true);
+          true, franka::kDefaultCutoffFrequency);
       if (core.fault() != Fault::None) {
         code = 2;
         if (core.fault() == Fault::Period && rejected_period_seen)
@@ -535,7 +692,8 @@ int run_controller(int argc, char** argv, Task task) {
     executor.cancel();
     spin.join();
   } catch (const std::exception& e) {
-    std::cerr << "franka_eit_vmc: " << e.what() << '\n';
+    // Keep native reflex/error flags in the ROS log, not only terminal stderr.
+    RCLCPP_ERROR(rclcpp::get_logger("franka_eit_vmc"), "Stopped by exception: %s", e.what());
     code = 2;
   }
   if (rclcpp::ok()) {
